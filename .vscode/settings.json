@@ -1,0 +1,14 @@
+{
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "python.formatting.provider": "none",
+  "python.linting.pylintEnabled": true,
+  "python.linting.enabled": true,
+  "python.linting.pylintArgs": [
+    "--rcfile",
+    ".pylintrc"
+  ],
+  "python.linting.maxNumberOfProblems": 50,
+  "python.linting.lintOnSave": true
+}
