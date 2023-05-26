@@ -146,3 +146,5 @@ ENV/
 .devspace
 devspace.yaml
 .vscode
+charts
+.github
