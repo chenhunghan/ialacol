@@ -1,0 +1,51 @@
+replicas: 1
+
+deployment:
+  image: quay.io/chenhunghan/ialacol:latest
+  env:
+    # the model repo to download from
+    # https://huggingface.co/rustformers/mpt-7b-ggml
+    GF_REPO: rustformers/mpt-7b-ggml
+    # the file name of the model file in the repo
+    MODEL_FILE: mpt-7b-q4_0.bin
+resources:
+  {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Persistent storage PVC for models and other artifacts
+persistence:
+  size: 24Gi
+  accessModes:
+    - ReadWriteOnce
+  # Optional. e.g. "gp2-unencrypted"
+  storageClass: ~
+# the path to mount the cache volume on the container
+cacheMountPath: /app/cache
+
+service:
+  type: ClusterIP
+  port: 80
+  annotations: {}
+  # If using an AWS load balancer, you'll need to override the default 60s load balancer idle timeout
+  # service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "1200"
+nodeSelector: {}
+tolerations: []
+  # e.g.
+  # - key: "ai"
+  #   operator: "Exists"
+  #   effect: "NoSchedule"
+affinity: {}
+  # e.g.
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: nodegroup-ai
+  #         operator: In
+  #         values:
+  #         - "true"
