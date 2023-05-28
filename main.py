@@ -10,7 +10,6 @@ from pydantic import BaseModel
 
 from fastapi.responses import StreamingResponse
 
-app = FastAPI()
 
 Sender = Callable[[Union[str, bytes]], Awaitable[None]]
 Generate = Callable[[Sender], Awaitable[None]]
@@ -36,6 +35,8 @@ class ModelStreamingResponse(StreamingResponse):
 
     sender: Sender
     DONE = object()
+    ERROR = object()
+    exception: Exception | None
 
     def __init__(
         self,
@@ -50,6 +51,7 @@ class ModelStreamingResponse(StreamingResponse):
         self.query = query
         self.llmModel = llmModel
         self.queue = Queue()
+        self.exception = None
 
     def get_model_response(self):
         """Get model response and put it into queue."""
@@ -58,9 +60,14 @@ class ModelStreamingResponse(StreamingResponse):
         def callback(token: str):
             self.queue.put(token)
 
-        self.llmModel.generate(
-            self.query, callback=callback, generation_config=generation_config
-        )
+        try:
+            self.llmModel.generate(
+                self.query, callback=callback, generation_config=generation_config
+            )
+        except Exception as exception:
+            self.queue.put(self.ERROR)
+            self.exception = exception
+
         self.queue.put(self.DONE)
 
     async def stream_response(self, send: Send) -> None:
@@ -79,6 +86,11 @@ class ModelStreamingResponse(StreamingResponse):
                 token = self.queue.get()
                 if token is self.DONE:
                     break
+                if token is self.ERROR and self.exception is not None:
+                    await send(
+                        {"type": "http.response.body", "body": b"", "more_body": False}
+                    )
+                    raise self.exception
                 await send(
                     {
                         "type": "http.response.body",
@@ -98,6 +110,9 @@ class CompletionsRequestBody(BaseModel):
     """Request body for streaming."""
 
     query: str
+
+
+app = FastAPI()
 
 
 @app.get("/ping")
