@@ -1,3 +1,7 @@
+"""_summary_
+
+This module contains the main FastAPI application.
+"""
 import logging
 import os
 import json
@@ -24,9 +28,17 @@ from llm_rs.config import GenerationConfig, Precision, SessionConfig
 from llm_rs.results import GenerationResult
 from starlette.types import Send
 from pydantic import BaseModel, Field
+from huggingface_hub import hf_hub_download
 
 LOGGING_LEVEL = os.environ.get("LOGGING_LEVEL", "DEBUG")
 MODELS_FOLDER = os.environ.get("MODELS_FOLDER", "models")
+CACHE_FOLDER = os.environ.get("MODELS_FOLDER", "cache")
+DEFAULT_MODEL_HG_REPO_ID = os.environ.get(
+    "DEFAULT_MODEL_HG_REPO_ID", "rustformers/pythia-ggml"
+)
+DEFAULT_MODEL_FILE = os.environ.get("DEFAULT_MODEL_FILE", "pythia-70m-q4_0.bin")
+DEFAULT_MODEL_META = os.environ.get("DEFAULT_MODEL_META", "pythia-70m-q4_0.meta")
+DOWNLOAD_DEFAULT_MODEL = os.environ.get("DOWNLOAD_DEFAULT_MODEL", "True") == "True"
 
 log = logging.getLogger("uvicorn")
 
@@ -35,6 +47,12 @@ Generate = Callable[[Sender], Awaitable[None]]
 
 
 class EmptyIterator(Iterator[Union[str, bytes]]):
+    """_summary_
+
+    Args:
+        Iterator (_type_): _description_
+    """
+
     def __iter__(self):
         return self
 
@@ -278,17 +296,35 @@ class ChatCompletionRequestBody(BaseModel):
 
 
 class Message(BaseModel):
+    """_summary_
+
+    Args:
+        BaseModel (_type_): message in choice
+    """
+
     role: Literal["system", "user", "assistant"]
     content: str
 
 
 class Choice(BaseModel):
+    """_summary_
+
+    Args:
+        BaseModel (_type_): choice in completion response
+    """
+
     index: int
     message: Message
     finish_reason: str
 
 
 class ChatCompletionResponseBody(BaseModel):
+    """_summary_
+
+    Args:
+        BaseModel (_type_): response body for /chat/completions
+    """
+
     id: str
     object: str
     created: int
@@ -307,6 +343,14 @@ session_config = SessionConfig(
 
 
 async def get_llm_model(body: ChatCompletionRequestBody):
+    """_summary_
+
+    Args:
+        body (ChatCompletionRequestBody): _description_
+
+    Returns:
+        _type_: _description_
+    """
     return AutoModel.from_pretrained(
         model_path_or_repo_id=f"./{MODELS_FOLDER}/{body.model}",
         session_config=session_config,
@@ -318,9 +362,32 @@ app = FastAPI()
 
 @app.on_event("startup")
 async def startup_event():
+    """_summary_
+    Starts up the server, setting log level, downloading the default model if necessary.
+    """
     log.info("Starting up...")
     log.setLevel(LOGGING_LEVEL)
     log.info("Log level set to %s", LOGGING_LEVEL)
+    if DOWNLOAD_DEFAULT_MODEL is True:
+        log.info(
+            "Downloading model... %s/%s", DEFAULT_MODEL_HG_REPO_ID, DEFAULT_MODEL_FILE
+        )
+        hf_hub_download(
+            repo_id=DEFAULT_MODEL_HG_REPO_ID,
+            cache_dir=CACHE_FOLDER,
+            local_dir=MODELS_FOLDER,
+            filename=DEFAULT_MODEL_FILE,
+        )
+        log.info(
+            "Downloading meta... %s/%s", DEFAULT_MODEL_HG_REPO_ID, DEFAULT_MODEL_META
+        )
+        hf_hub_download(
+            repo_id=DEFAULT_MODEL_HG_REPO_ID,
+            cache_dir=CACHE_FOLDER,
+            local_dir=MODELS_FOLDER,
+            filename=DEFAULT_MODEL_META,
+        )
+        log.info("Default model/meta downloaded to %s", DEFAULT_MODEL_HG_REPO_ID)
 
 
 @app.get("/ping")
