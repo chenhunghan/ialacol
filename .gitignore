@@ -161,3 +161,7 @@ cython_debug/
 
 # devspace cache
 .devspace
+.DS_Store
+
+models
+cache

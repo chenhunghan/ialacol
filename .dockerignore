@@ -148,3 +148,6 @@ devspace.yaml
 .vscode
 charts
 .github
+
+models
+cache
