@@ -4,6 +4,12 @@
 
 🦄 Self hosted, 🔒 private, 🐟 scalable, 🤑 commercially usable, 💬 LLM chat streaming service with 1-click Kubernetes cluster installation on any cloud
 
+```sh
+helm repo add ialacol https://chenhunghan.github.io/ialacol
+helm repo update
+helm install mpt7b ialacol/ialacol # named the release as `mpt7b` because by default the helm chart will install mpt7b model.
+```
+
 This project is inspired by [LocalAI](https://github.com/go-skynet/LocalAI), [privateGPT](https://github.com/imartinez/privateGPT), [local.ai](https://github.com/louisgv/local.ai), [llama-cpp-python](https://github.com/abetlen/llama-cpp-python), [closedai](https://github.com/closedai-project/closedai), [closedai](https://github.com/closedai-project/closedai), [mlc-llm](https://github.com/mlc-ai/mlc-llm), but with a focus on Kubernetes deployment, streaming, and commercially usable models only.
 
 Esssentially `ialacol` is a OpenAI RESTful API-compatible HTTP interface built on top of the great projects [llm-rs-python](https://github.com/LLukas22/llm-rs-python) and [llm](https://github.com/rustformers/llm), we aims to support all [known-good-models](https://github.com/rustformers/llm/blob/main/doc/known-good-models.md) supported by `llm-rs`.
@@ -33,6 +39,88 @@ chat_completion = openai.ChatCompletion.create(
 )
 
 print(chat_completion.choices[0].message.content)
+```
+
+## Receipts
+
+Deploy light-weight model `pythia-70m` wih only 70 millions paramters (~40MB)
+
+```sh
+cat > values.yaml <<EOF
+replicas: 1
+deployment:
+  image: quay.io/chenhunghan/ialacol:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: rustformers/pythia-ggml
+    DEFAULT_MODEL_FILE: pythia-70m-q4_0.bin
+    DEFAULT_MODEL_META: pythia-70m-q4_0.meta
+resources:
+  {}
+cache:
+  persistence:
+    size: 1Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+cacheMountPath: /app/cache
+model:
+  persistence:
+    size: 1Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+modelMountPath: /app/models
+service:
+  type: ClusterIP
+  port: 80
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+EOF
+helm repo add ialacol https://chenhunghan.github.io/ialacol
+helm repo update
+helm install mpt7b ialacol/ialacol -f values.yaml
+```
+
+Deploy `pythia-70m` models
+
+```sh
+cat > values.yaml <<EOF
+replicas: 1
+deployment:
+  image: quay.io/chenhunghan/ialacol:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: rustformers/pythia-ggml
+    DEFAULT_MODEL_FILE: RedPajama-INCITE-Base-3B-v1-q5_1-ggjt.bin
+    DEFAULT_MODEL_META: RedPajama-INCITE-Base-3B-v1-q5_1-ggjt.meta
+resources:
+  {}
+cache:
+  persistence:
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+cacheMountPath: /app/cache
+model:
+  persistence:
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+modelMountPath: /app/models
+service:
+  type: ClusterIP
+  port: 80
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+EOF
+helm repo add ialacol https://chenhunghan.github.io/ialacol
+helm repo update
+helm install mpt7b ialacol/ialacol -f values.yaml
 ```
 
 ## Development
