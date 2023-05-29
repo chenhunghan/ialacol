@@ -1,41 +1,55 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
   labels:
     app.kubernetes.io/instance: {{ .Chart.Name }}
-    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/name: {{ .Release.Name }}
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/instance: {{ .Chart.Name }}
-      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/name: {{ .Release.Name }}
   replicas: {{ .Values.replicas }}
   template:
     metadata:
-      name: {{ .Chart.Name }}
+      name: {{ .Release.Name }}
       labels:
         app.kubernetes.io/instance: {{ .Chart.Name }}
-        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/name: {{ .Release.Name }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Release.Name }}
           image: {{ .Values.deployment.image }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-          - name: GF_REPO
-            value: {{ .Values.deployment.env.GF_REPO | quote }}
-          - name: MODEL_FILE
-            value: {{ .Values.deployment.env.MODEL_FILE | quote }}
+          - name: DEFAULT_MODEL_HG_REPO_ID
+            value: {{ .Values.deployment.env.DEFAULT_MODEL_HG_REPO_ID | quote }}
+          - name: DEFAULT_MODEL_FILE
+            value: {{ .Values.deployment.env.DEFAULT_MODEL_FILE | quote }}
+          - name: DEFAULT_MODEL_META_FILE
+            value: {{ .Values.deployment.env.DEFAULT_MODEL_META_FILE | quote }}
+          - name: LOGGING_LEVEL
+            value: {{ .Values.deployment.env.LOGGING_LEVEL | quote }}
+          - name: MODELS_FOLDER
+            value: {{ .Values.deployment.env.MODELS_FOLDER | quote }}
+          - name: CACHE_FOLDER
+            value: {{ .Values.deployment.env.CACHE_FOLDER | quote }}
           volumeMounts:
           - mountPath: {{ .Values.cacheMountPath }}
             name: cache
+          volumeMounts:
+          - mountPath: {{ .Values.modelMountPath }}
+            name: model
       volumes:
       - name: cache
         persistentVolumeClaim:
-          claimName: {{ .Chart.Name }}
+          claimName: {{ .Release.Name }}-cache
+      - name: model
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-model
       tolerations:
 {{- if .Values.tolerations }}
 {{ toYaml .Values.tolerations | indent 8 }}

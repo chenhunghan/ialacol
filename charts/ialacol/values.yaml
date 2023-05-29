@@ -3,11 +3,22 @@ replicas: 1
 deployment:
   image: quay.io/chenhunghan/ialacol:latest
   env:
-    # the model repo to download from
+    # 
+    # the model repo to download from, runtime defaults to `rustformers/pythia-ggml`
     # https://huggingface.co/rustformers/mpt-7b-ggml
-    GF_REPO: rustformers/mpt-7b-ggml
-    # the file name of the model file in the repo
-    MODEL_FILE: mpt-7b-q4_0.bin
+    DEFAULT_MODEL_HG_REPO_ID: rustformers/mpt-7b-ggml
+    # the file name of the model binary in the repo, runtime defaults to `pythia-70m-q4_0.bin`
+    DEFAULT_MODEL_FILE: mpt-7b-q4_0.bin
+    # the metadata file name of the model in the repo, runtime defaults to `pythia-70m-q4_0.meta`
+    DEFAULT_MODEL_META_FILE: mpt-7b-q4_0.meta
+    # start of optional env vars
+    # 
+    # log level, runtime defaults to `INFO`
+    LOGGING_LEVEL: DEBUG
+    # the model cache directory, defaults to `models`, i.e., `/app/cache` in the container
+    MODELS_FOLDER: models
+    # the cache directory (for hf artifacts), defaults to `models`, i.e., `/app/cache` in the container
+    CACHE_FOLDER: cache
 resources:
   {}
   # limits:
@@ -17,15 +28,25 @@ resources:
   #   cpu: 100m
   #   memory: 128Mi
 
-# Persistent storage PVC for models and other artifacts
-persistence:
-  size: 24Gi
-  accessModes:
-    - ReadWriteOnce
-  # Optional. e.g. "gp2-unencrypted"
-  storageClass: ~
+cache:
+  persistence:
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+    # Optional. e.g. "gp2-unencrypted"
+    storageClass: ~
 # the path to mount the cache volume on the container
 cacheMountPath: /app/cache
+
+model:
+  persistence:
+    size: 24Gi
+    accessModes:
+      - ReadWriteOnce
+    # Optional. e.g. "gp2-unencrypted"
+    storageClass: ~
+# the path to mount the model volume on the container
+modelMountPath: /app/models
 
 service:
   type: ClusterIP
