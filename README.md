@@ -80,10 +80,10 @@ affinity: {}
 EOF
 helm repo add ialacol https://chenhunghan.github.io/ialacol
 helm repo update
-helm install mpt7b ialacol/ialacol -f values.yaml
+helm install pythia70m ialacol/ialacol -f values.yaml
 ```
 
-Deploy `pythia-70m` models
+Deploy `RedPajama` 3B model
 
 ```sh
 cat > values.yaml <<EOF
@@ -91,7 +91,7 @@ replicas: 1
 deployment:
   image: quay.io/chenhunghan/ialacol:latest
   env:
-    DEFAULT_MODEL_HG_REPO_ID: rustformers/pythia-ggml
+    DEFAULT_MODEL_HG_REPO_ID: rustformers/redpajama-ggml
     DEFAULT_MODEL_FILE: RedPajama-INCITE-Base-3B-v1-q5_1-ggjt.bin
     DEFAULT_MODEL_META: RedPajama-INCITE-Base-3B-v1-q5_1-ggjt.meta
 resources:
@@ -120,7 +120,47 @@ affinity: {}
 EOF
 helm repo add ialacol https://chenhunghan.github.io/ialacol
 helm repo update
-helm install mpt7b ialacol/ialacol -f values.yaml
+helm install redpajama3B ialacol/ialacol -f values.yaml
+```
+
+Deploy `stableLM` 7B model
+
+```sh
+cat > values.yaml <<EOF
+replicas: 1
+deployment:
+  image: quay.io/chenhunghan/ialacol:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: rustformers/stablelm-ggml
+    DEFAULT_MODEL_FILE: stablelm-tuned-alpha-7b-q4_0.bin
+    DEFAULT_MODEL_META: stablelm-tuned-alpha-7b-q4_0.meta
+resources:
+  {}
+cache:
+  persistence:
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+cacheMountPath: /app/cache
+model:
+  persistence:
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+modelMountPath: /app/models
+service:
+  type: ClusterIP
+  port: 80
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+EOF
+helm repo add ialacol https://chenhunghan.github.io/ialacol
+helm repo update
+helm install stablelm7B ialacol/ialacol -f values.yaml
 ```
 
 ## Development
