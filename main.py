@@ -30,15 +30,15 @@ from starlette.types import Send
 from pydantic import BaseModel, Field
 from huggingface_hub import hf_hub_download
 
-LOGGING_LEVEL = os.environ.get("LOGGING_LEVEL", "DEBUG")
-MODELS_FOLDER = os.environ.get("MODELS_FOLDER", "models")
-CACHE_FOLDER = os.environ.get("MODELS_FOLDER", "cache")
 DEFAULT_MODEL_HG_REPO_ID = os.environ.get(
     "DEFAULT_MODEL_HG_REPO_ID", "rustformers/pythia-ggml"
 )
 DEFAULT_MODEL_FILE = os.environ.get("DEFAULT_MODEL_FILE", "pythia-70m-q4_0.bin")
 DEFAULT_MODEL_META = os.environ.get("DEFAULT_MODEL_META", "pythia-70m-q4_0.meta")
 DOWNLOAD_DEFAULT_MODEL = os.environ.get("DOWNLOAD_DEFAULT_MODEL", "True") == "True"
+LOGGING_LEVEL = os.environ.get("LOGGING_LEVEL", "INFO")
+MODELS_FOLDER = os.environ.get("MODELS_FOLDER", "models")
+CACHE_FOLDER = os.environ.get("MODELS_FOLDER", "cache")
 
 log = logging.getLogger("uvicorn")
 
