@@ -1,5 +1,6 @@
 import logging
 import os
+from time import time
 from typing import (
     Awaitable,
     Callable,
@@ -13,15 +14,15 @@ from typing import (
 )
 from queue import Queue, Empty
 from threading import Thread
+from fastapi import FastAPI, Depends
+from fastapi.responses import StreamingResponse
 from fastapi.exceptions import HTTPException
 from llm_rs.auto import AutoModel
 from llm_rs.base_model import Model
 from llm_rs.config import GenerationConfig, Precision, SessionConfig
+from llm_rs.results import GenerationResult
 from starlette.types import Send
-from fastapi import FastAPI, Depends
 from pydantic import BaseModel, Field
-
-from fastapi.responses import StreamingResponse
 
 LOGGING_LEVEL = os.environ.get("LOGGING_LEVEL", "DEBUG")
 MODELS_FOLDER = os.environ.get("MODELS_FOLDER", "models")
@@ -228,6 +229,25 @@ class ChatCompletionRequestBody(BaseModel):
     seed: int = seed
 
 
+class Message(BaseModel):
+    role: Literal["system", "user", "assistant"]
+    content: str
+
+
+class Choice(BaseModel):
+    index: int
+    message: Message
+    finish_reason: str
+
+
+class ChatCompletionResponseBody(BaseModel):
+    id: str
+    object: str
+    created: int
+    choices: list[Choice]
+    usage: dict[str, int]
+
+
 session_config = SessionConfig(
     threads=8,
     batch_size=8,
@@ -237,15 +257,16 @@ session_config = SessionConfig(
     prefer_mmap=True,
 )
 
+
 async def get_llm_model(body: ChatCompletionRequestBody):
     return AutoModel.from_pretrained(
         model_path_or_repo_id=f"./{MODELS_FOLDER}/{body.model}",
         session_config=session_config,
     )
-    
 
 
 app = FastAPI()
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -264,10 +285,10 @@ async def ping():
     return {"ialacol": "pong"}
 
 
-@app.post("/v1/chat/completions")
+@app.post("/v1/chat/completions", response_model=ChatCompletionResponseBody)
 async def chat_completions(
     body: ChatCompletionRequestBody, llm_model: Annotated[Model, Depends(get_llm_model)]
-) -> StreamingResponse:
+):
     """_summary_
         Compatible with https://platform.openai.com/docs/api-reference/chat
     Args:
@@ -305,17 +326,36 @@ async def chat_completions(
 
     prompt = f"{system_message_content} {assistant_message_content} ### Human: {user_message_content} ### Assistant:"
     log.info("Prompt:%s", prompt)
-    return ModelStreamingResponse(
-        prompt,
-        llm_model,
-        GenerationConfig(
-            top_k=body.top_k,
-            top_p=body.top_p,
-            temperature=body.temperature,
-            repetition_penalty=body.repeat_penalty,
-            repetition_penalty_last_n=body.repeat_penalty_last_n,
-            seed=body.seed,
-            max_new_tokens=body.max_tokens,
-            stop_words=body.stop,
-        ),
-    )
+
+    if body.stream is True:
+        return ModelStreamingResponse(
+            prompt,
+            llm_model,
+            GenerationConfig(
+                top_k=body.top_k,
+                top_p=body.top_p,
+                temperature=body.temperature,
+                repetition_penalty=body.repeat_penalty,
+                repetition_penalty_last_n=body.repeat_penalty_last_n,
+                seed=body.seed,
+                max_new_tokens=body.max_tokens,
+                stop_words=body.stop,
+            ),
+        )
+    response: GenerationResult = llm_model.generate(prompt)
+    return {
+        "id": "id",
+        "object": "chat.completion",
+        "created": time.time(),
+        "choices": [
+            {
+                "index": 0,
+                "message": {
+                    "role": "assistant",
+                    "content": response.text,
+                },
+                "finish_reason": response.stop_reason,
+            }
+        ],
+        "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+    }
