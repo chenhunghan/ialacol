@@ -10,7 +10,7 @@ deployment:
     # the file name of the model binary in the repo, runtime defaults to `pythia-70m-q4_0.bin`
     DEFAULT_MODEL_FILE: mpt-7b-q4_0.bin
     # the metadata file name of the model in the repo, runtime defaults to `pythia-70m-q4_0.meta`
-    DEFAULT_MODEL_META_FILE: mpt-7b-q4_0.meta
+    DEFAULT_MODEL_META: mpt-7b-q4_0.meta
     # start of optional env vars
     # 
     # log level, runtime defaults to `INFO`
