@@ -19,7 +19,7 @@ curl -X POST \
      http://localhost:8000/v1/chat/completio
 ```
 
-or OpenAI python libs (see more examples in the `examples/openai` folder)
+or OpenAI python client (see more examples in the `examples/openai` folder)
 
 ```python
 import openai
