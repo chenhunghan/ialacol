@@ -1,5 +1,6 @@
 import logging
 import os
+import json
 from time import time
 from typing import (
     Awaitable,
@@ -52,6 +53,7 @@ class ModelStreamingResponse(StreamingResponse):
     def __init__(
         self,
         prompt: str,
+        model_name: str,
         _llm_model: Model,
         generation_config: GenerationConfig,
         status_code: int = 200,
@@ -61,6 +63,7 @@ class ModelStreamingResponse(StreamingResponse):
             content=EmptyIterator(), status_code=status_code, media_type=media_type
         )
         self.prompt = prompt
+        self.model_name = model_name
         self.llm_model = _llm_model
         self.queue = Queue()
         self.exception = None
@@ -92,6 +95,7 @@ class ModelStreamingResponse(StreamingResponse):
                 "headers": self.raw_headers,
             }
         )
+        created = time()
         thread = Thread(target=self.get_model_response)
         thread.start()
         while True:
@@ -104,17 +108,61 @@ class ModelStreamingResponse(StreamingResponse):
                         {"type": "http.response.body", "body": b"", "more_body": False}
                     )
                     raise self.exception
+                data = json.dumps(
+                    {
+                        "id": "id",
+                        "object": "chat.completion.chunk",
+                        "created": created,
+                        "model": self.model_name,
+                        "choices": [
+                            {
+                                "delta": {"role": "assistant", "content": token},
+                                "index": 0,
+                                "finish_reason": None,
+                            }
+                        ],
+                    }
+                )
+                chunk_body = bytes(f"data: {data}" + "\n\n", "utf-8")
                 await send(
                     {
                         "type": "http.response.body",
-                        "body": bytes(token, "utf-8"),
+                        "body": chunk_body,
                         "more_body": True,
                     }
                 )
-            # from get_nowait()
             except Empty:
                 break
         thread.join()
+        stop_data = json.dumps(
+            {
+                "id": "id",
+                "object": "chat.completion.chunk",
+                "created": created,
+                "model": self.model_name,
+                "choices": [
+                    {
+                        "delta": {},
+                        "index": 0,
+                        "finish_reason": "stop",
+                    }
+                ],
+            }
+        )
+        await send(
+            {
+                "type": "http.response.body",
+                "body": bytes(f"data: {stop_data}" + "\n\n", "utf-8"),
+                "more_body": True,
+            }
+        )
+        await send(
+            {
+                "type": "http.response.body",
+                "body": bytes("data: [DONE]" + "\n\n", "utf-8"),
+                "more_body": True,
+            }
+        )
         # send empty body to client to close connection
         await send({"type": "http.response.body", "body": b"", "more_body": False})
 
@@ -325,11 +373,13 @@ async def chat_completions(
     system_message_content = system_message.content if system_message else ""
 
     prompt = f"{system_message_content} {assistant_message_content} ### Human: {user_message_content} ### Assistant:"
-    log.info("Prompt:%s", prompt)
+    log.debug("Prompt:%s", prompt)
 
     if body.stream is True:
+        log.debug("Streaming...")
         return ModelStreamingResponse(
             prompt,
+            body.model,
             llm_model,
             GenerationConfig(
                 top_k=body.top_k,
@@ -342,20 +392,32 @@ async def chat_completions(
                 stop_words=body.stop,
             ),
         )
-    response: GenerationResult = llm_model.generate(prompt)
-    return {
+    generation_result: GenerationResult = llm_model.generate(prompt)
+
+    stop_reason = generation_result.stop_reason
+    finnish_reason = "unknown"
+    if stop_reason == 0:
+        finnish_reason = "end_of_token"
+    elif stop_reason == 1:
+        finnish_reason = "max_length"
+    elif stop_reason == 2:
+        finnish_reason = "user_cancelled"
+
+    http_response = {
         "id": "id",
         "object": "chat.completion",
-        "created": time.time(),
+        "created": time(),
         "choices": [
             {
                 "index": 0,
                 "message": {
                     "role": "assistant",
-                    "content": response.text,
+                    "content": generation_result.text,
                 },
-                "finish_reason": response.stop_reason,
+                "finish_reason": finnish_reason,
             }
         ],
         "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
     }
+    log.debug("http_response:%s ", http_response)
+    return http_response
