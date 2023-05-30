@@ -36,7 +36,7 @@ Chat with the default model `mpt-7b-q4_0.bin` using `curl`
 curl -X POST \
      -H 'Content-Type: application/json' \
      -d '{ "messages": [{"role": "user", "content": "How are you?"}], "model": "mpt-7b-q4_0.bin"}' \
-     http://localhost:8000/v1/chat/completio
+     http://localhost:8000/v1/chat/completions
 ```
 
 Alternatively, using OpenAI's client library (see more examples in the `examples/openai` folder).
@@ -54,6 +54,11 @@ chat_completion = openai.ChatCompletion.create(
 
 print(chat_completion.choices[0].message.content)
 ```
+
+## Roadmap
+- [ ] Mimic restof OpenAI API, including `GET /models` and `POST /completions`
+- [ ] Support more Apache-2.0 models such as [codet5p](https://huggingface.co/Salesforce/codet5p-16b) and others listed [here](https://github.com/eugeneyan/open-llms)
+- [ ] Support `POST /embeddings` backed by huggingface Apache-2.0 embedding models such as [Sentence Transformers](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) and [hkunlp/instructor](https://huggingface.co/hkunlp/instructor-large)
 
 ## Receipts
 
