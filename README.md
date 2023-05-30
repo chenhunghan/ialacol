@@ -28,7 +28,7 @@ By defaults, it will deploy [MosaicML's MPT-7B](https://www.mosaicml.com/blog/mp
 
 Port-forward
 ```sh
-kubectl port-forward svc/mpt7b 8000:8000
+kubectl port-forward svc/mpt7b 80:8000
 ```
 
 Chat with the default model `mpt-7b-q4_0.bin` using `curl`
