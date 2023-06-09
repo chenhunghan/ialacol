@@ -17,16 +17,12 @@ from typing import (
     Dict,
     Annotated,
 )
-from queue import Queue, Empty
-from threading import Thread
 from fastapi import FastAPI, Depends
 from fastapi.responses import StreamingResponse
-from fastapi.exceptions import HTTPException
 from llm_rs.auto import AutoModel
 from llm_rs.base_model import Model
 from llm_rs.config import GenerationConfig, Precision, SessionConfig
 from llm_rs.results import GenerationResult
-from starlette.types import Send
 from pydantic import BaseModel, Field
 from huggingface_hub import hf_hub_download
 
@@ -58,131 +54,6 @@ class EmptyIterator(Iterator[Union[str, bytes]]):
 
     def __next__(self):
         raise StopIteration
-
-
-class ModelStreamingResponse(StreamingResponse):
-    """Streaming response for model, inheritance from StreamingResponse."""
-
-    sender: Sender
-    DONE = object()
-    ERROR = object()
-    exception: Exception | None
-
-    def __init__(
-        self,
-        prompt: str,
-        model_name: str,
-        _llm_model: Model,
-        generation_config: GenerationConfig,
-        status_code: int = 200,
-        media_type: str = "text/event-stream",
-    ) -> None:
-        super().__init__(
-            content=EmptyIterator(), status_code=status_code, media_type=media_type
-        )
-        self.prompt = prompt
-        self.model_name = model_name
-        self.llm_model = _llm_model
-        self.queue = Queue()
-        self.exception = None
-        self.generation_config = generation_config
-
-    def get_model_response(self):
-        """Get model response and put it into queue."""
-
-        def callback(token: str):
-            self.queue.put(token)
-
-        try:
-            self.llm_model.generate(
-                self.prompt, callback=callback, generation_config=self.generation_config
-            )
-        # pylint: disable=broad-except
-        except Exception as exception:
-            self.queue.put(self.ERROR)
-            self.exception = exception
-
-        self.queue.put(self.DONE)
-
-    async def stream_response(self, send: Send) -> None:
-        """Rewrite stream_response to send response to client."""
-        await send(
-            {
-                "type": "http.response.start",
-                "status": self.status_code,
-                "headers": self.raw_headers,
-            }
-        )
-        created = time()
-        thread = Thread(target=self.get_model_response)
-        thread.start()
-        while True:
-            try:
-                token = self.queue.get()
-                if token is self.DONE:
-                    break
-                if token is self.ERROR and self.exception is not None:
-                    await send(
-                        {"type": "http.response.body", "body": b"", "more_body": False}
-                    )
-                    raise self.exception
-                data = json.dumps(
-                    {
-                        "id": "id",
-                        "object": "chat.completion.chunk",
-                        "created": created,
-                        "model": self.model_name,
-                        "choices": [
-                            {
-                                "delta": {"role": "assistant", "content": token},
-                                "index": 0,
-                                "finish_reason": None,
-                            }
-                        ],
-                    }
-                )
-                chunk_body = bytes(f"data: {data}" + "\n\n", "utf-8")
-                await send(
-                    {
-                        "type": "http.response.body",
-                        "body": chunk_body,
-                        "more_body": True,
-                    }
-                )
-            except Empty:
-                break
-        thread.join()
-        stop_data = json.dumps(
-            {
-                "id": "id",
-                "object": "chat.completion.chunk",
-                "created": created,
-                "model": self.model_name,
-                "choices": [
-                    {
-                        "delta": {},
-                        "index": 0,
-                        "finish_reason": "stop",
-                    }
-                ],
-            }
-        )
-        await send(
-            {
-                "type": "http.response.body",
-                "body": bytes(f"data: {stop_data}" + "\n\n", "utf-8"),
-                "more_body": True,
-            }
-        )
-        await send(
-            {
-                "type": "http.response.body",
-                "body": bytes("data: [DONE]" + "\n\n", "utf-8"),
-                "more_body": True,
-            }
-        )
-        # send empty body to client to close connection
-        await send({"type": "http.response.body", "body": b"", "more_body": False})
 
 
 model = Field(description="The model to use for generating completions.")
@@ -336,10 +207,55 @@ session_config = SessionConfig(
     threads=8,
     batch_size=8,
     context_length=2048,
-    keys_memory_type=Precision.FP32,
-    values_memory_type=Precision.FP32,
+    # https://github.com/ggerganov/llama.cpp/discussions/1593
+    keys_memory_type=Precision.FP16,
+    values_memory_type=Precision.FP16,
     prefer_mmap=True,
 )
+
+
+def streamer(
+    prompt: str,
+    model_name: str,
+    llm_model: Model,
+    generation_config: GenerationConfig,
+):
+    created = time()
+    for token in llm_model.stream(prompt, generation_config=generation_config):
+        log.debug("Streaming token %s", token)
+        data = json.dumps(
+            {
+                "id": "id",
+                "object": "chat.completion.chunk",
+                "created": created,
+                "model": model_name,
+                "choices": [
+                    {
+                        "delta": {"role": "assistant", "content": token},
+                        "index": 0,
+                        "finish_reason": None,
+                    }
+                ],
+            }
+        )
+        yield f"data: {data}" + "\n\n"
+    stop_data = json.dumps(
+        {
+            "id": "id",
+            "object": "chat.completion.chunk",
+            "created": created,
+            "model": model_name,
+            "choices": [
+                {
+                    "delta": {},
+                    "index": 0,
+                    "finish_reason": "stop",
+                }
+            ],
+        }
+    )
+    yield f"data: {stop_data}" + "\n\n"
+    log.debug("Streaming ended")
 
 
 async def get_llm_model(body: ChatCompletionRequestBody):
@@ -351,9 +267,11 @@ async def get_llm_model(body: ChatCompletionRequestBody):
     Returns:
         _type_: _description_
     """
+    verbose = LOGGING_LEVEL == "DEBUG"
     return AutoModel.from_pretrained(
         model_path_or_repo_id=f"./{MODELS_FOLDER}/{body.model}",
         session_config=session_config,
+        verbose=verbose,
     )
 
 
@@ -387,7 +305,12 @@ async def startup_event():
             local_dir=MODELS_FOLDER,
             filename=DEFAULT_MODEL_META,
         )
-        log.info("Default model/meta downloaded to %s", DEFAULT_MODEL_HG_REPO_ID)
+        log.info(
+            "Default model/meta %s/%s downloaded to %s",
+            DEFAULT_MODEL_FILE,
+            DEFAULT_MODEL_META,
+            MODELS_FOLDER,
+        )
 
 
 @app.get("/ping")
@@ -420,9 +343,8 @@ async def chat_completions(
         or (body.presence_penalty is not None)
         or (body.frequency_penalty is not None)
     ):
-        raise HTTPException(
-            status_code=422,
-            detail="n, logit_bias, user, presence_penalty and frequency_penalty are not supporte.",
+        log.warning(
+            "n, logit_bias, user, presence_penalty and frequency_penalty are not supporte."
         )
     user_message = next(
         (message for message in body.messages if message.role == "user"), None
@@ -441,26 +363,25 @@ async def chat_completions(
 
     prompt = f"{system_message_content} {assistant_message_content} ### Human: {user_message_content} ### Assistant:"
     log.debug("Prompt:%s", prompt)
-
+    generation_config = GenerationConfig(
+        top_k=body.top_k,
+        top_p=body.top_p,
+        temperature=body.temperature,
+        repetition_penalty=body.repeat_penalty,
+        repetition_penalty_last_n=body.repeat_penalty_last_n,
+        seed=body.seed,
+        max_new_tokens=body.max_tokens,
+        stop_words=body.stop,
+    )
     if body.stream is True:
-        log.debug("Streaming...")
-        return ModelStreamingResponse(
-            prompt,
-            body.model,
-            llm_model,
-            GenerationConfig(
-                top_k=body.top_k,
-                top_p=body.top_p,
-                temperature=body.temperature,
-                repetition_penalty=body.repeat_penalty,
-                repetition_penalty_last_n=body.repeat_penalty_last_n,
-                seed=body.seed,
-                max_new_tokens=body.max_tokens,
-                stop_words=body.stop,
-            ),
+        log.debug("Streaming response from %s", body.model)
+        return StreamingResponse(
+            streamer(prompt, body.model, llm_model, generation_config),
+            media_type="text/event-stream",
         )
-    generation_result: GenerationResult = llm_model.generate(prompt)
-
+    generation_result: GenerationResult | List[float] = llm_model.generate(prompt)
+    if not isinstance(generation_result, GenerationResult):
+        return {"error": "unknown generation_result"}
     stop_reason = generation_result.stop_reason
     finnish_reason = "unknown"
     if stop_reason == 0:
