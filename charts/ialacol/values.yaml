@@ -50,7 +50,7 @@ modelMountPath: /app/models
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8000
   annotations: {}
   # If using an AWS load balancer, you'll need to override the default 60s load balancer idle timeout
   # service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "1200"

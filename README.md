@@ -27,11 +27,13 @@ helm install mpt7b ialacol/ialacol
 By defaults, it will deploy [MosaicML's MPT-7B](https://www.mosaicml.com/blog/mpt-7b) model quantized by [rustformers](https://huggingface.co/rustformers/mpt-7b-ggml).
 
 Port-forward
+
 ```sh
-kubectl port-forward svc/mpt7b 80:8000
+kubectl port-forward svc/mpt7b 8000:8000
 ```
 
 Chat with the default model `mpt-7b-q4_0.bin` using `curl`
+
 ```sh
 curl -X POST \
      -H 'Content-Type: application/json' \
@@ -93,7 +95,7 @@ model:
 modelMountPath: /app/models
 service:
   type: ClusterIP
-  port: 80
+  port: 8000
   annotations: {}
 nodeSelector: {}
 tolerations: []
@@ -133,7 +135,7 @@ model:
 modelMountPath: /app/models
 service:
   type: ClusterIP
-  port: 80
+  port: 8000
   annotations: {}
 nodeSelector: {}
 tolerations: []
@@ -173,7 +175,7 @@ model:
 modelMountPath: /app/models
 service:
   type: ClusterIP
-  port: 80
+  port: 8000
   annotations: {}
 nodeSelector: {}
 tolerations: []
