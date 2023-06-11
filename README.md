@@ -59,12 +59,55 @@ print(chat_completion.choices[0].message.content)
 
 ## Roadmap
 
+- [x] Support `starcoder` model type via [ctransformers](https://github.com/marella/ctransformers), including:
+  - StarChat <https://huggingface.co/TheBloke/starchat-beta-GGML>
+  - StarCoder <https://huggingface.co/TheBloke/starcoder-GGML>
+  - StarCoderPlus <https://huggingface.co/TheBloke/starcoderplus-GGML>
 - [ ] Mimic restof OpenAI API, including `GET /models` and `POST /completions`
 - [ ] Support `POST /embeddings` backed by huggingface Apache-2.0 embedding models such as [Sentence Transformers](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) and [hkunlp/instructor](https://huggingface.co/hkunlp/instructor-large)
 - [ ] Suuport Apache-2.0 [fastchat-t5-3b](https://huggingface.co/lmsys/fastchat-t5-3b-v1.0)
 - [ ] Support more Apache-2.0 models such as [codet5p](https://huggingface.co/Salesforce/codet5p-16b) and others listed [here](https://github.com/eugeneyan/open-llms)
 
 ## Receipts
+
+Deploy model `starchat` <https://huggingface.co/TheBloke/starchat-beta-GGML>
+
+```sh
+cat > values.yaml <<EOF
+replicas: 1
+deployment:
+  image: quay.io/chenhunghan/ialacol:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: TheBloke/starchat-beta-GGML
+    DEFAULT_MODEL_FILE: starchat-beta.ggmlv3.q4_0.bin
+resources:
+  {}
+cache:
+  persistence:
+    size: 20Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+cacheMountPath: /app/cache
+model:
+  persistence:
+    size: 20Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+modelMountPath: /app/models
+service:
+  type: ClusterIP
+  port: 8000
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+EOF
+helm repo add starchat https://chenhunghan.github.io/ialacol
+helm repo update
+helm install starchat ialacol/ialacol -f values.yaml
+```
 
 Deploy light-weight model `pythia-70m` wih only 70 millions paramters (~40MB)
 
