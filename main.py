@@ -23,14 +23,15 @@ from llm_rs.auto import AutoModel
 from llm_rs.base_model import Model
 from llm_rs.config import GenerationConfig, Precision, SessionConfig
 from llm_rs.results import GenerationResult
+from ctransformers import LLM, AutoModelForCausalLM
 from pydantic import BaseModel, Field
 from huggingface_hub import hf_hub_download
 
 DEFAULT_MODEL_HG_REPO_ID = os.environ.get(
-    "DEFAULT_MODEL_HG_REPO_ID", "rustformers/pythia-ggml"
+    "DEFAULT_MODEL_HG_REPO_ID", None
 )
-DEFAULT_MODEL_FILE = os.environ.get("DEFAULT_MODEL_FILE", "pythia-70m-q4_0.bin")
-DEFAULT_MODEL_META = os.environ.get("DEFAULT_MODEL_META", "pythia-70m-q4_0.meta")
+DEFAULT_MODEL_FILE = os.environ.get("DEFAULT_MODEL_FILE", None)
+DEFAULT_MODEL_META = os.environ.get("DEFAULT_MODEL_META", None)
 DOWNLOAD_DEFAULT_MODEL = os.environ.get("DOWNLOAD_DEFAULT_MODEL", "True") == "True"
 LOGGING_LEVEL = os.environ.get("LOGGING_LEVEL", "INFO")
 MODELS_FOLDER = os.environ.get("MODELS_FOLDER", "models")
@@ -217,28 +218,52 @@ session_config = SessionConfig(
 def streamer(
     prompt: str,
     model_name: str,
-    llm_model: Model,
+    llm_model: Model | LLM,
     generation_config: GenerationConfig,
 ):
     created = time()
-    for token in llm_model.stream(prompt, generation_config=generation_config):
-        log.debug("Streaming token %s", token)
-        data = json.dumps(
-            {
-                "id": "id",
-                "object": "chat.completion.chunk",
-                "created": created,
-                "model": model_name,
-                "choices": [
-                    {
-                        "delta": {"role": "assistant", "content": token},
-                        "index": 0,
-                        "finish_reason": None,
-                    }
-                ],
-            }
-        )
-        yield f"data: {data}" + "\n\n"
+
+    # the llm_model is a ctransformer model instance
+    if isinstance(llm_model, LLM):
+        for token in llm_model(prompt, stream=True):
+            log.debug("Streaming token %s", token)
+            data = json.dumps(
+                {
+                    "id": "id",
+                    "object": "chat.completion.chunk",
+                    "created": created,
+                    "model": model_name,
+                    "choices": [
+                        {
+                            "delta": {"role": "assistant", "content": token},
+                            "index": 0,
+                            "finish_reason": None,
+                        }
+                    ],
+                }
+            )
+            yield f"data: {data}" + "\n\n"
+
+    # the llm_model is a llm-rs instance
+    if isinstance(llm_model, Model):
+        for token in llm_model.stream(prompt, generation_config=generation_config):
+            log.debug("Streaming token %s", token)
+            data = json.dumps(
+                {
+                    "id": "id",
+                    "object": "chat.completion.chunk",
+                    "created": created,
+                    "model": model_name,
+                    "choices": [
+                        {
+                            "delta": {"role": "assistant", "content": token},
+                            "index": 0,
+                            "finish_reason": None,
+                        }
+                    ],
+                }
+            )
+            yield f"data: {data}" + "\n\n"
     stop_data = json.dumps(
         {
             "id": "id",
@@ -268,6 +293,16 @@ async def get_llm_model(body: ChatCompletionRequestBody):
         _type_: _description_
     """
     verbose = LOGGING_LEVEL == "DEBUG"
+
+    # use ctransformer if the model is a `starcoder`/`starchat`/`starcoderplus` model
+    # as llm-rs does not support these models (yet) https://github.com/rustformers/llm/issues/304
+    if "star" in body.model:
+        log.debug("Using ctransformer model as the mode is %s", body.model)
+        return AutoModelForCausalLM.from_pretrained(
+            f"./{MODELS_FOLDER}/{body.model}", model_type="starcoder"
+        )
+
+    log.debug("Using llm-rs model as the mode is %s", body.model)
     return AutoModel.from_pretrained(
         model_path_or_repo_id=f"./{MODELS_FOLDER}/{body.model}",
         session_config=session_config,
@@ -287,30 +322,32 @@ async def startup_event():
     log.setLevel(LOGGING_LEVEL)
     log.info("Log level set to %s", LOGGING_LEVEL)
     if DOWNLOAD_DEFAULT_MODEL is True:
-        log.info(
-            "Downloading model... %s/%s", DEFAULT_MODEL_HG_REPO_ID, DEFAULT_MODEL_FILE
-        )
-        hf_hub_download(
-            repo_id=DEFAULT_MODEL_HG_REPO_ID,
-            cache_dir=CACHE_FOLDER,
-            local_dir=MODELS_FOLDER,
-            filename=DEFAULT_MODEL_FILE,
-        )
-        log.info(
-            "Downloading meta... %s/%s", DEFAULT_MODEL_HG_REPO_ID, DEFAULT_MODEL_META
-        )
-        hf_hub_download(
-            repo_id=DEFAULT_MODEL_HG_REPO_ID,
-            cache_dir=CACHE_FOLDER,
-            local_dir=MODELS_FOLDER,
-            filename=DEFAULT_MODEL_META,
-        )
-        log.info(
-            "Default model/meta %s/%s downloaded to %s",
-            DEFAULT_MODEL_FILE,
-            DEFAULT_MODEL_META,
-            MODELS_FOLDER,
-        )
+        if (DEFAULT_MODEL_FILE is not None and DEFAULT_MODEL_HG_REPO_ID is not None):
+            log.info(
+                "Downloading model... %s/%s", DEFAULT_MODEL_HG_REPO_ID, DEFAULT_MODEL_FILE
+            )
+            hf_hub_download(
+                repo_id=DEFAULT_MODEL_HG_REPO_ID,
+                cache_dir=CACHE_FOLDER,
+                local_dir=MODELS_FOLDER,
+                filename=DEFAULT_MODEL_FILE,
+            )
+        if (DEFAULT_MODEL_META is not None and DEFAULT_MODEL_HG_REPO_ID is not None):
+            log.info(
+                "Downloading meta... %s/%s", DEFAULT_MODEL_HG_REPO_ID, DEFAULT_MODEL_META
+            )
+            hf_hub_download(
+                repo_id=DEFAULT_MODEL_HG_REPO_ID,
+                cache_dir=CACHE_FOLDER,
+                local_dir=MODELS_FOLDER,
+                filename=DEFAULT_MODEL_META,
+            )
+            log.info(
+                "Default model/meta %s/%s downloaded to %s",
+                DEFAULT_MODEL_FILE,
+                DEFAULT_MODEL_META,
+                MODELS_FOLDER,
+            )
 
 
 @app.get("/ping")
@@ -374,9 +411,10 @@ async def chat_completions(
         stop_words=body.stop,
     )
     if body.stream is True:
-        log.debug("Streaming response from %s", body.model)
+        model_name = body.model
+        log.debug("Streaming response from %s", model_name)
         return StreamingResponse(
-            streamer(prompt, body.model, llm_model, generation_config),
+            streamer(prompt, model_name, llm_model, generation_config),
             media_type="text/event-stream",
         )
     generation_result: GenerationResult | List[float] = llm_model.generate(prompt)
