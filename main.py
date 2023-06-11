@@ -374,9 +374,10 @@ async def chat_completions(
         stop_words=body.stop,
     )
     if body.stream is True:
-        log.debug("Streaming response from %s", body.model)
+        model_name = body.model
+        log.debug("Streaming response from %s", model_name)
         return StreamingResponse(
-            streamer(prompt, body.model, llm_model, generation_config),
+            streamer(prompt, model_name, llm_model, generation_config),
             media_type="text/event-stream",
         )
     generation_result: GenerationResult | List[float] = llm_model.generate(prompt)
