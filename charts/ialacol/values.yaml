@@ -3,12 +3,12 @@ replicas: 1
 deployment:
   image: quay.io/chenhunghan/ialacol:latest
   env:
-    # the model repo to download from e.g. https://huggingface.co/rustformers/mpt-7b-ggml
-    DEFAULT_MODEL_HG_REPO_ID: rustformers/mpt-7b-ggml
+    # the model repo to download from e.g. https://huggingface.co/rustformers/open-llama-ggml
+    DEFAULT_MODEL_HG_REPO_ID: rustformers/open-llama-ggml
     # the file name of the model binary in the repo
-    DEFAULT_MODEL_FILE: mpt-7b-q4_0.bin
+    DEFAULT_MODEL_FILE: open_llama_7b-q4_0-ggjt.bin
     # the metadata file name of the model in the repo
-    DEFAULT_MODEL_META: mpt-7b-q4_0.meta
+    DEFAULT_MODEL_META: open_llama_7b-q4_0-ggjt.meta
     # start of optional env vars
     # 
     # log level, runtime defaults to `INFO`

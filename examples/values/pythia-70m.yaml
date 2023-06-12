@@ -1,0 +1,30 @@
+replicas: 1
+deployment:
+  image: quay.io/chenhunghan/ialacol:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: rustformers/pythia-ggml
+    DEFAULT_MODEL_FILE: pythia-70m-q4_0.bin
+    DEFAULT_MODEL_META: pythia-70m-q4_0.meta
+resources:
+  {}
+cache:
+  persistence:
+    size: 1Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+cacheMountPath: /app/cache
+model:
+  persistence:
+    size: 1Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+modelMountPath: /app/models
+service:
+  type: ClusterIP
+  port: 8000
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

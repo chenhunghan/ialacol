@@ -1,0 +1,30 @@
+replicas: 1
+deployment:
+  image: quay.io/chenhunghan/ialacol:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: rustformers/mpt-7b-ggml
+    DEFAULT_MODEL_FILE: mpt-7b-q4_0.bin
+    DEFAULT_MODEL_META: mpt-7b-q4_0.meta
+resources:
+  {}
+cache:
+  persistence:
+    size: 15Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+cacheMountPath: /app/cache
+model:
+  persistence:
+    size: 20Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+modelMountPath: /app/models
+service:
+  type: ClusterIP
+  port: 8000
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
