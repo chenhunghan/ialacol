@@ -18,8 +18,8 @@ from typing import (
 from fastapi import FastAPI, Depends
 from fastapi.responses import StreamingResponse
 from llm_rs.auto import AutoModel
-from llm_rs.config import GenerationConfig, Precision, SessionConfig
-from llm_rs.results import GenerationResult
+from llm_rs.config import GenerationConfig, Precision, SessionConfig # pylint: disable=no-name-in-module,import-error
+from llm_rs.results import GenerationResult # pylint: disable=no-name-in-module,import-error
 from ctransformers import AutoModelForCausalLM
 from huggingface_hub import hf_hub_download
 
@@ -35,15 +35,19 @@ LOGGING_LEVEL = os.environ.get("LOGGING_LEVEL", "INFO")
 MODELS_FOLDER = os.environ.get("MODELS_FOLDER", "models")
 CACHE_FOLDER = os.environ.get("MODELS_FOLDER", "cache")
 
+THREADS = int(os.environ.get("THREADS", "8"))
+BATCH_SIZE = int(os.environ.get("BATCH_SIZE", "8"))
+CONTEXT_LENGTH = int(os.environ.get("CONTEXT_LENGTH", "1024"))
+
 log = logging.getLogger("uvicorn")
 
 Sender = Callable[[Union[str, bytes]], Awaitable[None]]
 Generate = Callable[[Sender], Awaitable[None]]
 
 session_config = SessionConfig(
-    threads=8,
-    batch_size=8,
-    context_length=2048,
+    threads=THREADS,
+    batch_size=BATCH_SIZE,
+    context_length=CONTEXT_LENGTH,
     # https://github.com/ggerganov/llama.cpp/discussions/1593
     keys_memory_type=Precision.FP16,
     values_memory_type=Precision.FP16,
@@ -71,7 +75,8 @@ async def get_llm_model(
         return dict(
             lib="ctransformer",
             llm_model=AutoModelForCausalLM.from_pretrained(
-                f"./{MODELS_FOLDER}/{body.model}", model_type="starcoder"
+                f"./{MODELS_FOLDER}/{body.model}",
+                model_type="starcoder",
             ),
         )
 
@@ -197,7 +202,7 @@ async def chat_completions(
         log.debug("Streaming response from %s", model_name)
         return StreamingResponse(
             chat_completions_streamer(
-                prompt, model_name, llm_model, llm_model_lib, generation_config, log
+                prompt, model_name, llm_model, llm_model_lib, generation_config, session_config, log
             ),
             media_type="text/event-stream",
         )

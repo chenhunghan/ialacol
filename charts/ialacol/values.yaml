@@ -17,6 +17,12 @@ deployment:
     MODELS_FOLDER: models
     # the cache directory (for hf artifacts), defaults to `models`, i.e., `/app/cache` in the container
     CACHE_FOLDER: cache
+    # default to 8
+    THREADS: 8
+    # default to 8
+    BATCH_SIZE: 8
+    # default to 1024
+    CONTEXT_LENGTH: 1024
 resources:
   {}
   # limits:
