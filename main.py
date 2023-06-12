@@ -422,7 +422,7 @@ async def chat_completions(
         repetition_penalty_last_n=body.repeat_penalty_last_n,
         seed=body.seed,
         max_new_tokens=body.max_tokens,
-        stop_words=["###"],
+        stop_words=body.stop,
     )
     llm_model = model_data["llm_model"]
     llm_model_lib = model_data["lib"]
