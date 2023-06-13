@@ -147,6 +147,24 @@ async def ping():
     """
     return {"ialacol": "pong"}
 
+@app.get("/v1/models")
+async def models():
+    """_summary_
+
+    Returns:
+        _type_: a list of models
+    """
+    return {
+        "data": [
+            {
+                "id": DEFAULT_MODEL_FILE,
+                "object": "model",
+                "owned_by": "community",
+                "permission": []
+            }
+        ],
+        "object": "list"
+    }
 
 @app.post("/v1/completions", response_model=CompletionResponseBody)
 async def completions(
