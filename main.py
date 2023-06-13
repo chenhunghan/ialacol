@@ -73,7 +73,7 @@ async def get_llm_model(
     # use ctransformer if the model is a `starcoder`/`starchat`/`starcoderplus` model
     # as llm-rs does not support these models (yet) https://github.com/rustformers/llm/issues/304
     if "star" in body.model:
-        log.debug("Using ctransformer model as the mode is %s", body.model)
+        log.debug("Using ctransformer model as the model is %s", body.model)
 
         return dict(
             lib="ctransformer",
@@ -82,8 +82,22 @@ async def get_llm_model(
                 model_type="starcoder",
             ),
         )
+        
+    # use ctransformer if the model is a k-quants model
+    # as llm-rs does not support these models (yet) https://github.com/rustformers/llm/issues/301
+    # but ctransformer added in 0.2.8 https://github.com/marella/ctransformers/commit/ff2f9437263f8ffa40bca27eece6fa40c0c01919
+    # e.g. q2_K, q3_K_S, q3_K_M, q3_K_L, q4_K_S, q4_K_M, q5_K_S, q6_K
+    if "_K" in body.model:
+        log.debug("Using ctransformer model as the model %s is a k-quants model", body.model)
 
-    log.debug("Using llm-rs model as the mode is %s", body.model)
+        return dict(
+            lib="ctransformer",
+            llm_model=AutoModelForCausalLM.from_pretrained(
+                f"./{MODELS_FOLDER}/{body.model}"
+            ),
+        )
+
+    log.debug("Using llm-rs model as the model is %s", body.model)
     return dict(
         lib="llm-rs",
         llm_model=AutoModel.from_pretrained(
