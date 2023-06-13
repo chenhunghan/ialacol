@@ -122,7 +122,7 @@ async def startup_event():
     log.setLevel(LOGGING_LEVEL)
     log.info("Log level set to %s", LOGGING_LEVEL)
     if DOWNLOAD_DEFAULT_MODEL is True:
-        if DEFAULT_MODEL_FILE is not None and DEFAULT_MODEL_HG_REPO_ID is not None:
+        if DEFAULT_MODEL_FILE and DEFAULT_MODEL_HG_REPO_ID:
             log.info(
                 "Downloading model... %s/%s",
                 DEFAULT_MODEL_HG_REPO_ID,
@@ -134,7 +134,7 @@ async def startup_event():
                 local_dir=MODELS_FOLDER,
                 filename=DEFAULT_MODEL_FILE,
             )
-        if DEFAULT_MODEL_META is not None and DEFAULT_MODEL_HG_REPO_ID is not None:
+        if DEFAULT_MODEL_META and DEFAULT_MODEL_HG_REPO_ID:
             log.info(
                 "Downloading meta... %s/%s",
                 DEFAULT_MODEL_HG_REPO_ID,
