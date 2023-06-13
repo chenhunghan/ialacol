@@ -5,27 +5,30 @@ This module contains the main FastAPI application.
 import logging
 import os
 
-from time import time
 from typing import (
     Any,
     Awaitable,
     Callable,
     Literal,
     Union,
-    List,
     Annotated,
 )
 from fastapi import FastAPI, Depends
 from fastapi.responses import StreamingResponse
 from llm_rs.auto import AutoModel
-from llm_rs.config import GenerationConfig, Precision, SessionConfig # pylint: disable=no-name-in-module,import-error
-from llm_rs.results import GenerationResult # pylint: disable=no-name-in-module,import-error
-from ctransformers import AutoModelForCausalLM
+from llm_rs.config import (  # pylint: disable=no-name-in-module,import-error
+    GenerationConfig,
+    Precision,
+    SessionConfig,
+)
+from llm_rs.base_model import Model
+from ctransformers import LLM, AutoModelForCausalLM
 from huggingface_hub import hf_hub_download
 
-from request_body import ChatCompletionRequestBody
-from response_body import ChatCompletionResponseBody
-from streamers import chat_completions_streamer
+from request_body import ChatCompletionRequestBody, CompletionRequestBody
+from response_body import ChatCompletionResponseBody, CompletionResponseBody
+from streamers import chat_completions_streamer, completions_streamer
+from model_generate import chat_model_generate, model_generate
 
 DEFAULT_MODEL_HG_REPO_ID = os.environ.get("DEFAULT_MODEL_HG_REPO_ID", None)
 DEFAULT_MODEL_FILE = os.environ.get("DEFAULT_MODEL_FILE", None)
@@ -145,6 +148,67 @@ async def ping():
     return {"ialacol": "pong"}
 
 
+@app.post("/v1/completions", response_model=CompletionResponseBody)
+async def completions(
+    body: CompletionRequestBody,
+    model_data: Annotated[dict[str, Any], Depends(get_llm_model)],
+):
+    """_summary_
+        Compatible with https://platform.openai.com/docs/api-reference/completions
+    Args:
+        body (CompletionRequestBody): parsed request body
+
+    Returns:
+        StreamingResponse: streaming response
+    """
+    log.debug("Body:%s", str(body))
+    if (
+        (body.n is not None)
+        or (body.logit_bias is not None)
+        or (body.user is not None)
+        or (body.presence_penalty is not None)
+        or (body.frequency_penalty is not None)
+    ):
+        log.warning(
+            "n, logit_bias, user, presence_penalty and frequency_penalty are not supporte."
+        )
+    prompt = body.prompt
+    generation_config = GenerationConfig(
+        top_k=body.top_k,
+        top_p=body.top_p,
+        temperature=body.temperature,
+        repetition_penalty=body.repeat_penalty,
+        max_new_tokens=body.max_tokens,
+        stop_words=body.stop,
+    )
+    llm_model: LLM | Model = model_data["llm_model"]
+    llm_model_lib: str = model_data["lib"]
+    model_name = body.model
+    if body.stream is True:
+        log.debug("Streaming response from %s", model_name)
+        return StreamingResponse(
+            completions_streamer(
+                prompt,
+                model_name,
+                llm_model,
+                llm_model_lib,
+                generation_config,
+                session_config,
+                log,
+            ),
+            media_type="text/event-stream",
+        )
+    return model_generate(
+        prompt,
+        model_name,
+        llm_model,
+        llm_model_lib,
+        generation_config,
+        session_config,
+        log,
+    )
+
+
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponseBody)
 async def chat_completions(
     body: ChatCompletionRequestBody,
@@ -195,44 +259,29 @@ async def chat_completions(
         max_new_tokens=body.max_tokens,
         stop_words=body.stop,
     )
-    llm_model = model_data["llm_model"]
-    llm_model_lib = model_data["lib"]
+    llm_model: LLM | Model = model_data["llm_model"]
+    llm_model_lib: str = model_data["lib"]
+    model_name = body.model
     if body.stream is True:
-        model_name = body.model
         log.debug("Streaming response from %s", model_name)
         return StreamingResponse(
             chat_completions_streamer(
-                prompt, model_name, llm_model, llm_model_lib, generation_config, session_config, log
+                prompt,
+                model_name,
+                llm_model,
+                llm_model_lib,
+                generation_config,
+                session_config,
+                log,
             ),
             media_type="text/event-stream",
         )
-    generation_result: GenerationResult | List[float] = llm_model.generate(prompt)
-    if not isinstance(generation_result, GenerationResult):
-        return {"error": "unknown generation_result"}
-    stop_reason = generation_result.stop_reason
-    finnish_reason = "unknown"
-    if stop_reason == 0:
-        finnish_reason = "end_of_token"
-    elif stop_reason == 1:
-        finnish_reason = "max_length"
-    elif stop_reason == 2:
-        finnish_reason = "user_cancelled"
-
-    http_response = {
-        "id": "id",
-        "object": "chat.completion",
-        "created": time(),
-        "choices": [
-            {
-                "index": 0,
-                "message": {
-                    "role": "assistant",
-                    "content": generation_result.text,
-                },
-                "finish_reason": finnish_reason,
-            }
-        ],
-        "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
-    }
-    log.debug("http_response:%s ", http_response)
-    return http_response
+    return chat_model_generate(
+        prompt,
+        model_name,
+        llm_model,
+        llm_model_lib,
+        generation_config,
+        session_config,
+        log,
+    )

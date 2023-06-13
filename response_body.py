@@ -1,6 +1,7 @@
 from typing import Literal
 from pydantic import BaseModel
 
+
 class Message(BaseModel):
     """_summary_
 
@@ -10,7 +11,8 @@ class Message(BaseModel):
 
     role: Literal["system", "user", "assistant"]
     content: str
-    
+
+
 class Choice(BaseModel):
     """_summary_
 
@@ -19,10 +21,12 @@ class Choice(BaseModel):
     """
 
     index: int
-    message: Message
+    text: str
+    logprobs: None
     finish_reason: str
-    
-class ChatCompletionResponseBody(BaseModel):
+
+
+class CompletionResponseBody(BaseModel):
     """_summary_
 
     Args:
@@ -33,4 +37,30 @@ class ChatCompletionResponseBody(BaseModel):
     object: str
     created: int
     choices: list[Choice]
+    usage: dict[str, int]
+
+
+class ChatChoice(BaseModel):
+    """_summary_
+
+    Args:
+        BaseModel (_type_): choice in completion response
+    """
+
+    index: int
+    message: Message
+    finish_reason: str
+
+
+class ChatCompletionResponseBody(BaseModel):
+    """_summary_
+
+    Args:
+        BaseModel (_type_): response body for /chat/completions
+    """
+
+    id: str
+    object: str
+    created: int
+    choices: list[ChatChoice]
     usage: dict[str, int]

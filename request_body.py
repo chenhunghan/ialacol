@@ -22,17 +22,63 @@ from fields import (
 )
 
 
-# from https://github.com/abetlen/llama-cpp-python/blob/main/llama_cpp/server/app.py
+class CompletionRequestBody(BaseModel):
+    """_summary_
+    from from https://github.com/abetlen/llama-cpp-python/blob/main/llama_cpp/server/app.py
+    """
+
+    prompt: str = Field(
+        default="", description="The prompt to generate completions for."
+    )
+    suffix: Optional[str] = Field(
+        default=None,
+        description="A suffix to append to the generated text. If None, no suffix is appended. Useful for chatbots.",
+    )
+    max_tokens: int = max_tokens
+    temperature: float = temperature
+    top_p: float = top_p
+    echo: bool = Field(
+        default=False,
+        description="Whether to echo the prompt in the generated text. Useful for chatbots.",
+    )
+    stop: Optional[List[str]] = stop
+    stream: bool = stream
+    logprobs: Optional[int] = Field(
+        default=None,
+        ge=0,
+        description="The number of logprobs to generate. If None, no logprobs are generated.",
+    )
+    presence_penalty: Optional[float] = presence_penalty
+    frequency_penalty: Optional[float] = frequency_penalty
+
+    model: str = model
+    n: Optional[int] = 1
+    logprobs: Optional[int] = Field(None)
+    best_of: Optional[int] = 1
+    logit_bias: Optional[Dict[str, float]] = Field(None)
+    user: Optional[str] = Field(None)
+
+    # llama.cpp specific parameters
+    top_k: int = top_k
+    repeat_penalty: float = repeat_penalty
+
+
 class ChatCompletionRequestMessage(BaseModel):
+    """_summary_
+    from from  https://github.com/abetlen/llama-cpp-python/blob/main/llama_cpp/server/app.py
+    """
+
     role: Literal["system", "user", "assistant"] = Field(
         default="user", description="The role of the message."
     )
     content: str = Field(default="", description="The content of the message.")
 
 
-# from https://github.com/abetlen/llama-cpp-python/blob/main/llama_cpp/server/app.py
 class ChatCompletionRequestBody(BaseModel):
-    """Request body for /chat/completions."""
+    """_summary_
+    Request body for /chat/completions.
+    from from  https://github.com/abetlen/llama-cpp-python/blob/main/llama_cpp/server/app.py
+    """
 
     messages: List[ChatCompletionRequestMessage] = Field(
         default=[], description="A list of messages to generate completions for."
