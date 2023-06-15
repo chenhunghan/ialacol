@@ -79,6 +79,10 @@ print(chat_completion.choices[0].message.content)
 - [ ] Suuport Apache-2.0 [fastchat-t5-3b](https://huggingface.co/lmsys/fastchat-t5-3b-v1.0)
 - [ ] Support more Apache-2.0 models such as [codet5p](https://huggingface.co/Salesforce/codet5p-16b) and others listed [here](https://github.com/eugeneyan/open-llms)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=chenhunghan/ialacol&type=Date)](https://star-history.com/#chenhunghan/ialacol&Date)
+
 ## Receipts
 
 ### OpenLM Research's OpenLLaMA Models
