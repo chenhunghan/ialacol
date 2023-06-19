@@ -72,7 +72,7 @@ async def get_llm_model(
     verbose = LOGGING_LEVEL == "DEBUG"
     # use ctransformer if the model is a `starcoder`/`starchat`/`starcoderplus` model
     # as llm-rs does not support these models (yet) https://github.com/rustformers/llm/issues/304
-    if "star" in body.model:
+    if "star" in body.model or "starchat" in body.model or "WizardCoder" in body.model:
         log.debug("Using ctransformer model as the model is %s", body.model)
 
         return dict(
@@ -91,11 +91,15 @@ async def get_llm_model(
         log.debug(
             "Using ctransformer model as the model %s is a k-quants model", body.model
         )
-
+        model_type = "gpt2"
+        if "llama" in body.model:
+            model_type = "llama"
+            
         return dict(
             lib="ctransformer",
             llm_model=AutoModelForCausalLM.from_pretrained(
-                f"./{MODELS_FOLDER}/{body.model}"
+                f"./{MODELS_FOLDER}/{body.model}",
+                model_type=model_type
             ),
         )
 
