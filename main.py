@@ -15,7 +15,6 @@ from typing import (
 )
 from fastapi import FastAPI, Depends
 from fastapi.responses import StreamingResponse
-from llm_rs.auto import AutoModel
 from llm_rs.config import (  # pylint: disable=no-name-in-module,import-error
     GenerationConfig,
     Precision,
@@ -69,20 +68,38 @@ async def get_llm_model(
     Returns:
         _type_: _description_
     """
-    verbose = LOGGING_LEVEL == "DEBUG"
+
     # use ctransformer if the model is a `starcoder`/`starchat`/`starcoderplus` model
     # as llm-rs does not support these models (yet) https://github.com/rustformers/llm/issues/304
-    if "star" in body.model or "starchat" in body.model or "WizardCoder" in body.model:
-        log.debug("Using ctransformer model as the model is %s", body.model)
-
+    #
+    # These are also in "starcoder" format
+    # https://huggingface.co/TheBloke/WizardCoder-15B-1.0-GGML
+    # https://huggingface.co/TheBloke/minotaur-15B-GGML
+    if (
+        "star" in body.model
+        or "starchat" in body.model
+        or "WizardCoder" in body.model
+        or "minotaur-15" in body.model
+    ):
+        ctransformer_model_type = "starcoder"
         return dict(
             lib="ctransformer",
             llm_model=AutoModelForCausalLM.from_pretrained(
                 f"./{MODELS_FOLDER}/{body.model}",
-                model_type="starcoder",
+                model_type=ctransformer_model_type,
             ),
         )
 
+    ctransformer_model_type = "gpt2"
+    if "llama" in body.model:
+        ctransformer_model_type = "llama"
+    if "mpt" in body.model:
+        ctransformer_model_type = "mpt"
+    if "dolly" in body.model:
+        ctransformer_model_type = "dolly-v2"
+    if "stablelm" in body.model:
+        ctransformer_model_type = "gpt_neox"
+        
     # use ctransformer if the model is a k-quants model
     # as llm-rs does not support these models (yet) https://github.com/rustformers/llm/issues/301
     # but ctransformer added in 0.2.8 https://github.com/marella/ctransformers/commit/ff2f9437263f8ffa40bca27eece6fa40c0c01919
@@ -91,25 +108,17 @@ async def get_llm_model(
         log.debug(
             "Using ctransformer model as the model %s is a k-quants model", body.model
         )
-        model_type = "gpt2"
-        if "llama" in body.model:
-            model_type = "llama"
-            
         return dict(
             lib="ctransformer",
             llm_model=AutoModelForCausalLM.from_pretrained(
-                f"./{MODELS_FOLDER}/{body.model}",
-                model_type=model_type
+                f"./{MODELS_FOLDER}/{body.model}", model_type=ctransformer_model_type
             ),
         )
 
-    log.debug("Using llm-rs model as the model is %s", body.model)
     return dict(
-        lib="llm-rs",
-        llm_model=AutoModel.from_pretrained(
-            model_path_or_repo_id=f"./{MODELS_FOLDER}/{body.model}",
-            session_config=session_config,
-            verbose=verbose,
+        lib="ctransformer",
+        llm_model=AutoModelForCausalLM.from_pretrained(
+            f"./{MODELS_FOLDER}/{body.model}", model_type=ctransformer_model_type
         ),
     )
 
