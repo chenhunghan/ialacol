@@ -24,7 +24,8 @@ def completions_streamer(
     # the llm_model is a ctransformer model instance
     if lib == "ctransformer":
         llm: LLM = llm_model  # pyright: ignore [reportGeneralTypeIssues]
-        log.debug("Streaming from ctransformer instance")
+        log.debug("Streaming from ctransformer instance!")
+        log.debug("Prompt: %s", prompt)
         for token in llm(
             prompt,
             top_k=generation_config.top_k,
@@ -37,6 +38,7 @@ def completions_streamer(
             batch_size=session_config.batch_size,
             threads=session_config.threads,
             stream=True,
+            reset=True,
         ):
             log.debug("Streaming token %s", token)
             data = json.dumps(
@@ -110,22 +112,42 @@ def chat_completions_streamer(
     """
     created = times()
 
+    top_k = generation_config.top_k
+    log.debug("top_k: %s", top_k)
+    top_p = generation_config.top_p
+    log.debug("top_p: %s", top_p)
+    temperature = generation_config.temperature
+    log.debug("temperature: %s", temperature)
+    repetition_penalty = generation_config.repetition_penalty
+    log.debug("repetition_penalty: %s", repetition_penalty)
+    last_n_tokens = generation_config.repetition_penalty_last_n
+    log.debug("last_n_tokens: %s", last_n_tokens)
+    seed = generation_config.seed
+    log.debug("seed: %s", seed)
+    stop = generation_config.stop_words
+    log.debug("stop: %s", stop)
+    batch_size = session_config.batch_size
+    log.debug("batch_size: %s", batch_size)
+    thread = session_config.threads
+    log.debug("thread: %s", thread)
+        
     # the llm_model is a ctransformer model instance
     if lib == "ctransformer":
         llm: LLM = llm_model  # pyright: ignore [reportGeneralTypeIssues]
         log.debug("Streaming from ctransformer instance")
+        log.debug("Prompt: %s", prompt)
         for token in llm(
             prompt,
-            top_k=generation_config.top_k,
-            top_p=generation_config.top_p,
-            temperature=generation_config.temperature,
-            repetition_penalty=generation_config.repetition_penalty,
-            last_n_tokens=generation_config.repetition_penalty_last_n,
-            seed=generation_config.seed,
-            stop=generation_config.stop_words,
-            batch_size=session_config.batch_size,
-            threads=session_config.threads,
+            top_k=top_k,
+            top_p=top_p,
+            temperature=temperature,
+            repetition_penalty=repetition_penalty,
+            last_n_tokens=last_n_tokens,
+            seed=seed,
+            stop=stop,
+            batch_size=batch_size,
             stream=True,
+            reset=True,
         ):
             log.debug("Streaming token %s", token)
             data = json.dumps(
