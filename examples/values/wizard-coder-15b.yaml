@@ -1,0 +1,30 @@
+replicas: 1
+deployment:
+  image: quay.io/chenhunghan/ialacol:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: TheBloke/WizardCoder-15B-1.0-GGML
+    DEFAULT_MODEL_FILE: WizardCoder-15B-1.0.ggmlv3.q4_1.bin
+    DEFAULT_MODEL_META: ""
+resources:
+  {}
+cache:
+  persistence:
+    size: 20Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+cacheMountPath: /app/cache
+model:
+  persistence:
+    size: 25Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: ~
+modelMountPath: /app/models
+service:
+  type: ClusterIP
+  port: 8000
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

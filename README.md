@@ -2,12 +2,11 @@
 
 [![Docker Repository on Quay](https://quay.io/repository/chenhunghan/ialacol/status "Docker Repository on Quay")](https://quay.io/repository/chenhunghan/ialacol)
 
-
 ## Introduction
 
 ialacol (pronounced "localai") is an open-source project that provides a boring, lightweight, self-hosted, private, and commercially usable LLM streaming service.
 
-It is built on top of the great projects [llm-rs-python](https://github.com/LLukas22/llm-rs-python) + [llm](https://github.com/rustformers/llm) and [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms) and aims to support all [known-good-models](https://github.com/rustformers/llm/blob/main/doc/known-good-models.md) supported by [llm-rs](https://github.com/rustformers/llm/tree/main/crates/models) or [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
+It is built on top of the great projects [llm-rs-python](https://github.com/LLukas22/llm-rs-python) + [llm](https://github.com/rustformers/llm) and [ctransformers](https://github.com/marella/ctransformers) and aims to support all [known-good-models](https://github.com/rustformers/llm/blob/main/doc/known-good-models.md) supported by [llm-rs](https://github.com/rustformers/llm/tree/main/crates/models) or [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
 
 This project is inspired by other similar projects like [LocalAI](https://github.com/go-skynet/LocalAI), [privateGPT](https://github.com/imartinez/privateGPT), [local.ai](https://github.com/louisgv/local.ai), [llama-cpp-python](https://github.com/abetlen/llama-cpp-python), [closedai](https://github.com/closedai-project/closedai), and [mlc-llm](https://github.com/mlc-ai/mlc-llm), with a specific focus on Kubernetes deployment, streaming, and commercially usable LLMs.
 
@@ -17,6 +16,7 @@ See "Receipts" below for instructions of deployments.
 
 - [OpenLLaMA variants](https://github.com/openlm-research/open_llama)
 - [StarCoder variants](https://huggingface.co/bigcode/starcoder)
+- [WizardCoder](https://huggingface.co/WizardLM/WizardCoder-15B-V1.0)
 - [StarChat variants](https://huggingface.co/HuggingFaceH4/starchat-beta)
 - [MPT-7B](https://www.mosaicml.com/blog/mpt-7b)
 - [MPT-30B](https://huggingface.co/mosaicml/mpt-30b)
@@ -92,7 +92,7 @@ print(chat_completion.choices[0].message.content)
 
 ### OpenLM Research's OpenLLaMA Models
 
-Deploy [OpenLLaMA 7B](https://github.com/openlm-research/open_llama) model quantized by [rustformers](https://huggingface.co/rustformers/open-llama-ggml)
+Deploy [OpenLLaMA 7B](https://github.com/openlm-research/open_llama) model quantized by [rustformers](https://huggingface.co/rustformers/open-llama-ggml). ℹ️ This is a base model, likely only useful for text completion.
 
 ```sh
 helm repo add ialacol https://chenhunghan.github.io/ialacol
@@ -100,9 +100,19 @@ helm repo update
 helm install openllama-7b ialacol/ialacol -f examples/values/openllama-7b.yaml
 ```
 
+### VMWare's OpenLlama 13B Open Instruct
+
+Deploy [OpenLLaMA 13B Open Instruct](https://huggingface.co/VMware/open-llama-13b-open-instruct) model quantized by [TheBloke](https://huggingface.co/TheBloke).
+
+```sh
+helm repo add ialacol https://chenhunghan.github.io/ialacol
+helm repo update
+helm install openllama-13b-instruct ialacol/ialacol -f examples/values/openllama-13b-instruct.yaml
+```
+
 ### Mosaic's MPT Models
 
-Deploy [MosaicML's MPT-7B](https://www.mosaicml.com/blog/mpt-7b) model quantized by [rustformers](https://huggingface.co/rustformers/mpt-7b-ggml)
+Deploy [MosaicML's MPT-7B](https://www.mosaicml.com/blog/mpt-7b) model quantized by [rustformers](https://huggingface.co/rustformers/mpt-7b-ggml). ℹ️ This is a base model, likely only useful for text completion.
 
 ```sh
 helm repo add ialacol https://chenhunghan.github.io/ialacol
@@ -110,14 +120,48 @@ helm repo update
 helm install mpt-7b ialacol/ialacol -f examples/values/mpt-7b.yaml
 ```
 
-### StarCoder Models (startcoder, startchat, starcoderplut)
+Deploy [MosaicML's MPT-30B Chat](https://www.mosaicml.com/blog/mpt-30b) model quantized by [TheBloke](https://huggingface.co/TheBloke).
 
-Deploy model `starchat-beta` model <https://huggingface.co/TheBloke/starchat-beta-GGML> quantized by TheBloke.
+```sh
+helm repo add ialacol https://chenhunghan.github.io/ialacol
+helm repo update
+helm install mpt-30b-chat ialacol/ialacol -f examples/values/mpt-30b-chat.yaml
+```
+
+### Falcon Models
+
+Deploy [Uncensored Falcon 7B](https://huggingface.co/ehartford/WizardLM-Uncensored-Falcon-7b) model quantized by [TheBloke](https://huggingface.co/TheBloke).
+
+```sh
+helm repo add ialacol https://chenhunghan.github.io/ialacol
+helm repo update
+helm install falcon-7b ialacol/ialacol -f examples/values/falcon-7b.yaml
+```
+
+Deploy [Uncensored Falcon 40B](https://huggingface.co/ehartford/WizardLM-Uncensored-Falcon-40b) model quantized by [TheBloke](https://huggingface.co/TheBloke).
+
+```sh
+helm repo add ialacol https://chenhunghan.github.io/ialacol
+helm repo update
+helm install falcon-40b ialacol/ialacol -f examples/values/falcon-40b.yaml
+```
+
+### StarCoder Models (startcoder, startchat, starcoderplus, WizardCoder)
+
+Deploy `starchat-beta` model <https://huggingface.co/TheBloke/starchat-beta-GGML> quantized by TheBloke.
 
 ```sh
 helm repo add starchat https://chenhunghan.github.io/ialacol
 helm repo update
 helm install starchat-beta ialacol/ialacol -f examples/values/starchat-beta.yaml
+```
+
+Deploy `WizardCoder` model <https://huggingface.co/WizardLM/WizardCoder-15B-V1.0> quantized by TheBloke.
+
+```sh
+helm repo add starchat https://chenhunghan.github.io/ialacol
+helm repo update
+helm install wizard-coder-15b ialacol/ialacol -f examples/values/wizard-coder-15b.yaml
 ```
 
 ### Pythia Models
