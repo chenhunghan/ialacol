@@ -2,27 +2,32 @@
 
 [![Docker Repository on Quay](https://quay.io/repository/chenhunghan/ialacol/status "Docker Repository on Quay")](https://quay.io/repository/chenhunghan/ialacol)
 
-🦄 Self-hosted, 🔒 private, 🐟 scalable, 🤑 commercially usable, 💬 LLM chat streaming service with 1-click Kubernetes cluster installation on premises or public clouds.
 
 ## Introduction
 
-ialacol (pronounced "localai") is an open-source project that provides a self-hosted, private, and commercially usable chat streaming service. It is built on top of the great projects [llm-rs-python](https://github.com/LLukas22/llm-rs-python) and [llm](https://github.com/rustformers/llm) and aims to support all [known-good-models](https://github.com/rustformers/llm/blob/main/doc/known-good-models.md) supported by `llm-rs`. This project is inspired by other similar projects like [LocalAI](https://github.com/go-skynet/LocalAI), [privateGPT](https://github.com/imartinez/privateGPT), [local.ai](https://github.com/louisgv/local.ai), [llama-cpp-python](https://github.com/abetlen/llama-cpp-python), [closedai](https://github.com/closedai-project/closedai), and [mlc-llm](https://github.com/mlc-ai/mlc-llm), with a specific focus on Kubernetes deployment, streaming, and commercially usable models.
+ialacol (pronounced "localai") is an open-source project that provides a boring, lightweight, self-hosted, private, and commercially usable LLM streaming service.
+
+It is built on top of the great projects [llm-rs-python](https://github.com/LLukas22/llm-rs-python) + [llm](https://github.com/rustformers/llm) and [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms) and aims to support all [known-good-models](https://github.com/rustformers/llm/blob/main/doc/known-good-models.md) supported by [llm-rs](https://github.com/rustformers/llm/tree/main/crates/models) or [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
+
+This project is inspired by other similar projects like [LocalAI](https://github.com/go-skynet/LocalAI), [privateGPT](https://github.com/imartinez/privateGPT), [local.ai](https://github.com/louisgv/local.ai), [llama-cpp-python](https://github.com/abetlen/llama-cpp-python), [closedai](https://github.com/closedai-project/closedai), and [mlc-llm](https://github.com/mlc-ai/mlc-llm), with a specific focus on Kubernetes deployment, streaming, and commercially usable LLMs.
 
 ## Supported Models
 
 See "Receipts" below for instructions of deployments.
 
-- [OpenLLaMA](https://github.com/openlm-research/open_llama)
-- [StarCoder](https://huggingface.co/bigcode/starcoder)
-- [StarChat](https://huggingface.co/HuggingFaceH4/starchat-beta)
+- [OpenLLaMA variants](https://github.com/openlm-research/open_llama)
+- [StarCoder variants](https://huggingface.co/bigcode/starcoder)
+- [StarChat variants](https://huggingface.co/HuggingFaceH4/starchat-beta)
 - [MPT-7B](https://www.mosaicml.com/blog/mpt-7b)
+- [MPT-30B](https://huggingface.co/mosaicml/mpt-30b)
+- [Falcon](https://falconllm.tii.ae/)
 
-And all models supported by [llm-rs](https://github.com/rustformers/llm/tree/main/crates/models) or [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
+And all LLMs supported by [llm-rs](https://github.com/rustformers/llm/tree/main/crates/models) or [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
 
 ## Features
 
 - Compatibility with OpenAI APIs, allowing you to use OpenAI's Python client or any frameworks that are built on top of OpenAI APIs such as [langchain](https://github.com/hwchase17/langchain).
-- Easy deployment on Kubernetes clusters with a 1-click Helm installation.
+- Lightweight, easy deployment on Kubernetes clusters with a 1-click Helm installation.
 - Support for various commercially usable models.
 
 ## Quick Start
