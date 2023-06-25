@@ -37,6 +37,12 @@ spec:
             value: {{ .Values.deployment.env.MODELS_FOLDER | quote }}
           - name: CACHE_FOLDER
             value: {{ .Values.deployment.env.CACHE_FOLDER | quote }}
+          - name: THREADS
+            value: {{ .Values.deployment.env.THREADS | quote }}
+          - name: BATCH_SIZE
+            value: {{ .Values.deployment.env.BATCH_SIZE | quote }}
+          - name: CONTEXT_LENGTH
+            value: {{ .Values.deployment.env.CONTEXT_LENGTH | quote }}
           volumeMounts:
           - mountPath: {{ .Values.cacheMountPath }}
             name: cache
