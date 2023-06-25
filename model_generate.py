@@ -11,6 +11,7 @@ from llm_rs.results import (  # pylint: disable=no-name-in-module,import-error
     GenerationResult,
 )
 
+
 def model_generate(
     prompt: str,
     model_name: str,
@@ -25,20 +26,37 @@ def model_generate(
     """
     created = time()
 
+    top_k = generation_config.top_k
+    log.debug("top_k: %s", top_k)
+    top_p = generation_config.top_p
+    log.debug("top_p: %s", top_p)
+    temperature = generation_config.temperature
+    log.debug("temperature: %s", temperature)
+    repetition_penalty = generation_config.repetition_penalty
+    log.debug("repetition_penalty: %s", repetition_penalty)
+    last_n_tokens = generation_config.repetition_penalty_last_n
+    log.debug("last_n_tokens: %s", last_n_tokens)
+    seed = generation_config.seed
+    log.debug("seed: %s", seed)
+    batch_size = session_config.batch_size
+    log.debug("batch_size: %s", batch_size)
+    threads = session_config.threads
+    log.debug("thread: %s", threads)
+
     # the llm_model is a ctransformer model instance
     if lib == "ctransformer":
         llm: LLM = llm_model  # pyright: ignore [reportGeneralTypeIssues]
         log.debug("Getting from ctransformer instance")
         result: str = llm(  # pyright: ignore [reportGeneralTypeIssues]
             prompt=prompt,
-            top_k=generation_config.top_k,
-            top_p=generation_config.top_p,
-            temperature=generation_config.temperature,
-            repetition_penalty=generation_config.repetition_penalty,
-            last_n_tokens=generation_config.repetition_penalty_last_n,
-            seed=generation_config.seed,
-            batch_size=session_config.batch_size,
-            threads=session_config.threads,
+            top_k=top_k,
+            top_p=top_p,
+            temperature=temperature,
+            repetition_penalty=repetition_penalty,
+            last_n_tokens=last_n_tokens,
+            seed=seed,
+            batch_size=batch_size,
+            threads=threads,
         )
         http_response = {
             "id": "id",
@@ -95,6 +113,7 @@ def model_generate(
         log.debug("http_response:%s ", http_response)
         return http_response
 
+
 def chat_model_generate(
     prompt: str,
     model_name: str,
@@ -109,20 +128,37 @@ def chat_model_generate(
     """
     created = time()
 
+    top_k = generation_config.top_k
+    log.debug("top_k: %s", top_k)
+    top_p = generation_config.top_p
+    log.debug("top_p: %s", top_p)
+    temperature = generation_config.temperature
+    log.debug("temperature: %s", temperature)
+    repetition_penalty = generation_config.repetition_penalty
+    log.debug("repetition_penalty: %s", repetition_penalty)
+    last_n_tokens = generation_config.repetition_penalty_last_n
+    log.debug("last_n_tokens: %s", last_n_tokens)
+    seed = generation_config.seed
+    log.debug("seed: %s", seed)
+    batch_size = session_config.batch_size
+    log.debug("batch_size: %s", batch_size)
+    threads = session_config.threads
+    log.debug("thread: %s", threads)
+
     # the llm_model is a ctransformer model instance
     if lib == "ctransformer":
         llm: LLM = llm_model  # pyright: ignore [reportGeneralTypeIssues]
         log.debug("Getting from ctransformer instance")
         result: str = llm(  # pyright: ignore [reportGeneralTypeIssues]
             prompt=prompt,
-            top_k=generation_config.top_k,
-            top_p=generation_config.top_p,
-            temperature=generation_config.temperature,
-            repetition_penalty=generation_config.repetition_penalty,
-            last_n_tokens=generation_config.repetition_penalty_last_n,
-            seed=generation_config.seed,
-            batch_size=session_config.batch_size,
-            threads=session_config.threads,
+            top_k=top_k,
+            top_p=top_p,
+            temperature=temperature,
+            repetition_penalty=repetition_penalty,
+            last_n_tokens=last_n_tokens,
+            seed=seed,
+            batch_size=batch_size,
+            threads=threads,
         )
         http_response = {
             "id": "id",
