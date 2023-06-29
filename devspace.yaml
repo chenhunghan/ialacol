@@ -1,0 +1,75 @@
+version: v2beta1
+
+pipelines:
+  # override the default `devspace deploy`
+  deploy: |-
+    build_images --all
+    create_deployments ialacol
+  # override the default `devspace dev`
+  dev: |-
+    start_dev ialacol
+  # `devspace run-pipeline stop-dev` to stop all dev containers
+  stop-dev: |-
+    stop_dev --all
+
+deployments:
+  ialacol:
+    helm:
+      chart:
+        name: ./charts/ialacol
+      values:
+        deployment:
+          image: python:3.11-slim
+          command: ["sleep", "999999"]
+          # the path to mount the cache volume on the container
+          cachePath: /app/cache
+        # cache for artifacts downloaded like embedding models
+        cacheVolume:
+          pvc:
+            storageClassName: "gp2-unencrypted"
+            size: 15Gi
+            accessModes:
+            - ReadWriteOnce
+dev:
+  ialacol:
+    labelSelector:
+      app.kubernetes.io/name: ialacol
+      app.kubernetes.io/instance: ialacol
+    namespace: ${DEVSPACE_NAMESPACE}
+    devImage: python:3.11-slim
+    workingDir: /app
+    command: ["uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+    - port: "8000:8000"
+    env:
+    - name: DEFAULT_MODEL_HG_REPO_ID
+      value: "TheBloke/orca_mini_3B-GGML"
+    - name: DEFAULT_MODEL_FILE
+      value: "orca-mini-3b.ggmlv3.q4_0.bin"
+    - name: DEFAULT_MODEL_META
+      value: ""
+    - name: LOGGING_LEVEL
+      value: DEBUG
+    - name: MODELS_FOLDER
+      value: models
+    - name: CACHE_FOLDER
+      value: cache
+    sync:
+      - path: ./:/app
+        excludePaths:
+        - requirements.txt
+        printLogs: true
+        uploadExcludeFile: ./.dockerignore
+        downloadExcludeFile: ./.gitignore
+      - path: ./requirements.txt:/app/requirements.txt
+        startContainer: true
+        file: true
+        printLogs: true
+        onUpload:
+          exec:
+          - command: |-
+              pip install -r requirements.txt
+            onChange: ["requirements.txt"]
+    logs:
+      enabled: true
+      lastLines: 200
