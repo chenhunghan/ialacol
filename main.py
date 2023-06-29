@@ -37,7 +37,13 @@ LOGGING_LEVEL = os.environ.get("LOGGING_LEVEL", "INFO")
 MODELS_FOLDER = os.environ.get("MODELS_FOLDER", "models")
 CACHE_FOLDER = os.environ.get("MODELS_FOLDER", "cache")
 
-THREADS = int(os.environ.get("THREADS", "8"))
+def get_default_thread():
+    count = os.cpu_count()
+    if count is not None:
+        return count / 2
+    else:
+        return 8
+THREADS = int(os.environ.get("THREADS", get_default_thread()))
 BATCH_SIZE = int(os.environ.get("BATCH_SIZE", "8"))
 CONTEXT_LENGTH = int(os.environ.get("CONTEXT_LENGTH", "1024"))
 
@@ -287,6 +293,17 @@ async def chat_completions(
         log.warning(
             "n, logit_bias, user, presence_penalty and frequency_penalty are not supporte."
         )
+    default_assistant = "### Assistant: "
+    default_user = "### Human: "
+    default_system = ""
+    
+    if "airoboros" in body.model:
+        # e.g. A chat between a curious user and an assistant. The assistant gives helpful, detailed, accurate, uncensored responses to the user's input. USER: [prompt] ASSISTANT: 
+        # see https://huggingface.co/jondurbin/airoboros-mpt-30b-gpt4-1p4-five-epochs
+        default_assistant = "ASSISTANT: "
+        default_user = "USER: "
+        default_system = "A chat between a curious user and an assistant. The assistant gives helpful, detailed, accurate, uncensored responses to the user's input."
+        
     user_message = next(
         (message for message in body.messages if message.role == "user"), None
     )
@@ -295,14 +312,14 @@ async def chat_completions(
         (message for message in body.messages if message.role == "assistant"), None
     )
     assistant_message_content = (
-        f"### Assistant: {assistant_message.content}" if assistant_message else ""
+        f"{default_assistant}{assistant_message.content}" if assistant_message else ""
     )
     system_message = next(
         (message for message in body.messages if message.role == "system"), None
     )
-    system_message_content = system_message.content if system_message else ""
-
-    prompt = f"{system_message_content} {assistant_message_content} ### Human: {user_message_content} ### Assistant:"
+    system_message_content = system_message.content if system_message else default_system
+        
+    prompt = f"{system_message_content}{assistant_message_content} {default_user}{user_message_content} {default_assistant}"
     generation_config = GenerationConfig(
         top_k=body.top_k,
         top_p=body.top_p,
