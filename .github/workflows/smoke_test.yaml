@@ -13,7 +13,7 @@ env:
   IMAGE_NAME: ialacol-smoke-test
   HELM_RELEASE_NAME: ialacol-smoke-test
   HELM_NAMESPACE: default
-  USER_MESSAGE: "Tell me a joke."
+  USER_MESSAGE: Tell me a joke.
   TEMPERATURE: 1.5
   DEFAULT_MODEL_HG_REPO_ID: TheBloke/orca_mini_3B-GGML
   DEFAULT_MODEL_FILE: orca-mini-3b.ggmlv3.q4_0.bin
