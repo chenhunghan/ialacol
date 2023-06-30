@@ -13,7 +13,7 @@ from typing import (
     Union,
     Annotated,
 )
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from llm_rs.config import (  # pylint: disable=no-name-in-module,import-error
     GenerationConfig,
@@ -37,15 +37,34 @@ LOGGING_LEVEL = os.environ.get("LOGGING_LEVEL", "INFO")
 MODELS_FOLDER = os.environ.get("MODELS_FOLDER", "models")
 CACHE_FOLDER = os.environ.get("MODELS_FOLDER", "cache")
 
+
 def get_default_thread():
+    """_summary_
+    Automatically get the default number of threads to use for generation
+    """
     count = os.cpu_count()
     if count is not None:
         return count / 2
     else:
         return 8
+
+
 THREADS = int(os.environ.get("THREADS", get_default_thread()))
 BATCH_SIZE = int(os.environ.get("BATCH_SIZE", "8"))
 CONTEXT_LENGTH = int(os.environ.get("CONTEXT_LENGTH", "1024"))
+
+DOWNLOADING_MODEL = False
+
+
+def set_downloading_model(boolean: bool):
+    """_summary_
+
+    Args:
+        boolean (bool): the boolean value to set DOWNLOADING_MODEL to
+    """
+    globals()["DOWNLOADING_MODEL"] = boolean
+    log.info("DOWNLOADING_MODEL set to %s", globals()["DOWNLOADING_MODEL"])
+
 
 log = logging.getLogger("uvicorn")
 
@@ -110,7 +129,7 @@ async def get_llm_model(
         ctransformer_model_type = "dolly-v2"
     if "stablelm" in body.model:
         ctransformer_model_type = "gpt_neox"
-        
+
     # use ctransformer if the model is a k-quants model
     # as llm-rs does not support these models (yet) https://github.com/rustformers/llm/issues/301
     # but ctransformer added in 0.2.8 https://github.com/marella/ctransformers/commit/ff2f9437263f8ffa40bca27eece6fa40c0c01919
@@ -147,17 +166,24 @@ async def startup_event():
     log.info("Log level set to %s", LOGGING_LEVEL)
     if DOWNLOAD_DEFAULT_MODEL is True:
         if DEFAULT_MODEL_FILE and DEFAULT_MODEL_HG_REPO_ID:
+            set_downloading_model(True)
             log.info(
                 "Downloading model... %s/%s",
                 DEFAULT_MODEL_HG_REPO_ID,
                 DEFAULT_MODEL_FILE,
             )
-            hf_hub_download(
-                repo_id=DEFAULT_MODEL_HG_REPO_ID,
-                cache_dir=CACHE_FOLDER,
-                local_dir=MODELS_FOLDER,
-                filename=DEFAULT_MODEL_FILE,
-            )
+            try:
+                hf_hub_download(
+                    repo_id=DEFAULT_MODEL_HG_REPO_ID,
+                    cache_dir=CACHE_FOLDER,
+                    local_dir=MODELS_FOLDER,
+                    filename=DEFAULT_MODEL_FILE,
+                )
+            except Exception as exception:
+                raise Exception from exception
+            finally:
+                set_downloading_model(False)
+
         if DEFAULT_MODEL_META and DEFAULT_MODEL_HG_REPO_ID:
             log.info(
                 "Downloading meta... %s/%s",
@@ -178,16 +204,6 @@ async def startup_event():
             )
 
 
-@app.get("/ping")
-async def ping():
-    """_summary_
-
-    Returns:
-        _type_: pong!
-    """
-    return {"ialacol": "pong"}
-
-
 @app.get("/v1/models")
 async def models():
     """_summary_
@@ -195,6 +211,8 @@ async def models():
     Returns:
         _type_: a list of models
     """
+    if DOWNLOADING_MODEL is True:
+        raise HTTPException(status_code=503, detail="Downloading model")
     return {
         "data": [
             {
@@ -221,6 +239,8 @@ async def completions(
     Returns:
         StreamingResponse: streaming response
     """
+    if DOWNLOADING_MODEL is True:
+        raise HTTPException(status_code=503, detail="Downloading model")
     log.debug("Body:%s", str(body))
     if (
         (body.n is not None)
@@ -282,6 +302,8 @@ async def chat_completions(
     Returns:
         StreamingResponse: streaming response
     """
+    if DOWNLOADING_MODEL is True:
+        raise HTTPException(status_code=503, detail="Downloading model")
     log.debug("Body:%s", str(body))
     if (
         (body.n is not None)
@@ -296,14 +318,14 @@ async def chat_completions(
     default_assistant = "### Assistant: "
     default_user = "### Human: "
     default_system = ""
-    
+
     if "airoboros" in body.model:
-        # e.g. A chat between a curious user and an assistant. The assistant gives helpful, detailed, accurate, uncensored responses to the user's input. USER: [prompt] ASSISTANT: 
+        # e.g. A chat between a curious user and an assistant. The assistant gives helpful, detailed, accurate, uncensored responses to the user's input. USER: [prompt] ASSISTANT:
         # see https://huggingface.co/jondurbin/airoboros-mpt-30b-gpt4-1p4-five-epochs
         default_assistant = "ASSISTANT: "
         default_user = "USER: "
         default_system = "A chat between a curious user and an assistant. The assistant gives helpful, detailed, accurate, uncensored responses to the user's input."
-        
+
     user_message = next(
         (message for message in body.messages if message.role == "user"), None
     )
@@ -317,8 +339,10 @@ async def chat_completions(
     system_message = next(
         (message for message in body.messages if message.role == "system"), None
     )
-    system_message_content = system_message.content if system_message else default_system
-        
+    system_message_content = (
+        system_message.content if system_message else default_system
+    )
+
     prompt = f"{system_message_content}{assistant_message_content} {default_user}{user_message_content} {default_assistant}"
     generation_config = GenerationConfig(
         top_k=body.top_k,
