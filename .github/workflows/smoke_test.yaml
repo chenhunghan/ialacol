@@ -13,6 +13,8 @@ env:
   IMAGE_NAME: ialacol-smoke-test
   HELM_RELEASE_NAME: ialacol-smoke-test
   HELM_NAMESPACE: default
+  USER_MESSAGE: "Tell me a joke."
+  TEMPERATURE: 1.5
   DEFAULT_MODEL_HG_REPO_ID: TheBloke/orca_mini_3B-GGML
   DEFAULT_MODEL_FILE: orca-mini-3b.ggmlv3.q4_0.bin
   DEFAULT_MODEL_META: ""
@@ -108,9 +110,10 @@ jobs:
 
           curl http://localhost:8000/v1/models
 
-          curl -X POST \
-            -H 'Content-Type: application/json' \
-            -d '{ "messages": [{"role": "user", "content": "How are you?"}], "model": "'${DEFAULT_MODEL_FILE}'"}' \
-            http://localhost:8000/v1/chat/completions -v
+          RESPONSE=$(curl -X POST -H 'Content-Type: application/json' -d '{ "messages": [{"role": "user", "content": "'${USER_MESSAGE}'"}], "temperature":"'${TEMPERATURE}'", "model": "'${DEFAULT_MODEL_FILE}'"}' http://localhost:8000/v1/chat/completions)
+          echo "$RESPONSE"
+
+          REPLY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+          echo "$REPLY"
 
           kubectl logs --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
