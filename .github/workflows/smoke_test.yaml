@@ -106,3 +106,5 @@ jobs:
             -H 'Content-Type: application/json' \
             -d '{ "messages": [{"role": "user", "content": "How are you?"}], "model": "'${DEFAULT_MODEL_FILE}'"}' \
             http://localhost:8000/v1/chat/completions -v
+
+          kubectl logs --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
