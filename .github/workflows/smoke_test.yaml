@@ -13,9 +13,9 @@ env:
   IMAGE_NAME: ialacol-smoke-test
   HELM_RELEASE_NAME: ialacol-smoke-test
   HELM_NAMESPACE: default
-  DEFAULT_MODEL_HG_REPO_ID: rustformers/pythia-ggml
-  DEFAULT_MODEL_FILE: pythia-70m-q4_0.bin
-  DEFAULT_MODEL_META: pythia-70m-q4_0.meta
+  DEFAULT_MODEL_HG_REPO_ID: TheBloke/orca_mini_3B-GGML
+  DEFAULT_MODEL_FILE: orca-mini-3b.ggmlv3.q4_0.bin
+  DEFAULT_MODEL_META: ""
   THREADS: 2
   BATCH_SIZE: 8
   CONTEXT_LENGTH: 1024
@@ -83,7 +83,7 @@ jobs:
           cacheMountPath: /app/cache
           model:
             persistence:
-              size: 0.5Gi
+              size: 2Gi
               accessModes:
                 - ReadWriteOnce
               storageClass: ~
@@ -98,7 +98,7 @@ jobs:
           EOF
           helm install $HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
 
-          sleep 30
+          sleep 100
           kubectl get pods -n $HELM_NAMESPACE
 
       - run: |
