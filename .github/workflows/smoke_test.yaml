@@ -98,6 +98,8 @@ jobs:
       - run: |
           kubectl port-forward svc/$HELM_RELEASE_NAME 8000:8000 &
 
+          sleep 10
+
           curl http://localhost:8000/v1/models
 
           curl -X POST \
