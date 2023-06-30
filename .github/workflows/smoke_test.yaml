@@ -105,4 +105,4 @@ jobs:
           curl -X POST \
             -H 'Content-Type: application/json' \
             -d '{ "messages": [{"role": "user", "content": "How are you?"}], "model": "'${DEFAULT_MODEL_FILE}'"}' \
-            http://localhost:8000/v1/chat/completions
+            http://localhost:8000/v1/chat/completions -v
