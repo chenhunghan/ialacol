@@ -16,6 +16,9 @@ env:
   DEFAULT_MODEL_HG_REPO_ID: rustformers/pythia-ggml
   DEFAULT_MODEL_FILE: pythia-70m-q4_0.bin
   DEFAULT_MODEL_META: pythia-70m-q4_0.meta
+  THREADS: 2
+  BATCH_SIZE: 8
+  CONTEXT_LENGTH: 1024
 
 jobs:
   do:
@@ -66,6 +69,9 @@ jobs:
               DEFAULT_MODEL_HG_REPO_ID: $DEFAULT_MODEL_HG_REPO_ID
               DEFAULT_MODEL_FILE: $DEFAULT_MODEL_FILE
               DEFAULT_MODEL_META: $DEFAULT_MODEL_META
+              THREADS: $THREADS
+              BATCH_SIZE: $BATCH_SIZE
+              CONTEXT_LENGTH: $CONTEXT_LENGTH
           resources:
             {}
           cache:
