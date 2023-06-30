@@ -13,7 +13,6 @@ env:
   IMAGE_NAME: ialacol-smoke-test
   HELM_RELEASE_NAME: ialacol-smoke-test
   HELM_NAMESPACE: default
-  USER_MESSAGE: Tell me a joke.
   TEMPERATURE: 1.5
   DEFAULT_MODEL_HG_REPO_ID: TheBloke/orca_mini_3B-GGML
   DEFAULT_MODEL_FILE: orca-mini-3b.ggmlv3.q4_0.bin
@@ -110,10 +109,28 @@ jobs:
 
           curl http://localhost:8000/v1/models
 
-          RESPONSE=$(curl -X POST -H 'Content-Type: application/json' -d '{ "messages": [{"role": "user", "content": "'${USER_MESSAGE}'"}], "temperature":"'${TEMPERATURE}'", "model": "'${DEFAULT_MODEL_FILE}'"}' http://localhost:8000/v1/chat/completions)
+          RESPONSE=$(curl -X POST -H 'Content-Type: application/json' -d '{ "messages": [{"role": "user", "content": "Tell me a joke."}], "temperature":"'${TEMPERATURE}'", "model": "'${DEFAULT_MODEL_FILE}'"}' http://localhost:8000/v1/chat/completions)
           echo "$RESPONSE"
 
           REPLY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
           echo "$REPLY"
 
+          echo "REPLY=$REPLY" >> $GITHUB_ENV
+
           kubectl logs --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
+
+      - name: Comment the Joke
+        uses: actions/github-script@v6
+        # Note, issue and PR are the same thing in GitHub's eyes
+        # See https://stackoverflow.com/questions/58066966/commenting-a-pull-request-in-a-github-action
+        with:
+          script: |
+            const REPLY = process.env.REPLY
+            if (REPLY) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `AI: ${REPLY}`
+              })
+            }
