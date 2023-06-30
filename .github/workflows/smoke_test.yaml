@@ -1,6 +1,12 @@
 name: Smoke Test
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
 
 env:
   REGISTRY: ghcr.io
@@ -12,7 +18,7 @@ env:
   DEFAULT_MODEL_META: pythia-70m-q4_0.meta
 
 jobs:
-  smoke-test:
+  do:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
