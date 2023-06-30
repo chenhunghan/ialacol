@@ -22,7 +22,7 @@ env:
   CONTEXT_LENGTH: 1024
 
 jobs:
-  do:
+  joke:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -58,7 +58,8 @@ jobs:
         with:
           version: v3.12.0
           
-      - run: |
+      - name: Install ialacol and wait for pods to be ready
+        run: |
           helm repo add ialacol https://chenhunghan.github.io/ialacol
           helm repo update
 
@@ -99,13 +100,15 @@ jobs:
           EOF
           helm install $HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
 
-          sleep 100
+          echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
+          sleep 40
           kubectl get pods -n $HELM_NAMESPACE
 
-      - run: |
+      - name: Ask the AI for a joke
+        run: |
           kubectl port-forward svc/$HELM_RELEASE_NAME 8000:8000 &
-
-          sleep 10
+          echo "Wait for port-forward to be ready"
+          sleep 5
 
           curl http://localhost:8000/v1/models
 
@@ -114,6 +117,11 @@ jobs:
 
           REPLY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
           echo "$REPLY"
+
+          if [ -z "$REPLY" ]; then
+            echo "No reply from AI"
+            exit 1
+          fi
 
           echo "REPLY=$REPLY" >> $GITHUB_ENV
 
