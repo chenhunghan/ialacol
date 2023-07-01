@@ -1,0 +1,143 @@
+name: Smoke Test
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ialacol-smoke-test
+  HELM_RELEASE_NAME: ialacol-smoke-test
+  HELM_NAMESPACE: default
+  TEMPERATURE: 1
+  DEFAULT_MODEL_HG_REPO_ID: TheBloke/orca_mini_3B-GGML
+  DEFAULT_MODEL_FILE: orca-mini-3b.ggmlv3.q4_0.bin
+  DEFAULT_MODEL_META: ""
+  THREADS: 2
+  BATCH_SIZE: 8
+  CONTEXT_LENGTH: 1024
+
+jobs:
+  joke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Login to Github Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.7.0
+
+      - run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+          
+      - name: Install ialacol and wait for pods to be ready
+        run: |
+          helm repo add ialacol https://chenhunghan.github.io/ialacol
+          helm repo update
+
+          cat > values.yaml <<EOF
+          replicas: 1
+          deployment:
+            image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            env:
+              DEFAULT_MODEL_HG_REPO_ID: $DEFAULT_MODEL_HG_REPO_ID
+              DEFAULT_MODEL_FILE: $DEFAULT_MODEL_FILE
+              DEFAULT_MODEL_META: $DEFAULT_MODEL_META
+              THREADS: $THREADS
+              BATCH_SIZE: $BATCH_SIZE
+              CONTEXT_LENGTH: $CONTEXT_LENGTH
+          resources:
+            {}
+          cache:
+            persistence:
+              size: 0.5Gi
+              accessModes:
+                - ReadWriteOnce
+              storageClass: ~
+          cacheMountPath: /app/cache
+          model:
+            persistence:
+              size: 2Gi
+              accessModes:
+                - ReadWriteOnce
+              storageClass: ~
+          modelMountPath: /app/models
+          service:
+            type: ClusterIP
+            port: 8000
+            annotations: {}
+          nodeSelector: {}
+          tolerations: []
+          affinity: {}
+          EOF
+          helm install $HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
+
+          echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
+          sleep 40
+          kubectl get pods -n $HELM_NAMESPACE
+
+      - name: Ask the AI for a joke
+        run: |
+          kubectl port-forward svc/$HELM_RELEASE_NAME 8000:8000 &
+          echo "Wait for port-forward to be ready"
+          sleep 5
+
+          curl http://localhost:8000/v1/models
+
+          RESPONSE=$(curl -X POST -H 'Content-Type: application/json' -d '{ "messages": [{"role": "user", "content": "Tell me a joke."}], "temperature":"'${TEMPERATURE}'", "model": "'${DEFAULT_MODEL_FILE}'"}' http://localhost:8000/v1/chat/completions)
+          echo "$RESPONSE"
+
+          REPLY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+          echo "$REPLY"
+
+          kubectl logs --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
+
+          if [ -z "$REPLY" ]; then
+            echo "No reply from AI"
+            exit 1
+          fi
+
+          echo "REPLY=$REPLY" >> $GITHUB_ENV
+      - name: Comment the Joke
+        uses: actions/github-script@v6
+        # Note, issue and PR are the same thing in GitHub's eyes
+        # See https://stackoverflow.com/questions/58066966/commenting-a-pull-request-in-a-github-action
+        with:
+          script: |
+            const REPLY = process.env.REPLY
+            if (REPLY) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `🤖: ${REPLY}`
+              })
+            }
