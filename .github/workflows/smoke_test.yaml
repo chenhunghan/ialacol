@@ -104,6 +104,9 @@ jobs:
           sleep 40
           kubectl get pods -n $HELM_NAMESPACE
 
+          echo "model binary files downloaded to host node at /opt/local-path-provisioner:"
+          ls /opt/local-path-provisioner
+
       - name: Ask the AI for a joke
         run: |
           kubectl port-forward svc/$HELM_RELEASE_NAME 8000:8000 &
