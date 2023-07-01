@@ -104,6 +104,8 @@ jobs:
           sleep 40
           kubectl get pods -n $HELM_NAMESPACE
 
+          kubectl get pods -A -o wide
+
           echo "model binary files downloaded to host node at /opt/local-path-provisioner:"
           ls /opt/local-path-provisioner
 
@@ -121,15 +123,14 @@ jobs:
           REPLY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
           echo "$REPLY"
 
+          kubectl logs --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
+
           if [ -z "$REPLY" ]; then
             echo "No reply from AI"
             exit 1
           fi
 
           echo "REPLY=$REPLY" >> $GITHUB_ENV
-
-          kubectl logs --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
-
       - name: Comment the Joke
         uses: actions/github-script@v6
         # Note, issue and PR are the same thing in GitHub's eyes
@@ -142,6 +143,6 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `AI: ${REPLY}`
+                body: `🤖: ${REPLY}`
               })
             }
