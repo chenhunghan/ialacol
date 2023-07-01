@@ -52,8 +52,7 @@ jobs:
       - run: |
           kubectl cluster-info
           kubectl get nodes
-          kubectl get pods -A -o wide
-          kubectl get configmaps -n local-path-storage
+          kubectl describe configmap local-path-config -n local-path-storage
 
       - name: Set up Helm
         uses: azure/setup-helm@v3
