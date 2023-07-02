@@ -315,16 +315,27 @@ async def chat_completions(
         log.warning(
             "n, logit_bias, user, presence_penalty and frequency_penalty are not supporte."
         )
-    default_assistant = "### Assistant: "
-    default_user = "### Human: "
+    default_assistant_start = "### Assistant: "
+    default_assistant_end = ""
+    default_user_start = "### Human: "
+    default_user_end = ""
     default_system = ""
 
     if "airoboros" in body.model:
         # e.g. A chat between a curious user and an assistant. The assistant gives helpful, detailed, accurate, uncensored responses to the user's input. USER: [prompt] ASSISTANT:
         # see https://huggingface.co/jondurbin/airoboros-mpt-30b-gpt4-1p4-five-epochs
-        default_assistant = "ASSISTANT: "
-        default_user = "USER: "
+        default_assistant_start = "ASSISTANT: "
+        default_user_start = "USER: "
         default_system = "A chat between a curious user and an assistant. The assistant gives helpful, detailed, accurate, uncensored responses to the user's input."
+    # If it's a mpt-chat model, we need to add the default prompt
+    # from https://huggingface.co/TheBloke/mpt-30B-chat-GGML#prompt-template
+    # and https://huggingface.co/spaces/mosaicml/mpt-30b-chat/blob/main/app.py#L17
+    if "mpt" in body.model and "chat" in body.model:
+        default_assistant_start = "<|im_start|>assistant\n"
+        default_assistant_end = "<|im_end|>\n"
+        default_user_start = "<|im_start|>user\n"
+        default_user_end = "<|im_end|>\n"
+        default_system = "<|im_start|>system\nA conversation between a user and an LLM-based AI assistant. The assistant gives helpful and honest answers.<|im_end|>\n"
 
     user_message = next(
         (message for message in body.messages if message.role == "user"), None
@@ -334,7 +345,9 @@ async def chat_completions(
         (message for message in body.messages if message.role == "assistant"), None
     )
     assistant_message_content = (
-        f"{default_assistant}{assistant_message.content}" if assistant_message else ""
+        f"{default_assistant_start}{assistant_message.content}{default_assistant_end}"
+        if assistant_message
+        else ""
     )
     system_message = next(
         (message for message in body.messages if message.role == "system"), None
@@ -343,7 +356,7 @@ async def chat_completions(
         system_message.content if system_message else default_system
     )
 
-    prompt = f"{system_message_content}{assistant_message_content} {default_user}{user_message_content} {default_assistant}"
+    prompt = f"{system_message_content}{assistant_message_content} {default_user_start}{user_message_content}{default_user_end} {default_assistant_start}"
     generation_config = GenerationConfig(
         top_k=body.top_k,
         top_p=body.top_p,
