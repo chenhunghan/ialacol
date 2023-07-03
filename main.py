@@ -321,6 +321,22 @@ async def chat_completions(
     default_user_end = ""
     default_system = ""
 
+    # For most instruct fine-tuned models using  Alpaca prompt template
+    # Although instruct fine-tuned models are not tuned for chat, they can be to generate response as if chatting, using Alpaca
+    # prompt template likely gives better results than using the default prompt template
+    # See https://github.com/tatsu-lab/stanford_alpaca#data-release
+    if "instruct" in body.model:
+        default_assistant_start = "### Response:"
+        default_user_start = "### Instruction: "
+        default_user_end = "\n\n"
+        default_system = "Below is an instruction that describes a task. Write a response that appropriately completes the request\n\n"
+    if "starchat" in body.model:
+        # See https://huggingface.co/blog/starchat-alpha and https://huggingface.co/TheBloke/starchat-beta-GGML#prompt-template
+        default_assistant_start = "<|assistant|>\n"
+        default_assistant_end = " <|end|>\n"
+        default_user_start = "<|user|>\n"
+        default_user_end = " <|end|>\n"
+        default_system = "<|system|>\nBelow is a dialogue between a human and an AI assistant called StarChat.<|end|>\n"
     if "airoboros" in body.model:
         # e.g. A chat between a curious user and an assistant. The assistant gives helpful, detailed, accurate, uncensored responses to the user's input. USER: [prompt] ASSISTANT:
         # see https://huggingface.co/jondurbin/airoboros-mpt-30b-gpt4-1p4-five-epochs
