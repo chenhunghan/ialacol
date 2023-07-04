@@ -114,6 +114,7 @@ jobs:
 
           curl http://localhost:8000/v1/models
 
+          PR_TITLE="${PR_TITLE}"
           curl -X POST -H 'Content-Type: application/json' -d '{ "prompt": "### Instruction:\nGenerate the source code\n### Input:\n'${PR_TITLE}'\n### Response:", "temperature":"'${TEMPERATURE}'", "model": "'${DEFAULT_MODEL_FILE}'"}' http://localhost:8000/v1/completions > res.json
           RESPONSE=$(cat res.json)
           echo "$RESPONSE"
