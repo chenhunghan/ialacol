@@ -114,7 +114,6 @@ jobs:
 
           curl http://localhost:8000/v1/models
 
-          PR_TITLE=${{ github.event.pull_request.title }}
           RESPONSE=$(curl -X POST -H 'Content-Type: application/json' -d '{ "prompt": "### Instruction:\nGenerate the source code\n### Input:\n'${PR_TITLE}'\n### Response:", "temperature":"'${TEMPERATURE}'", "model": "'${DEFAULT_MODEL_FILE}'"}' http://localhost:8000/v1/completions)
           echo "$RESPONSE"
 
@@ -129,6 +128,8 @@ jobs:
           fi
 
           echo "REPLY=$REPLY" >> $GITHUB_ENV
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
       - name: Comment
         uses: actions/github-script@v6
         # Note, issue and PR are the same thing in GitHub's eyes
