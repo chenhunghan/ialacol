@@ -114,11 +114,12 @@ jobs:
 
           curl http://localhost:8000/v1/models
 
+          echo '\n'
           PR_TITLE="${{ github.event.pull_request.title }}"
           echo '=== PR Title ==='
           echo $PR_TITLE
           echo '=== PR Title ==='
-          REQ_BODY='{ "prompt": "### Instruction:\\nGenerate the source code\\n### Input:\\n${PR_TITLE}\\n### Response:", "temperature":"'${TEMPERATURE}'", "model": "'${DEFAULT_MODEL_FILE}'"}'
+          REQ_BODY='{ "prompt": "### Instruction:\\nGenerate the source code\\n### Input:\\n'${PR_TITLE}'\\n### Response:", "temperature":"'${TEMPERATURE}'", "model": "'${DEFAULT_MODEL_FILE}'"}'
           echo '=== Request Body ==='
           echo $REQ_BODY
           echo '=== Request Body ==='
