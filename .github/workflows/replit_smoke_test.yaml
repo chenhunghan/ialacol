@@ -116,7 +116,7 @@ jobs:
 
           PR_TITLE="${{ github.event.pull_request.title }}"
           echo $PR_TITLE
-          PROMPT="### Instruction:\nGenerate the source code\n### Input:\n'${PR_TITLE}'\n### Response:"
+          PROMPT="### Instruction:\nGenerate the source code\n### Input:\n${PR_TITLE}\n### Response:"
           echo $PROMPT
           REQ_BODY='{ "prompt": "'{$PROMPT}'", "temperature":"'${TEMPERATURE}'", "model": "'${DEFAULT_MODEL_FILE}'"}'
           echo $REQ_BODY
