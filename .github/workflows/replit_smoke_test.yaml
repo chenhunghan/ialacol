@@ -118,7 +118,7 @@ jobs:
           echo $PR_TITLE
           PROMPT="### Instruction:\nGenerate the source code\n### Input:\n${PR_TITLE}\n### Response:"
           echo $PROMPT
-          REQ_BODY='{ "prompt": "$PROMPT", "temperature":"'${TEMPERATURE}'", "model": "'${DEFAULT_MODEL_FILE}'"}'
+          REQ_BODY='{ "prompt": "'${PROMPT}'", "temperature":"'${TEMPERATURE}'", "model": "'${DEFAULT_MODEL_FILE}'"}'
           echo $REQ_BODY
           curl -X POST -H 'Content-Type: application/json' -d $REQ_BODY http://localhost:8000/v1/completions > res.json
           RESPONSE=$(cat res.json)
