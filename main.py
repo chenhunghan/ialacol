@@ -125,6 +125,8 @@ async def get_llm_model(
         ctransformer_model_type = "mpt"
     if "falcon" in body.model:
         ctransformer_model_type = "falcon"
+    if "replit" in body.model:
+        ctransformer_model_type = "replit"
     if "dolly" in body.model:
         ctransformer_model_type = "dolly-v2"
     if "stablelm" in body.model:
