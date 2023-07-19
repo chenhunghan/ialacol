@@ -14,6 +14,7 @@ This project is inspired by other similar projects like [LocalAI](https://github
 
 See "Receipts" below for instructions of deployments.
 
+- [LLaMa 2 variants](https://huggingface.co/meta-llama)
 - [OpenLLaMA variants](https://github.com/openlm-research/open_llama)
 - [StarCoder variants](https://huggingface.co/bigcode/starcoder)
 - [WizardCoder](https://huggingface.co/WizardLM/WizardCoder-15B-V1.0)
@@ -89,6 +90,34 @@ print(chat_completion.choices[0].message.content)
 [![Star History Chart](https://api.star-history.com/svg?repos=chenhunghan/ialacol&type=Date)](https://star-history.com/#chenhunghan/ialacol&Date)
 
 ## Receipts
+
+### Llama-2
+
+Deploy [Meta's Llama 2 Chat](https://huggingface.co/meta-llama) model quantized by [TheBloke](https://huggingface.co/TheBloke).
+
+7B Chat
+
+```sh
+helm repo add ialacol https://chenhunghan.github.io/ialacol
+helm repo update
+helm install llama2-7b-chat ialacol/ialacol -f examples/values/llama2-7b-chat.yaml
+```
+
+13B Chat
+
+```sh
+helm repo add ialacol https://chenhunghan.github.io/ialacol
+helm repo update
+helm install llama2-13b-chat ialacol/ialacol -f examples/values/llama2-13b-chat.yaml
+```
+
+70B Chat
+
+```sh
+helm repo add ialacol https://chenhunghan.github.io/ialacol
+helm repo update
+helm install llama2-70b-chat ialacol/ialacol -f examples/values/llama2-70b-chat.yaml
+```
 
 ### OpenLM Research's OpenLLaMA Models
 

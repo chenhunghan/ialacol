@@ -321,6 +321,10 @@ async def chat_completions(
     default_user_end = ""
     default_system = ""
 
+    if "llama" in body.model:
+        default_assistant_start = "ASSISTANT:"
+        default_user_start = "USER: "
+        default_system="SYSTEM: You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."
     # For most instruct fine-tuned models using  Alpaca prompt template
     # Although instruct fine-tuned models are not tuned for chat, they can be to generate response as if chatting, using Alpaca
     # prompt template likely gives better results than using the default prompt template
