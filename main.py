@@ -21,20 +21,41 @@ from response_body import ChatCompletionResponseBody, CompletionResponseBody
 from streamers import chat_completions_streamer, completions_streamer
 from model_generate import chat_model_generate, model_generate
 
-DEFAULT_MODEL_HG_REPO_ID = os.environ.get(
+
+def get_env(key: str, default_value: str):
+    """_summary_
+    Fallback to default of the env get by key is not set or is empty string
+    """
+    env = os.environ.get(key)
+    if env is None or len(env) == 0:
+        return default_value
+    else:
+        return env
+
+
+DEFAULT_MODEL_HG_REPO_ID = get_env(
     "DEFAULT_MODEL_HG_REPO_ID", "TheBloke/Llama-2-7B-Chat-GGML"
 )
-DEFAULT_MODEL_FILE = os.environ.get(
-    "DEFAULT_MODEL_FILE", "llama-2-7b-chat.ggmlv3.q4_0.bin"
-)
-DEFAULT_MODEL_META = os.environ.get("DEFAULT_MODEL_META", "")
-DOWNLOAD_DEFAULT_MODEL = os.environ.get("DOWNLOAD_DEFAULT_MODEL", "True") == "True"
-LOGGING_LEVEL = os.environ.get("LOGGING_LEVEL", "INFO")
-MODELS_FOLDER = os.environ.get("MODELS_FOLDER", "models")
-CACHE_FOLDER = os.environ.get("MODELS_FOLDER", "cache")
+DEFAULT_MODEL_FILE = get_env("DEFAULT_MODEL_FILE", "llama-2-7b-chat.ggmlv3.q4_0.bin")
+DEFAULT_MODEL_META = get_env("DEFAULT_MODEL_META", "")
+DOWNLOAD_DEFAULT_MODEL = get_env("DOWNLOAD_DEFAULT_MODEL", "True") == "True"
+LOGGING_LEVEL = get_env("LOGGING_LEVEL", "INFO")
+MODELS_FOLDER = get_env("MODELS_FOLDER", "models")
+CACHE_FOLDER = get_env("MODELS_FOLDER", "cache")
+BATCH_SIZE = int(get_env("BATCH_SIZE", "8"))
+CONTEXT_LENGTH = int(get_env("CONTEXT_LENGTH", "1024"))
 
-BATCH_SIZE = int(os.environ.get("BATCH_SIZE", "8"))
-CONTEXT_LENGTH = int(os.environ.get("CONTEXT_LENGTH", "1024"))
+log = logging.getLogger("uvicorn")
+
+log.info("DEFAULT_MODEL_HG_REPO_ID: %s", DEFAULT_MODEL_HG_REPO_ID)
+log.info("DEFAULT_MODEL_FILE: %s", DEFAULT_MODEL_FILE)
+log.info("DEFAULT_MODEL_META: %s", DEFAULT_MODEL_META)
+log.info("DOWNLOAD_DEFAULT_MODEL: %s", DOWNLOAD_DEFAULT_MODEL)
+log.info("LOGGING_LEVEL: %s", LOGGING_LEVEL)
+log.info("MODELS_FOLDER: %s", MODELS_FOLDER)
+log.info("CACHE_FOLDER: %s", CACHE_FOLDER)
+log.info("BATCH_SIZE: %s", BATCH_SIZE)
+log.info("CONTEXT_LENGTH: %s", CONTEXT_LENGTH)
 
 
 def get_default_thread():
@@ -49,6 +70,7 @@ def get_default_thread():
 
 
 THREADS = int(os.environ.get("THREADS", get_default_thread()))
+log.info("THREADS: %s", THREADS)
 
 DOWNLOADING_MODEL = False
 
@@ -62,8 +84,6 @@ def set_downloading_model(boolean: bool):
     globals()["DOWNLOADING_MODEL"] = boolean
     log.info("DOWNLOADING_MODEL set to %s", globals()["DOWNLOADING_MODEL"])
 
-
-log = logging.getLogger("uvicorn")
 
 Sender = Callable[[Union[str, bytes]], Awaitable[None]]
 Generate = Callable[[Sender], Awaitable[None]]
@@ -220,8 +240,11 @@ async def completions(
         top_p=body.top_p,
         temperature=body.temperature,
         repetition_penalty=body.repeat_penalty,
+        batch_size=BATCH_SIZE,
+        threads=THREADS,
         max_new_tokens=body.max_tokens,
         stop=body.stop,
+        context_length=CONTEXT_LENGTH,
     )
 
     model_name = body.model
@@ -342,8 +365,11 @@ async def chat_completions(
         repetition_penalty=body.repeat_penalty,
         last_n_tokens=body.repeat_penalty_last_n,
         seed=body.seed,
+        batch_size=BATCH_SIZE,
+        threads=THREADS,
         max_new_tokens=body.max_tokens,
         stop=body.stop,
+        context_length=CONTEXT_LENGTH,
     )
     model_name = body.model
     if body.stream is True:
