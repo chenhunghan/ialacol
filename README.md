@@ -38,23 +38,23 @@ To quickly get started with ialacol, follow the steps below:
 ```sh
 helm repo add ialacol https://chenhunghan.github.io/ialacol
 helm repo update
-helm install openllama-7b ialacol/ialacol
+helm install llama-2-7b-chat ialacol/ialacol
 ```
 
-By defaults, it will deploy [OpenLLaMA 7B](https://github.com/openlm-research/open_llama) model quantized by [rustformers](https://huggingface.co/rustformers/open-llama-ggml).
+By defaults, it will deploy [Llama 2 Chat](https://github.com/openlm-research/open_llama).
 
 Port-forward
 
 ```sh
-kubectl port-forward svc/openllama-7b 8000:8000
+kubectl port-forward svc/llama-2-7b-chat 8000:8000
 ```
 
-Chat with the default model `open_llama_7b-q4_0-ggjt.bin` using `curl`
+Chat with the default model `llama-2-7b-chat.ggmlv3.q4_0.bin` using `curl`
 
 ```sh
 curl -X POST \
      -H 'Content-Type: application/json' \
-     -d '{ "messages": [{"role": "user", "content": "How are you?"}], "model": "open_llama_7b-q4_0-ggjt.bin"}' \
+     -d '{ "messages": [{"role": "user", "content": "How are you?"}], "model": "llama-2-7b-chat.ggmlv3.q4_0.bin"}' \
      http://localhost:8000/v1/chat/completions
 ```
 
@@ -67,7 +67,7 @@ openai.api_key = "placeholder_to_avoid_exception" # needed to avoid an exception
 openai.api_base = "http://localhost:8000/v1"
 
 chat_completion = openai.ChatCompletion.create(
-  model="open_llama_7b-q4_0-ggjt.bin",
+  model="llama-2-7b-chat.ggmlv3.q4_0.bin",
   messages=[{"role": "user", "content": "Hello world!"}]
 )
 
