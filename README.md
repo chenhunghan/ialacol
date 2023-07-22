@@ -41,7 +41,7 @@ helm repo update
 helm install llama-2-7b-chat ialacol/ialacol
 ```
 
-By defaults, it will deploy [Llama 2 Chat](https://github.com/openlm-research/open_llama).
+By defaults, it will deploy [Meta's Llama 2 Chat](https://huggingface.co/meta-llama/Llama-2-7b-chat) model quantized by [TheBloke](https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGML).
 
 Port-forward
 
