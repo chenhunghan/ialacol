@@ -120,8 +120,12 @@ async def startup_event():
     Starts up the server, setting log level, downloading the default model if necessary.
     """
     log.info("Starting up...")
-    log.setLevel(LOGGING_LEVEL)
-    log.info("Log level set to %s", LOGGING_LEVEL)
+    try:
+        log.setLevel(LOGGING_LEVEL)
+        log.info("Log level set to %s", LOGGING_LEVEL)
+    except ValueError:
+        log.setLevel("INFO")
+        log.info("Unknown Log level %s, fallback to INFO", LOGGING_LEVEL)
     if DOWNLOAD_DEFAULT_MODEL is True:
         if DEFAULT_MODEL_FILE and DEFAULT_MODEL_HG_REPO_ID:
             set_downloading_model(True)
