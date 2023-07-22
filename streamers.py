@@ -37,6 +37,8 @@ def completions_streamer(
     log.debug("last_n_tokens: %s", last_n_tokens)
     seed = generation_config.seed
     log.debug("seed: %s", seed)
+    max_new_tokens = generation_config.max_new_tokens
+    log.debug("max_new_tokens: %s", max_new_tokens)
     stop = generation_config.stop_words
     log.debug("stop: %s", stop)
     batch_size = session_config.batch_size
@@ -62,6 +64,7 @@ def completions_streamer(
             threads=threads,
             stream=True,
             reset=True,
+            max_new_tokens=max_new_tokens,
         ):
             log.debug("Streaming token %s", token)
             data = json.dumps(

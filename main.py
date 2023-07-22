@@ -115,14 +115,13 @@ async def get_llm_model(
             ),
         )
 
-    ctransformer_model_type = "gpt2"
+    ctransformer_model_type = "llama"
     if "llama" in body.model:
-        ctransformer_model_type = "llama"
-    # https://huggingface.co/psmathur/orca_mini_3b was based on OpenaLLaMa
-    if "orca-mini" in body.model:
         ctransformer_model_type = "llama"
     if "mpt" in body.model:
         ctransformer_model_type = "mpt"
+    if "replit" in body.model:
+        ctransformer_model_type = "replit"
     if "falcon" in body.model:
         ctransformer_model_type = "falcon"
     if "dolly" in body.model:

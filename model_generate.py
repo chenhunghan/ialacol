@@ -38,6 +38,8 @@ def model_generate(
     log.debug("last_n_tokens: %s", last_n_tokens)
     seed = generation_config.seed
     log.debug("seed: %s", seed)
+    max_new_tokens = generation_config.max_new_tokens
+    log.debug("max_new_tokens: %s", max_new_tokens)
     batch_size = session_config.batch_size
     log.debug("batch_size: %s", batch_size)
     threads = session_config.threads
@@ -57,6 +59,7 @@ def model_generate(
             seed=seed,
             batch_size=batch_size,
             threads=threads,
+            max_new_tokens=max_new_tokens,
         )
         http_response = {
             "id": "id",
