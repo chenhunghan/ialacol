@@ -142,7 +142,7 @@ async def startup_event():
                     filename=DEFAULT_MODEL_FILE,
                 )
             except Exception as exception:
-                raise Exception from exception
+                log.error("Error downloading model: %s", exception)
             finally:
                 set_downloading_model(False)
 
