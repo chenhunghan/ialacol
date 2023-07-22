@@ -100,6 +100,7 @@ jobs:
           echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
           sleep 40
           kubectl get pods -n $HELM_NAMESPACE
+          kubectl logs --since=1h --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
 
       - name: Ask the AI for a joke
         run: |
@@ -115,7 +116,7 @@ jobs:
           REPLY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
           echo "$REPLY"
 
-          kubectl logs --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
+          kubectl logs --since=1h --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
 
           if [ -z "$REPLY" ]; then
             echo "No reply from AI"

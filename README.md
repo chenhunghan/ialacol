@@ -6,7 +6,7 @@
 
 ialacol (pronounced "localai") is an open-source project that provides a boring, lightweight, self-hosted, private, and commercially usable LLM streaming service.
 
-It is built on top of the great projects [llm-rs-python](https://github.com/LLukas22/llm-rs-python) + [llm](https://github.com/rustformers/llm) and [ctransformers](https://github.com/marella/ctransformers) and aims to support all [known-good-models](https://github.com/rustformers/llm/blob/main/doc/known-good-models.md) supported by [llm-rs](https://github.com/rustformers/llm/tree/main/crates/models) or [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
+It is built on top of  [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
 
 This project is inspired by other similar projects like [LocalAI](https://github.com/go-skynet/LocalAI), [privateGPT](https://github.com/imartinez/privateGPT), [local.ai](https://github.com/louisgv/local.ai), [llama-cpp-python](https://github.com/abetlen/llama-cpp-python), [closedai](https://github.com/closedai-project/closedai), and [mlc-llm](https://github.com/mlc-ai/mlc-llm), with a specific focus on Kubernetes deployment, streaming, and commercially usable LLMs.
 
@@ -23,7 +23,7 @@ See "Receipts" below for instructions of deployments.
 - [MPT-30B](https://huggingface.co/mosaicml/mpt-30b)
 - [Falcon](https://falconllm.tii.ae/)
 
-And all LLMs supported by [llm-rs](https://github.com/rustformers/llm/tree/main/crates/models) or [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
+And all LLMs supported by [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
 
 ## Features
 
