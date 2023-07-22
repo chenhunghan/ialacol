@@ -2,27 +2,15 @@ replicas: 1
 
 deployment:
   image: quay.io/chenhunghan/ialacol:latest
-  env:
-    # the model repo to download from e.g. https://huggingface.co/rustformers/open-llama-ggml
-    DEFAULT_MODEL_HG_REPO_ID: rustformers/open-llama-ggml
-    # the file name of the model binary in the repo
-    DEFAULT_MODEL_FILE: open_llama_7b-q4_0-ggjt.bin
-    # the metadata file name of the model in the repo
-    DEFAULT_MODEL_META: open_llama_7b-q4_0-ggjt.meta
-    # start of optional env vars
-    # 
-    # log level, runtime defaults to `INFO`
-    LOGGING_LEVEL: DEBUG
-    # the model cache directory, defaults to `models`, i.e., `/app/cache` in the container
-    MODELS_FOLDER: models
-    # the cache directory (for hf artifacts), defaults to `models`, i.e., `/app/cache` in the container
-    CACHE_FOLDER: cache
-    # default to 8
-    THREADS: 8
-    # default to 8
-    BATCH_SIZE: 8
-    # default to 1024
-    CONTEXT_LENGTH: 1024
+  # env:
+    # DEFAULT_MODEL_HG_REPO_ID: TheBloke/Llama-2-7B-Chat-GGML
+    # DEFAULT_MODEL_FILE: llama-2-7b-chat.ggmlv3.q4_0.bin
+    # LOGGING_LEVEL: DEBUG
+    # MODELS_FOLDER: models
+    # CACHE_FOLDER: cache
+    # THREADS: 8
+    # BATCH_SIZE: 8
+    # CONTEXT_LENGTH: 1024
 resources:
   {}
   # limits:
