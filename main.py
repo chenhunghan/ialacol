@@ -29,14 +29,16 @@ from response_body import ChatCompletionResponseBody, CompletionResponseBody
 from streamers import chat_completions_streamer, completions_streamer
 from model_generate import chat_model_generate, model_generate
 
-DEFAULT_MODEL_HG_REPO_ID = os.environ.get("DEFAULT_MODEL_HG_REPO_ID", None)
-DEFAULT_MODEL_FILE = os.environ.get("DEFAULT_MODEL_FILE", None)
-DEFAULT_MODEL_META = os.environ.get("DEFAULT_MODEL_META", None)
+DEFAULT_MODEL_HG_REPO_ID = os.environ.get("DEFAULT_MODEL_HG_REPO_ID", "TheBloke/Llama-2-7B-Chat-GGML")
+DEFAULT_MODEL_FILE = os.environ.get("DEFAULT_MODEL_FILE", "llama-2-7b-chat.ggmlv3.q4_0.bin")
+DEFAULT_MODEL_META = os.environ.get("DEFAULT_MODEL_META", "")
 DOWNLOAD_DEFAULT_MODEL = os.environ.get("DOWNLOAD_DEFAULT_MODEL", "True") == "True"
 LOGGING_LEVEL = os.environ.get("LOGGING_LEVEL", "INFO")
 MODELS_FOLDER = os.environ.get("MODELS_FOLDER", "models")
 CACHE_FOLDER = os.environ.get("MODELS_FOLDER", "cache")
 
+BATCH_SIZE = int(os.environ.get("BATCH_SIZE", "8"))
+CONTEXT_LENGTH = int(os.environ.get("CONTEXT_LENGTH", "1024"))
 
 def get_default_thread():
     """_summary_
@@ -50,8 +52,6 @@ def get_default_thread():
 
 
 THREADS = int(os.environ.get("THREADS", get_default_thread()))
-BATCH_SIZE = int(os.environ.get("BATCH_SIZE", "8"))
-CONTEXT_LENGTH = int(os.environ.get("CONTEXT_LENGTH", "1024"))
 
 DOWNLOADING_MODEL = False
 
