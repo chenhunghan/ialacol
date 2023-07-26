@@ -56,13 +56,13 @@ log.info("BATCH_SIZE: %s", BATCH_SIZE)
 log.info("CONTEXT_LENGTH: %s", CONTEXT_LENGTH)
 
 
-def get_default_thread():
+def get_default_thread() -> int:
     """_summary_
     Automatically get the default number of threads to use for generation
     """
     count = os.cpu_count()
     if count is not None:
-        return count / 2
+        return int(count / 2)
     else:
         return 8
 
