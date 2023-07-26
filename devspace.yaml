@@ -59,14 +59,8 @@ dev:
       value: "TheBloke/Llama-2-13B-chat-GGML"
     - name: DEFAULT_MODEL_FILE
       value: "llama-2-13b-chat.ggmlv3.q4_0.bin"
-    - name: DEFAULT_MODEL_META
-      value: ""
     - name: LOGGING_LEVEL
       value: DEBUG
-    - name: MODELS_FOLDER
-      value: models
-    - name: CACHE_FOLDER
-      value: cache
     sync:
       - path: ./:/app
         excludePaths:

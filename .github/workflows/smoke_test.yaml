@@ -13,10 +13,7 @@ env:
   TEMPERATURE: 1
   DEFAULT_MODEL_HG_REPO_ID: TheBloke/orca_mini_3B-GGML
   DEFAULT_MODEL_FILE: orca-mini-3b.ggmlv3.q4_0.bin
-  DEFAULT_MODEL_META: ""
-  THREADS: 2
-  BATCH_SIZE: 8
-  CONTEXT_LENGTH: 1024
+  LOGGING_LEVEL: DEBUG
 
 jobs:
   joke:
@@ -67,10 +64,7 @@ jobs:
             env:
               DEFAULT_MODEL_HG_REPO_ID: $DEFAULT_MODEL_HG_REPO_ID
               DEFAULT_MODEL_FILE: $DEFAULT_MODEL_FILE
-              DEFAULT_MODEL_META: $DEFAULT_MODEL_META
-              THREADS: $THREADS
-              BATCH_SIZE: $BATCH_SIZE
-              CONTEXT_LENGTH: $CONTEXT_LENGTH
+              LOGGING_LEVEL: $LOGGING_LEVEL
           resources:
             {}
           cache:
