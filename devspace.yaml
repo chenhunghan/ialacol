@@ -23,6 +23,19 @@ deployments:
           command: ["sleep", "999999"]
           # the path to mount the cache volume on the container
           cachePath: /app/cache
+        tolerations:
+          - key: "ai"
+            operator: "Exists"
+            effect: "NoSchedule"
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: nodegroup-ai
+                  operator: In
+                  values:
+                  - "true"
         # cache for artifacts downloaded like embedding models
         cacheVolume:
           pvc:
@@ -43,9 +56,9 @@ dev:
     - port: "8000:8000"
     env:
     - name: DEFAULT_MODEL_HG_REPO_ID
-      value: "TheBloke/orca_mini_3B-GGML"
+      value: "TheBloke/Llama-2-13B-chat-GGML"
     - name: DEFAULT_MODEL_FILE
-      value: "orca-mini-3b.ggmlv3.q4_0.bin"
+      value: "llama-2-13b-chat.ggmlv3.q4_0.bin"
     - name: DEFAULT_MODEL_META
       value: ""
     - name: LOGGING_LEVEL

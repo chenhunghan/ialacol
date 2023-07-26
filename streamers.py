@@ -37,9 +37,9 @@ def completions_streamer(
     log.debug("batch_size: %s", batch_size)
     threads = config.threads
     log.debug("thread: %s", threads)
+    log.debug("prompt: %s", prompt)
 
     log.debug("Streaming from ctransformer instance!")
-    log.debug("Prompt: %s", prompt)
     for token in llm(
         prompt,
         top_k=top_k,
@@ -122,9 +122,9 @@ def chat_completions_streamer(
     log.debug("batch_size: %s", batch_size)
     threads = config.threads
     log.debug("threads: %s", threads)
+    log.debug("prompt: %s", prompt)
 
     log.debug("Streaming from ctransformer instance")
-    log.debug("Prompt: %s", prompt)
     for token in llm(
         prompt,
         top_k=top_k,

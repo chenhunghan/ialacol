@@ -33,6 +33,7 @@ def model_generate(
     log.debug("batch_size: %s", batch_size)
     threads = config.threads
     log.debug("thread: %s", threads)
+    log.debug("prompt: %s", prompt)
 
     log.debug("Getting from ctransformer instance")
     result: str = llm(  # pyright: ignore [reportGeneralTypeIssues]
@@ -94,6 +95,7 @@ def chat_model_generate(
     log.debug("batch_size: %s", batch_size)
     threads = config.threads
     log.debug("thread: %s", threads)
+    log.debug("prompt: %s", prompt)
 
     log.debug("Getting from ctransformer instance")
     result: str = llm(  # pyright: ignore [reportGeneralTypeIssues]
