@@ -4,7 +4,6 @@ deployment:
   env:
     DEFAULT_MODEL_HG_REPO_ID: rustformers/mpt-7b-ggml
     DEFAULT_MODEL_FILE: mpt-7b-q4_0.bin
-    DEFAULT_MODEL_META: mpt-7b-q4_0.meta
 resources:
   {}
 cache:

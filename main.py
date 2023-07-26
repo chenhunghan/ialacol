@@ -37,7 +37,6 @@ DEFAULT_MODEL_HG_REPO_ID = get_env(
     "DEFAULT_MODEL_HG_REPO_ID", "TheBloke/Llama-2-7B-Chat-GGML"
 )
 DEFAULT_MODEL_FILE = get_env("DEFAULT_MODEL_FILE", "llama-2-7b-chat.ggmlv3.q4_0.bin")
-DEFAULT_MODEL_META = get_env("DEFAULT_MODEL_META", "")
 DOWNLOAD_DEFAULT_MODEL = get_env("DOWNLOAD_DEFAULT_MODEL", "True") == "True"
 LOGGING_LEVEL = get_env("LOGGING_LEVEL", "INFO")
 MODELS_FOLDER = get_env("MODELS_FOLDER", "models")
@@ -49,7 +48,6 @@ log = logging.getLogger("uvicorn")
 
 log.info("DEFAULT_MODEL_HG_REPO_ID: %s", DEFAULT_MODEL_HG_REPO_ID)
 log.info("DEFAULT_MODEL_FILE: %s", DEFAULT_MODEL_FILE)
-log.info("DEFAULT_MODEL_META: %s", DEFAULT_MODEL_META)
 log.info("DOWNLOAD_DEFAULT_MODEL: %s", DOWNLOAD_DEFAULT_MODEL)
 log.info("LOGGING_LEVEL: %s", LOGGING_LEVEL)
 log.info("MODELS_FOLDER: %s", MODELS_FOLDER)
@@ -165,25 +163,6 @@ async def startup_event():
                 log.error("Error downloading model: %s", exception)
             finally:
                 set_downloading_model(False)
-
-        if DEFAULT_MODEL_META and DEFAULT_MODEL_HG_REPO_ID:
-            log.info(
-                "Downloading meta... %s/%s",
-                DEFAULT_MODEL_HG_REPO_ID,
-                DEFAULT_MODEL_META,
-            )
-            hf_hub_download(
-                repo_id=DEFAULT_MODEL_HG_REPO_ID,
-                cache_dir=CACHE_FOLDER,
-                local_dir=MODELS_FOLDER,
-                filename=DEFAULT_MODEL_META,
-            )
-            log.info(
-                "Default model/meta %s/%s downloaded to %s",
-                DEFAULT_MODEL_FILE,
-                DEFAULT_MODEL_META,
-                MODELS_FOLDER,
-            )
 
 
 @app.get("/v1/models")

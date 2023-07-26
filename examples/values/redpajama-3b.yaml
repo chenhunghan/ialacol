@@ -4,7 +4,6 @@ deployment:
   env:
     DEFAULT_MODEL_HG_REPO_ID: rustformers/redpajama-ggml
     DEFAULT_MODEL_FILE: RedPajama-INCITE-Base-3B-v1-q5_1-ggjt.bin
-    DEFAULT_MODEL_META: RedPajama-INCITE-Base-3B-v1-q5_1-ggjt.meta
 resources:
   {}
 cache:

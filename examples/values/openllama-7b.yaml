@@ -4,7 +4,6 @@ deployment:
   env:
     DEFAULT_MODEL_HG_REPO_ID: rustformers/open-llama-ggml
     DEFAULT_MODEL_FILE: open_llama_7b-q4_0-ggjt.bin
-    DEFAULT_MODEL_META: open_llama_7b-q4_0-ggjt.meta
 resources:
   {}
 cache:
