@@ -67,7 +67,7 @@ def get_default_thread():
         return 8
 
 
-THREADS = int(os.environ.get("THREADS", get_default_thread()))
+THREADS = int(get_env("THREADS", str(get_default_thread())))
 log.info("THREADS: %s", THREADS)
 
 DOWNLOADING_MODEL = False
