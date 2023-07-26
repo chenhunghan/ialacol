@@ -4,7 +4,6 @@ deployment:
   env:
     DEFAULT_MODEL_HG_REPO_ID: TheBloke/mpt-30B-chat-GGML
     DEFAULT_MODEL_FILE: mpt-30b-chat.ggmlv0.q4_1.bin
-    DEFAULT_MODEL_META: ""
 resources:
   {}
 cache:

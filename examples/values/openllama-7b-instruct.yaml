@@ -4,7 +4,6 @@ deployment:
   env:
     DEFAULT_MODEL_HG_REPO_ID: TheBloke/open-llama-7b-open-instruct-GGML
     DEFAULT_MODEL_FILE: open-llama-7B-open-instruct.ggmlv3.q4_K_M.bin
-    DEFAULT_MODEL_META: ""
 resources:
   {}
 cache:

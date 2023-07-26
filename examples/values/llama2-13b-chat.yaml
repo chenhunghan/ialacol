@@ -4,7 +4,6 @@ deployment:
   env:
     DEFAULT_MODEL_HG_REPO_ID: TheBloke/Llama-2-13B-chat-GGML
     DEFAULT_MODEL_FILE: llama-2-13b-chat.ggmlv3.q4_0.bin
-    DEFAULT_MODEL_META: ""
 resources:
   {}
 cache:

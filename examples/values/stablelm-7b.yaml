@@ -4,7 +4,6 @@ deployment:
   env:
     DEFAULT_MODEL_HG_REPO_ID: rustformers/stablelm-ggml
     DEFAULT_MODEL_FILE: stablelm-tuned-alpha-7b-q4_0.bin
-    DEFAULT_MODEL_META: stablelm-tuned-alpha-7b-q4_0.meta
 resources:
   {}
 cache:

@@ -29,8 +29,6 @@ spec:
             value: {{ .Values.deployment.env.DEFAULT_MODEL_HG_REPO_ID | quote }}
           - name: DEFAULT_MODEL_FILE
             value: {{ .Values.deployment.env.DEFAULT_MODEL_FILE | quote }}
-          - name: DEFAULT_MODEL_META
-            value: {{ .Values.deployment.env.DEFAULT_MODEL_META | quote }}
           - name: LOGGING_LEVEL
             value: {{ .Values.deployment.env.LOGGING_LEVEL | quote }}
           - name: MODELS_FOLDER

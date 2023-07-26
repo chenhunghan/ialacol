@@ -4,7 +4,6 @@ deployment:
   env:
     DEFAULT_MODEL_HG_REPO_ID: TheBloke/WizardLM-Uncensored-Falcon-40B-GGML
     DEFAULT_MODEL_FILE: wizard-falcon40b.ggmlv3.q4_K_S.bin
-    DEFAULT_MODEL_META: ""
 resources:
   {}
 cache:
