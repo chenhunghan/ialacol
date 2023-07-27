@@ -57,9 +57,6 @@ jobs:
           helm repo add ialacol https://chenhunghan.github.io/ialacol
           helm repo update
 
-          echo "test Helm chart defeaults"
-          helm install llama-2-7b-chat ialacol/ialacol --namespace $HELM_NAMESPACE
-
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
