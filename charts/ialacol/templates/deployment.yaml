@@ -26,21 +26,21 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
           - name: DEFAULT_MODEL_HG_REPO_ID
-            value: {{ .Values.deployment.env.DEFAULT_MODEL_HG_REPO_ID | quote }}
+            value: {{ (.Values.deployment.env).DEFAULT_MODEL_HG_REPO_ID | quote }}
           - name: DEFAULT_MODEL_FILE
-            value: {{ .Values.deployment.env.DEFAULT_MODEL_FILE | quote }}
+            value: {{ (.Values.deployment.env).DEFAULT_MODEL_FILE | quote }}
           - name: LOGGING_LEVEL
-            value: {{ .Values.deployment.env.LOGGING_LEVEL | quote }}
+            value: {{ (.Values.deployment.env).LOGGING_LEVEL | quote }}
           - name: MODELS_FOLDER
-            value: {{ .Values.deployment.env.MODELS_FOLDER | quote }}
+            value: {{ (.Values.deployment.env).MODELS_FOLDER | quote }}
           - name: CACHE_FOLDER
-            value: {{ .Values.deployment.env.CACHE_FOLDER | quote }}
+            value: {{ (.Values.deployment.env).CACHE_FOLDER | quote }}
           - name: THREADS
-            value: {{ .Values.deployment.env.THREADS | quote }}
+            value: {{ (.Values.deployment.env).THREADS | quote }}
           - name: BATCH_SIZE
-            value: {{ .Values.deployment.env.BATCH_SIZE | quote }}
+            value: {{ (.Values.deployment.env).BATCH_SIZE | quote }}
           - name: CONTEXT_LENGTH
-            value: {{ .Values.deployment.env.CONTEXT_LENGTH | quote }}
+            value: {{ (.Values.deployment.env).CONTEXT_LENGTH | quote }}
           volumeMounts:
           - mountPath: {{ .Values.cacheMountPath }}
             name: cache
