@@ -25,22 +25,38 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
+          {{- if .Values.deployment.env?.DEFAULT_MODEL_HG_REPO_ID }}
           - name: DEFAULT_MODEL_HG_REPO_ID
             value: {{ .Values.deployment.env.DEFAULT_MODEL_HG_REPO_ID | quote }}
+          {{- end }}
+          {{- if .Values.deployment.env?.DEFAULT_MODEL_FILE }}
           - name: DEFAULT_MODEL_FILE
             value: {{ .Values.deployment.env.DEFAULT_MODEL_FILE | quote }}
+          {{- end }}
+          {{- if .Values.deployment.env?.LOGGING_LEVEL }}
           - name: LOGGING_LEVEL
             value: {{ .Values.deployment.env.LOGGING_LEVEL | quote }}
+          {{- end }}
+          {{- if .Values.deployment.env?.MODELS_FOLDER }}
           - name: MODELS_FOLDER
             value: {{ .Values.deployment.env.MODELS_FOLDER | quote }}
+          {{- end }}
+          {{- if .Values.deployment.env?.CACHE_FOLDER }}
           - name: CACHE_FOLDER
             value: {{ .Values.deployment.env.CACHE_FOLDER | quote }}
+          {{- end }}
+          {{- if .Values.deployment.env?.THREADS }}
           - name: THREADS
             value: {{ .Values.deployment.env.THREADS | quote }}
+          {{- end }}
+          {{- if .Values.deployment.env?.BATCH_SIZE }}
           - name: BATCH_SIZE
             value: {{ .Values.deployment.env.BATCH_SIZE | quote }}
+          {{- end }}
+          {{- if .Values.deployment.env?.CONTEXT_LENGTH }}
           - name: CONTEXT_LENGTH
             value: {{ .Values.deployment.env.CONTEXT_LENGTH | quote }}
+          {{- end }}
           volumeMounts:
           - mountPath: {{ .Values.cacheMountPath }}
             name: cache
