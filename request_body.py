@@ -16,7 +16,7 @@ from fields import (
     presence_penalty,
     frequency_penalty,
     top_k,
-    repeat_penalty,
+    repetition_penalty,
 )
 
 
@@ -28,37 +28,33 @@ class CompletionRequestBody(BaseModel):
     prompt: str = Field(
         default="", description="The prompt to generate completions for."
     )
+    max_tokens = max_tokens
+    temperature = temperature
+    top_p = top_p
+    stop = stop
+    stream: bool = stream
+    model: str = model
+    # llama.cpp specific parameters
+    top_k = top_k
+    repetition_penalty = repetition_penalty
+
+    # ignored or currently unsupported
     suffix: Optional[str] = Field(
         default=None,
         description="A suffix to append to the generated text. If None, no suffix is appended. Useful for chatbots.",
     )
-    max_tokens: int = max_tokens
-    temperature: Optional[float] = temperature
-    top_p: Optional[float] = top_p
+    logprobs: Optional[int] = Field()
+    presence_penalty: Optional[float] = presence_penalty
+    frequency_penalty: Optional[float] = frequency_penalty
     echo: bool = Field(
         default=False,
         description="Whether to echo the prompt in the generated text. Useful for chatbots.",
     )
-    stop: Optional[List[str]] = stop
-    stream: bool = stream
-    logprobs: Optional[int] = Field(
-        default=None,
-        ge=0,
-        description="The number of logprobs to generate. If None, no logprobs are generated.",
-    )
-    presence_penalty: Optional[float] = presence_penalty
-    frequency_penalty: Optional[float] = frequency_penalty
-
-    model: str = model
     n: Optional[int] = 1
     logprobs: Optional[int] = Field(None)
     best_of: Optional[int] = 1
     logit_bias: Optional[Dict[str, float]] = Field(None)
     user: Optional[str] = Field(None)
-
-    # llama.cpp specific parameters
-    top_k: int = top_k
-    repeat_penalty: float = repeat_penalty
 
 
 class ChatCompletionRequestMessage(BaseModel):
@@ -81,13 +77,15 @@ class ChatCompletionRequestBody(BaseModel):
     messages: List[ChatCompletionRequestMessage] = Field(
         default=[], description="A list of messages to generate completions for."
     )
-    max_tokens: int = max_tokens
-    temperature: Optional[float] = temperature
-    top_p: Optional[float] = top_p
-    stop: Optional[List[str]] = stop
-    stream: bool = stream
-
-    model: str = model
+    max_tokens = max_tokens
+    temperature = temperature
+    top_p = top_p
+    stop = stop
+    stream = stream
+    model = model
+    # llama.cpp specific parameters
+    top_k = top_k
+    repetition_penalty = repetition_penalty
 
     # ignored or currently unsupported
     n: Optional[int] = Field(None)
@@ -96,6 +94,4 @@ class ChatCompletionRequestBody(BaseModel):
     presence_penalty: Optional[float] = presence_penalty
     frequency_penalty: Optional[float] = frequency_penalty
 
-    # llama.cpp specific parameters
-    top_k: int = top_k
-    repeat_penalty: float = repeat_penalty
+
