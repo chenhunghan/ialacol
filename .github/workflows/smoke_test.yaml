@@ -10,7 +10,7 @@ env:
   IMAGE_NAME: ialacol-smoke-test
   HELM_RELEASE_NAME: ialacol-smoke-test
   HELM_NAMESPACE: default
-  TEMPERATURE: 1
+  TOP_K: 0
   DEFAULT_MODEL_HG_REPO_ID: TheBloke/orca_mini_3B-GGML
   DEFAULT_MODEL_FILE: orca-mini-3b.ggmlv3.q4_0.bin
   LOGGING_LEVEL: DEBUG
@@ -65,6 +65,7 @@ jobs:
               DEFAULT_MODEL_HG_REPO_ID: $DEFAULT_MODEL_HG_REPO_ID
               DEFAULT_MODEL_FILE: $DEFAULT_MODEL_FILE
               LOGGING_LEVEL: $LOGGING_LEVEL
+              TOP_K: $TOP_K
           resources:
             {}
           cache:
@@ -99,21 +100,29 @@ jobs:
       - if: always()
         run: |
           kubectl logs --tail=200 --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-          cache: pip # caching pip dependencies
-      - name: Ask the AI for a joke
+      - name: Port forward to the service
         run: |
           kubectl port-forward svc/$HELM_RELEASE_NAME 8000:8000 &
           echo "Wait for port-forward to be ready"
           sleep 5
-
+      - name: Check the GET /v1/models endpoint
+        run: |
           curl http://localhost:8000/v1/models
-
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+          cache: pip # caching pip dependencies
+      - name: Install OpenAI CLI
+        run: |
           pip install --upgrade openai --quiet
-
-          REPLY=$(openai -k "sk-" -b http://localhost:8000/v1 api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Tell me a joke.")
+      - name: Test the OpenAI CLI with default parameters
+        run: |
+          openai -k "sk-fake" -b http://localhost:8000/v1 api models.list
+          openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Hello world!"
+          openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api completions.create -m $DEFAULT_MODEL_FILE -p "Who are"
+      - name: Ask the AI for a joke
+        run: |
+          REPLY=$(openai -k "sk-fake" -b http://localhost:8000/v1 api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Tell me a joke." --max-tokens 4096 --temperature 2 --top_p 1.0)
           REPLY=$(echo $REPLY | tr -d '\n')
           echo "$REPLY"
 

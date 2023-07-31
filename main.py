@@ -12,7 +12,7 @@ from typing import (
 )
 from fastapi import FastAPI, Depends, HTTPException, Body
 from fastapi.responses import StreamingResponse
-from ctransformers import LLM, Config
+from ctransformers import LLM
 from huggingface_hub import hf_hub_download
 
 from request_body import ChatCompletionRequestBody, CompletionRequestBody
@@ -20,8 +20,8 @@ from response_body import ChatCompletionResponseBody, CompletionResponseBody
 from streamers import chat_completions_streamer, completions_streamer
 from model_generate import chat_model_generate, model_generate
 from get_env import get_env
-from get_default_thread import get_default_thread
 from get_llm import get_llm
+from get_config import get_config
 
 DEFAULT_MODEL_HG_REPO_ID = get_env(
     "DEFAULT_MODEL_HG_REPO_ID", "TheBloke/Llama-2-7B-Chat-GGML"
@@ -31,10 +31,8 @@ DOWNLOAD_DEFAULT_MODEL = get_env("DOWNLOAD_DEFAULT_MODEL", "True") == "True"
 LOGGING_LEVEL = get_env("LOGGING_LEVEL", "INFO")
 MODELS_FOLDER = get_env("MODELS_FOLDER", "models")
 CACHE_FOLDER = get_env("MODELS_FOLDER", "cache")
-BATCH_SIZE = int(get_env("BATCH_SIZE", "8"))
-CONTEXT_LENGTH = int(get_env("CONTEXT_LENGTH", "1024"))
 
-log = logging.getLogger("uvicorn")
+log = logging.getLogger(__name__)
 
 log.info("DEFAULT_MODEL_HG_REPO_ID: %s", DEFAULT_MODEL_HG_REPO_ID)
 log.info("DEFAULT_MODEL_FILE: %s", DEFAULT_MODEL_FILE)
@@ -42,12 +40,6 @@ log.info("DOWNLOAD_DEFAULT_MODEL: %s", DOWNLOAD_DEFAULT_MODEL)
 log.info("LOGGING_LEVEL: %s", LOGGING_LEVEL)
 log.info("MODELS_FOLDER: %s", MODELS_FOLDER)
 log.info("CACHE_FOLDER: %s", CACHE_FOLDER)
-log.info("BATCH_SIZE: %s", BATCH_SIZE)
-log.info("CONTEXT_LENGTH: %s", CONTEXT_LENGTH)
-
-
-THREADS = int(get_env("THREADS", str(get_default_thread())))
-log.info("THREADS: %s", THREADS)
 
 DOWNLOADING_MODEL = False
 
@@ -151,17 +143,7 @@ async def completions(
             "n, logit_bias, user, presence_penalty and frequency_penalty are not supporte."
         )
     prompt = body.prompt
-    config = Config(
-        top_k=body.top_k,
-        top_p=body.top_p,
-        temperature=body.temperature,
-        repetition_penalty=body.repeat_penalty,
-        batch_size=BATCH_SIZE,
-        threads=THREADS,
-        max_new_tokens=body.max_tokens,
-        stop=body.stop,
-        context_length=CONTEXT_LENGTH,
-    )
+    config = get_config(body)
 
     model_name = body.model
     if body.stream is True:
@@ -274,19 +256,7 @@ async def chat_completions(
     )
 
     prompt = f"{system_message_content}{assistant_message_content} {default_user_start}{user_message_content}{default_user_end} {default_assistant_start}"
-    config = Config(
-        top_k=body.top_k,
-        top_p=body.top_p,
-        temperature=body.temperature,
-        repetition_penalty=body.repeat_penalty,
-        last_n_tokens=body.repeat_penalty_last_n,
-        seed=body.seed,
-        batch_size=BATCH_SIZE,
-        threads=THREADS,
-        max_new_tokens=body.max_tokens,
-        stop=body.stop,
-        context_length=CONTEXT_LENGTH,
-    )
+    config = get_config(body)
     model_name = body.model
     if body.stream is True:
         log.debug("Streaming response from %s", model_name)
