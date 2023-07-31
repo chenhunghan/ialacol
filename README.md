@@ -4,11 +4,9 @@
 
 ## Introduction
 
-ialacol (pronounced "localai") is an open-source project that provides a boring, lightweight, self-hosted, private, and commercially usable LLM streaming service.
+ialacol (pronounced "localai") is an open-source project that provides a boring, lightweight, self-hosted, private, and commercially usable LLM streaming service. It is built on top of  [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
 
-It is built on top of  [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
-
-This project is inspired by other similar projects like [LocalAI](https://github.com/go-skynet/LocalAI), [privateGPT](https://github.com/imartinez/privateGPT), [local.ai](https://github.com/louisgv/local.ai), [llama-cpp-python](https://github.com/abetlen/llama-cpp-python), [closedai](https://github.com/closedai-project/closedai), and [mlc-llm](https://github.com/mlc-ai/mlc-llm), with a specific focus on Kubernetes deployment, streaming, and commercially usable LLMs.
+This project is inspired by other similar projects like [LocalAI](https://github.com/go-skynet/LocalAI), [privateGPT](https://github.com/imartinez/privateGPT), [local.ai](https://github.com/louisgv/local.ai), [llama-cpp-python](https://github.com/abetlen/llama-cpp-python), [closedai](https://github.com/closedai-project/closedai), and [mlc-llm](https://github.com/mlc-ai/mlc-llm), with a specific focus on Kubernetes deployment.
 
 ## Supported Models
 
@@ -30,6 +28,7 @@ And all LLMs supported by [ctransformers](https://github.com/marella/ctransforme
 - Compatibility with OpenAI APIs, allowing you to use OpenAI's Python client or any frameworks that are built on top of OpenAI APIs such as [langchain](https://github.com/hwchase17/langchain).
 - Lightweight, easy deployment on Kubernetes clusters with a 1-click Helm installation.
 - Support for various commercially usable models.
+- Streaming first! For better UX.
 
 ## Quick Start
 
@@ -60,18 +59,32 @@ curl -X POST \
 
 Alternatively, using OpenAI's client library (see more examples in the `examples/openai` folder).
 
-```python
-import openai
+```sh
+openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api chat_completions.create -m llama-2-7b-chat.ggmlv3.q4_0.bin -g user "Hello world!"
+```
 
-openai.api_key = "placeholder_to_avoid_exception" # needed to avoid an exception
-openai.api_base = "http://localhost:8000/v1"
+## Tips
 
-chat_completion = openai.ChatCompletion.create(
-  model="llama-2-7b-chat.ggmlv3.q4_0.bin",
-  messages=[{"role": "user", "content": "Hello world!"}]
-)
+### Creative v.s. Conservative
 
-print(chat_completion.choices[0].message.content)
+LLMs are known to be sensitive to parameters, the higher `temperature` leads to more "randomness" hence LLM becomes more "creative", `top_p` and `top_k` also contribute to the "randomness"
+
+If you want to make LLM be creative.
+
+```sh
+curl -X POST \
+     -H 'Content-Type: application/json' \
+     -d '{ "messages": [{"role": "user", "content": "Tell me a story."}], "model": "llama-2-7b-chat.ggmlv3.q4_0.bin", "temperature": "2", "top_p": "1.0", "top_k": "0" }' \
+     http://localhost:8000/v1/chat/completions
+```
+
+If you want to make LLM be more consistent and genereate the same result with the same input.
+
+```sh
+curl -X POST \
+     -H 'Content-Type: application/json' \
+     -d '{ "messages": [{"role": "user", "content": "Tell me a story."}], "model": "llama-2-7b-chat.ggmlv3.q4_0.bin", "temperature": "0.1", "top_p": "0.1", "top_k": "40" }' \
+     http://localhost:8000/v1/chat/completions
 ```
 
 ## Roadmap
