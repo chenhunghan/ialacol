@@ -7,7 +7,7 @@ max_tokens = Field(
 )
 
 temperature = Field(
-    default=0.01,
+    default=0.8,
     ge=0.00001,
     le=1.0,
     description="Adjust the randomness of the generated text.\n\n"
