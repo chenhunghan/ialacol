@@ -117,8 +117,8 @@ jobs:
       - name: Test the OpenAI CLI with default parameters
         run: |
           openai -k "sk-fake" -b http://localhost:8000/v1 api models.list
-          openai -k "sk-fake" -vvvvv api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Hello world!"
-          openai -k "sk-fake" -vvvvv api completions.create -m $DEFAULT_MODEL_FILE -p "Who are"
+          openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Hello world!"
+          openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api completions.create -m $DEFAULT_MODEL_FILE -p "Who are"
       - name: Ask the AI for a joke
         run: |
           REPLY=$(openai -k "sk-fake" -b http://localhost:8000/v1 api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Tell me a joke.")
