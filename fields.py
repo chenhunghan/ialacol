@@ -18,9 +18,16 @@ stream: bool = Field()
 
 # ggml only
 top_k: None | int = Field(ge=0)
-
 # ggml only
 repetition_penalty: None | float = Field(ge=0.0)
+# ggml only
+last_n_tokens: None | int = Field(ge=0)
+# ggml only
+seed: None | int = Field()
+# ggml only
+batch_size: None | int = Field(ge=0)
+# ggml only
+threads: None | int = Field(ge=0)
 
 # ignore
 presence_penalty: None | float = Field()

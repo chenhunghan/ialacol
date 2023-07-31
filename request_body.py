@@ -17,6 +17,10 @@ from fields import (
     frequency_penalty,
     top_k,
     repetition_penalty,
+    last_n_tokens,
+    seed,
+    batch_size,
+    threads,
 )
 
 
@@ -37,6 +41,10 @@ class CompletionRequestBody(BaseModel):
     # llama.cpp specific parameters
     top_k = top_k
     repetition_penalty = repetition_penalty
+    last_n_tokens = last_n_tokens
+    seed = seed
+    batch_size = batch_size
+    threads = threads
 
     # ignored or currently unsupported
     suffix: Optional[str] = Field(
@@ -86,6 +94,10 @@ class ChatCompletionRequestBody(BaseModel):
     # llama.cpp specific parameters
     top_k = top_k
     repetition_penalty = repetition_penalty
+    last_n_tokens = last_n_tokens
+    seed = seed
+    batch_size = batch_size
+    threads = threads
 
     # ignored or currently unsupported
     n: Optional[int] = Field(None)
@@ -93,5 +105,3 @@ class ChatCompletionRequestBody(BaseModel):
     user: Optional[str] = Field(None)
     presence_penalty: Optional[float] = presence_penalty
     frequency_penalty: Optional[float] = frequency_penalty
-
-
