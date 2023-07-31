@@ -3,7 +3,6 @@ from typing import (
     Literal,
     List,
     Optional,
-    Dict,
 )
 from pydantic import BaseModel, Field
 
@@ -31,22 +30,15 @@ class CompletionRequestBody(BaseModel):
     threads = Optional[int]
 
     # ignored or currently unsupported
-    suffix: Optional[str] = Field(
-        default=None,
-        description="A suffix to append to the generated text. If None, no suffix is appended. Useful for chatbots.",
-    )
-    logprobs: Optional[int] = Field()
-    presence_penalty: Optional[float] = Any
-    frequency_penalty: Optional[float] = Any
-    echo: bool = Field(
-        default=False,
-        description="Whether to echo the prompt in the generated text. Useful for chatbots.",
-    )
-    n: Optional[int] = 1
-    logprobs: Optional[int] = Field(None)
-    best_of: Optional[int] = 1
-    logit_bias: Optional[Dict[str, float]] = Field(None)
-    user: Optional[str] = Field(None)
+    suffix: Any = Any
+    presence_penalty: Any = Any
+    frequency_penalty: Any = Any
+    echo: Any = Any
+    n: Any = Any
+    logprobs: Any = Any
+    best_of: Any = Any
+    logit_bias: Any = Any
+    user: Any = Any
 
 
 class ChatCompletionRequestMessage(BaseModel):
@@ -84,8 +76,8 @@ class ChatCompletionRequestBody(BaseModel):
     threads = Optional[int]
 
     # ignored or currently unsupported
-    n: Optional[int] = Field(None)
-    logit_bias: Optional[Dict[str, float]] = Field(None)
-    user: Optional[str] = Field(None)
-    presence_penalty: Optional[float] = Any
-    frequency_penalty: Optional[float] = Any
+    n: Any = Any
+    logit_bias: Any = Any
+    user: Any = Any
+    presence_penalty: Any = Any
+    frequency_penalty: Any = Any
