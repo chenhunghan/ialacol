@@ -35,8 +35,8 @@ class CompletionRequestBody(BaseModel):
         description="A suffix to append to the generated text. If None, no suffix is appended. Useful for chatbots.",
     )
     max_tokens: int = max_tokens
-    temperature: Optional[float] = temperature
-    top_p: Optional[float] = top_p
+    temperature: float = temperature
+    top_p: float = top_p
     echo: bool = Field(
         default=False,
         description="Whether to echo the prompt in the generated text. Useful for chatbots.",
@@ -84,8 +84,8 @@ class ChatCompletionRequestBody(BaseModel):
         default=[], description="A list of messages to generate completions for."
     )
     max_tokens: int = max_tokens
-    temperature: Optional[float] = temperature
-    top_p: Optional[float] = top_p
+    temperature: float = temperature
+    top_p: float = top_p
     stop: Optional[List[str]] = stop
     stream: bool = stream
 
