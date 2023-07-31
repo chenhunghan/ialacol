@@ -3,7 +3,6 @@
 This module contains the main FastAPI application.
 """
 import logging
-import os
 
 from typing import (
     Awaitable,
@@ -11,27 +10,18 @@ from typing import (
     Union,
     Annotated,
 )
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Body
 from fastapi.responses import StreamingResponse
-from ctransformers import LLM, AutoModelForCausalLM, Config
+from ctransformers import LLM, Config
 from huggingface_hub import hf_hub_download
 
 from request_body import ChatCompletionRequestBody, CompletionRequestBody
 from response_body import ChatCompletionResponseBody, CompletionResponseBody
 from streamers import chat_completions_streamer, completions_streamer
 from model_generate import chat_model_generate, model_generate
-
-
-def get_env(key: str, default_value: str):
-    """_summary_
-    Fallback to default of the env get by key is not set or is empty string
-    """
-    env = os.environ.get(key)
-    if env is None or len(env) == 0:
-        return default_value
-    else:
-        return env
-
+from get_env import get_env
+from get_default_thread import get_default_thread
+from get_llm import get_llm
 
 DEFAULT_MODEL_HG_REPO_ID = get_env(
     "DEFAULT_MODEL_HG_REPO_ID", "TheBloke/Llama-2-7B-Chat-GGML"
@@ -56,17 +46,6 @@ log.info("BATCH_SIZE: %s", BATCH_SIZE)
 log.info("CONTEXT_LENGTH: %s", CONTEXT_LENGTH)
 
 
-def get_default_thread() -> int:
-    """_summary_
-    Automatically get the default number of threads to use for generation
-    """
-    count = os.cpu_count()
-    if count is not None:
-        return int(count / 2)
-    else:
-        return 8
-
-
 THREADS = int(get_env("THREADS", str(get_default_thread())))
 log.info("THREADS: %s", THREADS)
 
@@ -85,48 +64,6 @@ def set_downloading_model(boolean: bool):
 
 Sender = Callable[[Union[str, bytes]], Awaitable[None]]
 Generate = Callable[[Sender], Awaitable[None]]
-
-
-async def get_llm_model(
-    body: ChatCompletionRequestBody,
-) -> LLM:
-    """_summary_
-
-    Args:
-        body (ChatCompletionRequestBody): _description_
-
-    Returns:
-        _type_: _description_
-    """
-
-    # These are also in "starcoder" format
-    # https://huggingface.co/TheBloke/WizardCoder-15B-1.0-GGML
-    # https://huggingface.co/TheBloke/minotaur-15B-GGML
-    if (
-        "star" in body.model
-        or "starchat" in body.model
-        or "WizardCoder" in body.model
-        or "minotaur-15" in body.model
-    ):
-        ctransformer_model_type = "starcoder"
-
-    ctransformer_model_type = "llama"
-    if "llama" in body.model:
-        ctransformer_model_type = "llama"
-    if "mpt" in body.model:
-        ctransformer_model_type = "mpt"
-    if "replit" in body.model:
-        ctransformer_model_type = "replit"
-    if "falcon" in body.model:
-        ctransformer_model_type = "falcon"
-    if "dolly" in body.model:
-        ctransformer_model_type = "dolly-v2"
-    if "stablelm" in body.model:
-        ctransformer_model_type = "gpt_neox"
-
-    return AutoModelForCausalLM.from_pretrained(
-        f"./{MODELS_FOLDER}/{body.model}", model_type=ctransformer_model_type
-    )
 
 
 app = FastAPI()
@@ -189,8 +126,8 @@ async def models():
 
 @app.post("/v1/completions", response_model=CompletionResponseBody)
 async def completions(
-    body: CompletionRequestBody,
-    llm: Annotated[LLM, Depends(get_llm_model)],
+    body: Annotated[CompletionRequestBody, Body()],
+    llm: Annotated[LLM, Depends(get_llm)],
 ):
     """_summary_
         Compatible with https://platform.openai.com/docs/api-reference/completions
@@ -250,8 +187,8 @@ async def completions(
 
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponseBody)
 async def chat_completions(
-    body: ChatCompletionRequestBody,
-    llm: Annotated[LLM, Depends(get_llm_model)],
+    body: Annotated[ChatCompletionRequestBody, Body()],
+    llm: Annotated[LLM, Depends(get_llm)],
 ):
     """_summary_
         Compatible with https://platform.openai.com/docs/api-reference/chat

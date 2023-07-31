@@ -93,9 +93,16 @@ jobs:
 
           echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
           sleep 40
+      - if: always()
+        run: |
           kubectl get pods -n $HELM_NAMESPACE
-          kubectl logs --since=1h --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
-
+      - if: always()
+        run: |
+          kubectl logs --tail=200 --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+          cache: pip # caching pip dependencies
       - name: Ask the AI for a joke
         run: |
           kubectl port-forward svc/$HELM_RELEASE_NAME 8000:8000 &
@@ -104,13 +111,11 @@ jobs:
 
           curl http://localhost:8000/v1/models
 
-          RESPONSE=$(curl -X POST -H 'Content-Type: application/json' -d '{ "messages": [{"role": "user", "content": "Tell me a joke."}], "temperature":"'${TEMPERATURE}'", "model": "'${DEFAULT_MODEL_FILE}'"}' http://localhost:8000/v1/chat/completions)
-          echo "$RESPONSE"
+          pip install --upgrade openai --quiet
 
-          REPLY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+          REPLY=$(openai -k "sk-" -b http://localhost:8000/v1 api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Tell me a joke.")
+          REPLY=$(echo $REPLY | tr -d '\n')
           echo "$REPLY"
-
-          kubectl logs --since=1h --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
 
           if [ -z "$REPLY" ]; then
             echo "No reply from AI"
@@ -118,6 +123,9 @@ jobs:
           fi
 
           echo "REPLY=$REPLY" >> $GITHUB_ENV
+      - if: always()
+        run: |
+          kubectl logs --tail=20 --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
       - name: Comment the Joke
         uses: actions/github-script@v6
         # Note, issue and PR are the same thing in GitHub's eyes
