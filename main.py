@@ -11,7 +11,7 @@ from typing import (
     Union,
     Annotated,
 )
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Body
 from fastapi.responses import StreamingResponse
 from ctransformers import LLM, AutoModelForCausalLM, Config
 from huggingface_hub import hf_hub_download
@@ -189,7 +189,7 @@ async def models():
 
 @app.post("/v1/completions", response_model=CompletionResponseBody)
 async def completions(
-    body: CompletionRequestBody,
+    body: Annotated[CompletionRequestBody, Body()],
     llm: Annotated[LLM, Depends(get_llm_model)],
 ):
     """_summary_
@@ -250,7 +250,7 @@ async def completions(
 
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponseBody)
 async def chat_completions(
-    body: ChatCompletionRequestBody,
+    body: Annotated[ChatCompletionRequestBody, Body()],
     llm: Annotated[LLM, Depends(get_llm_model)],
 ):
     """_summary_
