@@ -111,6 +111,7 @@ jobs:
           pip install --upgrade openai --quiet
 
           REPLY=$(openai -k "sk-" -b http://localhost:8000/v1 api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Tell me a joke.")
+          REPLY=$(echo $REPLY|tr -d '\n')
           echo "$REPLY"
 
           kubectl logs --since=1h --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
