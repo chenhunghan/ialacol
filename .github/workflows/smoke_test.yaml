@@ -10,7 +10,7 @@ env:
   IMAGE_NAME: ialacol-smoke-test
   HELM_RELEASE_NAME: ialacol-smoke-test
   HELM_NAMESPACE: default
-  TEMPERATURE: 1
+  TOP_K: 0
   DEFAULT_MODEL_HG_REPO_ID: TheBloke/orca_mini_3B-GGML
   DEFAULT_MODEL_FILE: orca-mini-3b.ggmlv3.q4_0.bin
   LOGGING_LEVEL: DEBUG
@@ -65,6 +65,7 @@ jobs:
               DEFAULT_MODEL_HG_REPO_ID: $DEFAULT_MODEL_HG_REPO_ID
               DEFAULT_MODEL_FILE: $DEFAULT_MODEL_FILE
               LOGGING_LEVEL: $LOGGING_LEVEL
+              TOP_K: $TOP_K
           resources:
             {}
           cache:
@@ -121,7 +122,7 @@ jobs:
           openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api completions.create -m $DEFAULT_MODEL_FILE -p "Who are"
       - name: Ask the AI for a joke
         run: |
-          REPLY=$(openai -k "sk-fake" -b http://localhost:8000/v1 api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Tell me a joke.")
+          REPLY=$(openai -k "sk-fake" -b http://localhost:8000/v1 api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Tell me a joke." --max-tokens 4096 --temperature 2 --top_p 1.0)
           REPLY=$(echo $REPLY | tr -d '\n')
           echo "$REPLY"
 
