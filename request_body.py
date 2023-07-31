@@ -15,12 +15,12 @@ class CompletionRequestBody(BaseModel):
     prompt: str = Field(
         default="", description="The prompt to generate completions for."
     )
-    max_tokens: Optional[int]
-    temperature: Optional[float]
-    top_p: Optional[float]
-    stop: None | str | List[str]
-    stream: bool
-    model: str
+    max_tokens = Optional[int]
+    temperature = Optional[float]
+    top_p = Optional[float]
+    stop = Optional[List[str] | str]
+    stream: bool = Field()
+    model: str = Field()
     # llama.cpp specific parameters
     top_k = Optional[int]
     repetition_penalty = Optional[float]
@@ -39,6 +39,9 @@ class CompletionRequestBody(BaseModel):
     best_of: Any = Any
     logit_bias: Any = Any
     user: Any = Any
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class ChatCompletionRequestMessage(BaseModel):
@@ -61,12 +64,12 @@ class ChatCompletionRequestBody(BaseModel):
     messages: List[ChatCompletionRequestMessage] = Field(
         default=[], description="A list of messages to generate completions for."
     )
-    max_tokens: Optional[int]
-    temperature: Optional[float]
-    top_p: Optional[float]
-    stop: None | str | List[str]
-    stream: bool
-    model: str
+    max_tokens = Optional[int]
+    temperature = Optional[float]
+    top_p = Optional[float]
+    stop = Optional[List[str] | str]
+    stream: bool = Field()
+    model: str = Field()
     # llama.cpp specific parameters
     top_k = Optional[int]
     repetition_penalty = Optional[float]
@@ -81,3 +84,6 @@ class ChatCompletionRequestBody(BaseModel):
     user: Any = Any
     presence_penalty: Any = Any
     frequency_penalty: Any = Any
+
+    class Config:
+        arbitrary_types_allowed = True
