@@ -17,8 +17,6 @@ from fields import (
     frequency_penalty,
     top_k,
     repeat_penalty,
-    repeat_penalty_last_n,
-    seed,
 )
 
 
@@ -101,7 +99,3 @@ class ChatCompletionRequestBody(BaseModel):
     # llama.cpp specific parameters
     top_k: int = top_k
     repeat_penalty: float = repeat_penalty
-
-    # Unknown parameters but required by GenerationConfig
-    repeat_penalty_last_n: int = repeat_penalty_last_n
-    seed: int = seed

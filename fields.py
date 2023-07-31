@@ -45,17 +45,6 @@ repeat_penalty = Field(
     description="A penalty applied to each token that is already generated. This helps prevent the model from repeating itself.\n\n"
     + "Repeat penalty is a hyperparameter used to penalize the repetition of token sequences during text generation. It helps prevent the model from generating repetitive or monotonous text. A higher value (e.g., 1.5) will penalize repetitions more strongly, while a lower value (e.g., 0.9) will be more lenient.",
 )
-
-repeat_penalty_last_n = Field(
-    default=512,
-    ge=0,
-)
-
-seed = Field(
-    default=42,
-    ge=0,
-)
-
 presence_penalty = Field(
     default=None,
     ge=-2.0,
