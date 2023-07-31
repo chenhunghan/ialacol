@@ -108,7 +108,7 @@ jobs:
 
           curl http://localhost:8000/v1/models
 
-          pip install --upgrade openai
+          pip install --upgrade openai --quiet
 
           REPLY=$(openai -k "sk-" -b http://localhost:8000/v1 api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Tell me a joke.")
           echo "$REPLY"
