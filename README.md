@@ -53,7 +53,7 @@ Chat with the default model `llama-2-7b-chat.ggmlv3.q4_0.bin` using `curl`
 ```sh
 curl -X POST \
      -H 'Content-Type: application/json' \
-     -d '{ "messages": [{"role": "user", "content": "How are you?"}], "model": "llama-2-7b-chat.ggmlv3.q4_0.bin"}' \
+     -d '{ "messages": [{"role": "user", "content": "How are you?"}], "model": "llama-2-7b-chat.ggmlv3.q4_0.bin", "stream": false}' \
      http://localhost:8000/v1/chat/completions
 ```
 
@@ -74,7 +74,7 @@ If you want to make LLM be creative.
 ```sh
 curl -X POST \
      -H 'Content-Type: application/json' \
-     -d '{ "messages": [{"role": "user", "content": "Tell me a story."}], "model": "llama-2-7b-chat.ggmlv3.q4_0.bin", "temperature": "2", "top_p": "1.0", "top_k": "0" }' \
+     -d '{ "messages": [{"role": "user", "content": "Tell me a story."}], "model": "llama-2-7b-chat.ggmlv3.q4_0.bin", "stream": false, "temperature": "2", "top_p": "1.0", "top_k": "0" }' \
      http://localhost:8000/v1/chat/completions
 ```
 
@@ -83,7 +83,7 @@ If you want to make LLM be more consistent and genereate the same result with th
 ```sh
 curl -X POST \
      -H 'Content-Type: application/json' \
-     -d '{ "messages": [{"role": "user", "content": "Tell me a story."}], "model": "llama-2-7b-chat.ggmlv3.q4_0.bin", "temperature": "0.1", "top_p": "0.1", "top_k": "40" }' \
+     -d '{ "messages": [{"role": "user", "content": "Tell me a story."}], "model": "llama-2-7b-chat.ggmlv3.q4_0.bin", "stream": false, "temperature": "0.1", "top_p": "0.1", "top_k": "40" }' \
      http://localhost:8000/v1/chat/completions
 ```
 
