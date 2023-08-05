@@ -73,14 +73,12 @@ jobs:
               size: 0.5Gi
               accessModes:
                 - ReadWriteOnce
-              storageClass: ~
           cacheMountPath: /app/cache
           model:
             persistence:
               size: 2Gi
               accessModes:
                 - ReadWriteOnce
-              storageClass: ~
           modelMountPath: /app/models
           service:
             type: ClusterIP

@@ -11,14 +11,14 @@ cache:
     size: 10Gi
     accessModes:
       - ReadWriteOnce
-    storageClass: ~
+    storageClassName: ~
 cacheMountPath: /app/cache
 model:
   persistence:
     size: 15Gi
     accessModes:
       - ReadWriteOnce
-    storageClass: ~
+    storageClassName: ~
 modelMountPath: /app/models
 service:
   type: ClusterIP
