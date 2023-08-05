@@ -26,7 +26,7 @@ cache:
     accessModes:
       - ReadWriteOnce
     # Optional. e.g. "gp2-unencrypted"
-    storageClass: ~
+    storageClassName: ~
 # the path to mount the cache volume on the container
 cacheMountPath: /app/cache
 
@@ -36,7 +36,7 @@ model:
     accessModes:
       - ReadWriteOnce
     # Optional. e.g. "gp2-unencrypted"
-    storageClass: ~
+    storageClassName: ~
 # the path to mount the model volume on the container
 modelMountPath: /app/models
 
