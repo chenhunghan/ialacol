@@ -4,7 +4,7 @@
 
 ## Introduction
 
-ialacol (pronounced "localai") is an open-source project that provides a boring, lightweight, self-hosted, private, and commercially usable LLM streaming service. It is built on top of  [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
+ialacol (pronounced "localai") is an open-source project that provides a boring, lightweight, self-hosted, private, and commercially usable LLM streaming service. It is built on top of  [ctransformers](https://github.com/marella/ctransformers).
 
 This project is inspired by other similar projects like [LocalAI](https://github.com/go-skynet/LocalAI), [privateGPT](https://github.com/imartinez/privateGPT), [local.ai](https://github.com/louisgv/local.ai), [llama-cpp-python](https://github.com/abetlen/llama-cpp-python), [closedai](https://github.com/closedai-project/closedai), and [mlc-llm](https://github.com/mlc-ai/mlc-llm), with a specific focus on Kubernetes deployment.
 
