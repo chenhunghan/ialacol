@@ -174,7 +174,7 @@ jobs:
         run: |
           helm repo add ialacol https://chenhunghan.github.io/ialacol
           helm repo update
-          
+
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
@@ -209,7 +209,7 @@ jobs:
           helm install $STARCODER_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
 
           echo "Wait for the pod to be ready"
-          sleep 5
+          sleep 20
       - if: always()
         run: |
           kubectl logs --tail=200 --selector app.kubernetes.io/name=$STARCODER_HELM_RELEASE_NAME -n $HELM_NAMESPACE
