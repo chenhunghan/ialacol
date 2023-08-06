@@ -15,6 +15,7 @@ async def get_llm(
         _type_: _description_
     """
 
+    ctransformer_model_type = "llama"
     # These are also in "starcoder" format
     # https://huggingface.co/TheBloke/WizardCoder-15B-1.0-GGML
     # https://huggingface.co/TheBloke/minotaur-15B-GGML
@@ -25,8 +26,6 @@ async def get_llm(
         or "minotaur-15" in body.model
     ):
         ctransformer_model_type = "starcoder"
-
-    ctransformer_model_type = "llama"
     if "llama" in body.model:
         ctransformer_model_type = "llama"
     if "mpt" in body.model:
