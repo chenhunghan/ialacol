@@ -172,6 +172,9 @@ jobs:
           pip install --upgrade openai --quiet
       - name: Install ialacol with starcoder based model and wait for pods to be ready
         run: |
+          helm repo add ialacol https://chenhunghan.github.io/ialacol
+          helm repo update
+          
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
