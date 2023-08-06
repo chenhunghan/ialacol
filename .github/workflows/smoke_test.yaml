@@ -18,7 +18,7 @@ env:
   # for testing starcoder base models
   STARCODER_HELM_RELEASE_NAME: tiny-starcoder-py
   STARCODER_MODEL_HG_REPO_ID: mike-ravkine/tiny_starcoder_py-GGML
-  STARCODER_MODEL_FILE: tiny_starcoder_py-q8_0.bin
+  STARCODER_MODEL_FILE: tiny_starcoder_py-fp16.bin
   STARCODER_SVC_PORT: 8001
 
 jobs:
