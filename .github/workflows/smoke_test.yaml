@@ -136,7 +136,7 @@ jobs:
           echo "REPLY=$REPLY" >> $GITHUB_ENV
       - if: always()
         run: |
-          kubectl logs --tail=20 --selector app.kubernetes.io/name=$HELM_RELEASE_NAME -n $HELM_NAMESPACE
+          kubectl logs --tail=20 --selector app.kubernetes.io/name=$LLAMA_HELM_RELEASE_NAME -n $HELM_NAMESPACE
       - name: Comment the Joke
         uses: actions/github-script@v6
         # Note, issue and PR are the same thing in GitHub's eyes
@@ -225,3 +225,6 @@ jobs:
       - name: Check model response
         run: |
           openai -k "sk-fake" -b http://localhost:$STARCODER_SVC_PORT/v1 -vvvvv api completions.create -m $STARCODER_MODEL_FILE -p "def fibonnaci"
+      - if: always()
+        run: |
+          kubectl logs --tail=20 --selector app.kubernetes.io/name=$STARCODER_HELM_RELEASE_NAME -n $HELM_NAMESPACE
