@@ -212,6 +212,9 @@ jobs:
           sleep 20
       - if: always()
         run: |
+          kubectl get pods -n $HELM_NAMESPACE
+      - if: always()
+        run: |
           kubectl logs --tail=200 --selector app.kubernetes.io/name=$STARCODER_HELM_RELEASE_NAME -n $HELM_NAMESPACE
       - name: Port forward to the starcoder model service
         run: |
