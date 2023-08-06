@@ -15,6 +15,11 @@ env:
   LLAMA_MODEL_HG_REPO_ID: TheBloke/orca_mini_3B-GGML
   LLAMA_MODEL_FILE: orca-mini-3b.ggmlv3.q4_0.bin
   LLAMA_SVC_PORT: 8000
+  # for testing starcoder base models
+  STARCODER_HELM_RELEASE_NAME: tiny-starcoder-py
+  STARCODER_MODEL_HG_REPO_ID: mike-ravkine/tiny_starcoder_py-GGML
+  STARCODER_MODEL_FILE: tiny_starcoder_py-q8_0.bin
+  STARCODER_SVC_PORT: 8001
 
 jobs:
   joke:
@@ -49,7 +54,7 @@ jobs:
         with:
           version: v3.12.0
           
-      - name: Install ialacol and wait for pods to be ready
+      - name: Install ialacol with LLaMa based model and wait for pods to be ready
         run: |
           helm repo add ialacol https://chenhunghan.github.io/ialacol
           helm repo update
@@ -95,7 +100,7 @@ jobs:
       - if: always()
         run: |
           kubectl logs --tail=200 --selector app.kubernetes.io/name=$LLAMA_HELM_RELEASE_NAME -n $HELM_NAMESPACE
-      - name: Port forward to the service
+      - name: Port forward to the LLaMa model service
         run: |
           kubectl port-forward svc/$LLAMA_HELM_RELEASE_NAME $LLAMA_SVC_PORT:$LLAMA_SVC_PORT &
           echo "Wait for port-forward to be ready"
@@ -113,11 +118,11 @@ jobs:
       - name: Test the OpenAI CLI with default parameters
         run: |
           openai -k "sk-fake" -b http://localhost:$LLAMA_SVC_PORT/v1 api models.list
-          openai -k "sk-fake" -b http://localhost:$LLAMA_SVC_PORT/v1 -vvvvv api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Hello world!"
-          openai -k "sk-fake" -b http://localhost:$LLAMA_SVC_PORT/v1 -vvvvv api completions.create -m $DEFAULT_MODEL_FILE -p "Who are"
+          openai -k "sk-fake" -b http://localhost:$LLAMA_SVC_PORT/v1 -vvvvv api chat_completions.create -m $LLAMA_MODEL_FILE -g user "Hello world!"
+          openai -k "sk-fake" -b http://localhost:$LLAMA_SVC_PORT/v1 -vvvvv api completions.create -m $LLAMA_MODEL_FILE -p "Who are"
       - name: Ask the AI for a joke
         run: |
-          REPLY=$(openai -k "sk-fake" -b http://localhost:$LLAMA_SVC_PORT/v1 api chat_completions.create -m $DEFAULT_MODEL_FILE -g user "Tell me a joke." --max-tokens 4096 --temperature 2 --top_p 1.0)
+          REPLY=$(openai -k "sk-fake" -b http://localhost:$LLAMA_SVC_PORT/v1 api chat_completions.create -m $LLAMA_MODEL_FILE -g user "Tell me a joke." --max-tokens 4096 --temperature 2 --top_p 1.0)
           REPLY=$(echo $REPLY | tr -d '\n')
           echo "$REPLY"
 
@@ -145,3 +150,51 @@ jobs:
                 body: `🤖: ${REPLY}`
               })
             }
+      - name: Install ialacol with starcoder based model and wait for pods to be ready
+        run: |
+          cat > values.yaml <<EOF
+          replicas: 1
+          deployment:
+            image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            env:
+              DEFAULT_MODEL_HG_REPO_ID: $STARCODER_MODEL_HG_REPO_ID
+              DEFAULT_MODEL_FILE: $STARCODER_MODEL_FILE
+              LOGGING_LEVEL: $LOGGING_LEVEL
+              TOP_K: 0
+          resources:
+            {}
+          cache:
+            persistence:
+              size: 0.5Gi
+              accessModes:
+                - ReadWriteOnce
+          cacheMountPath: /app/cache
+          model:
+            persistence:
+              size: 0.5Gi
+              accessModes:
+                - ReadWriteOnce
+          modelMountPath: /app/models
+          service:
+            type: ClusterIP
+            port: $STARCODER_SVC_PORT
+            annotations: {}
+          nodeSelector: {}
+          tolerations: []
+          affinity: {}
+          EOF
+          helm install $STARCODER_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
+
+          echo "Wait for the pod to be ready"
+          sleep 5
+      - if: always()
+        run: |
+          kubectl logs --tail=200 --selector app.kubernetes.io/name=$STARCODER_HELM_RELEASE_NAME -n $HELM_NAMESPACE
+      - name: Port forward to the starcoder model service
+        run: |
+          kubectl port-forward svc/$STARCODER_HELM_RELEASE_NAME $STARCODER_SVC_PORT:$STARCODER_SVC_PORT &
+          echo "Wait for port-forward to be ready"
+          sleep 5
+      - name: Check model response
+        run: |
+          openai -k "sk-fake" -b http://localhost:$STARCODER_SVC_PORT/v1 -vvvvv api completions.create -m $STARCODER_MODEL_FILE -p "def fibonnaci"
