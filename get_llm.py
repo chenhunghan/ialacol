@@ -1,4 +1,4 @@
-from ctransformers import LLM, AutoModelForCausalLM
+from ctransformers import LLM
 from request_body import ChatCompletionRequestBody, CompletionRequestBody
 from get_env import get_env
 from get_config import get_config
