@@ -3,7 +3,7 @@ deployment:
   image: quay.io/chenhunghan/ialacol:latest
   env:
     DEFAULT_MODEL_HG_REPO_ID: TheBloke/WizardLM-Uncensored-Falcon-40B-GGML
-    DEFAULT_MODEL_FILE: wizard-falcon40b.ggmlv3.q4_K_S.bin
+    DEFAULT_MODEL_FILE: wizardlm-uncensored-falcon-40b.ggccv1.q4_0.bin
 resources:
   {}
 cache:
