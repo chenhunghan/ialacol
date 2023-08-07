@@ -10,7 +10,7 @@ This project is inspired by other similar projects like [LocalAI](https://github
 
 ## Supported Models
 
-See "Receipts" below for instructions of deployments.
+See [Receipts](#receipts) below for instructions of deployments.
 
 - [LLaMa 2 variants](https://huggingface.co/meta-llama)
 - [OpenLLaMA variants](https://github.com/openlm-research/open_llama)
@@ -135,7 +135,9 @@ helm install llama2-70b-chat ialacol/ialacol -f examples/values/llama2-70b-chat.
 
 ### OpenLM Research's OpenLLaMA Models
 
-Deploy [OpenLLaMA 7B](https://github.com/openlm-research/open_llama) model quantized by [rustformers](https://huggingface.co/rustformers/open-llama-ggml). ℹ️ This is a base model, likely only useful for text completion.
+Deploy [OpenLLaMA 7B](https://github.com/openlm-research/open_llama) model quantized by [rustformers](https://huggingface.co/rustformers/open-llama-ggml). 
+
+ℹ️ This is a base model, likely only useful for text completion.
 
 ```sh
 helm repo add ialacol https://chenhunghan.github.io/ialacol
@@ -155,7 +157,7 @@ helm install openllama-13b-instruct ialacol/ialacol -f examples/values/openllama
 
 ### Mosaic's MPT Models
 
-Deploy [MosaicML's MPT-7B](https://www.mosaicml.com/blog/mpt-7b) model quantized by [rustformers](https://huggingface.co/rustformers/mpt-7b-ggml). ℹ️ This is a base model, likely only useful for text completion.
+Deploy [MosaicML's MPT-7B](https://www.mosaicml.com/blog/mpt-7b) model quantized by [rustformers](https://huggingface.co/rustformers). ℹ️ This is a base model, likely only useful for text completion.
 
 ```sh
 helm repo add ialacol https://chenhunghan.github.io/ialacol
@@ -191,7 +193,7 @@ helm install falcon-40b ialacol/ialacol -f examples/values/falcon-40b.yaml
 
 ### StarCoder Models (startcoder, startchat, starcoderplus, WizardCoder)
 
-Deploy `starchat-beta` model <https://huggingface.co/TheBloke/starchat-beta-GGML> quantized by TheBloke.
+Deploy [`starchat-beta`](https://huggingface.co/TheBloke/starchat-beta-GGML) model quantized by [TheBloke](https://huggingface.co/TheBloke).
 
 ```sh
 helm repo add starchat https://chenhunghan.github.io/ialacol
@@ -199,7 +201,7 @@ helm repo update
 helm install starchat-beta ialacol/ialacol -f examples/values/starchat-beta.yaml
 ```
 
-Deploy `WizardCoder` model <https://huggingface.co/WizardLM/WizardCoder-15B-V1.0> quantized by TheBloke.
+Deploy [`WizardCoder`](https://huggingface.co/WizardLM/WizardCoder-15B-V1.0) model quantized by [TheBloke](https://huggingface.co/TheBloke).
 
 ```sh
 helm repo add starchat https://chenhunghan.github.io/ialacol
@@ -209,7 +211,7 @@ helm install wizard-coder-15b ialacol/ialacol -f examples/values/wizard-coder-15
 
 ### Pythia Models
 
-Deploy light-weight model `pythia-70m` wih only 70 millions paramters (~40MB)
+Deploy light-weight [`pythia-70m`](https://huggingface.co/rustformers/pythia-ggml) model with only 70 millions paramters (~40MB) quantized by [rustformers](https://huggingface.co/rustformers).
 
 ```sh
 helm repo add ialacol https://chenhunghan.github.io/ialacol
@@ -219,7 +221,7 @@ helm install pythia70m ialacol/ialacol -f examples/values/pythia-70m.yaml
 
 ### RedPajama Models
 
-Deploy `RedPajama` 3B model
+Deploy [`RedPajama` 3B](https://huggingface.co/rustformers/redpajama-3b-ggml) model
 
 ```sh
 helm repo add ialacol https://chenhunghan.github.io/ialacol
@@ -229,7 +231,7 @@ helm install redpajama-3b ialacol/ialacol -f examples/values/redpajama-3b.yaml
 
 ### StableLM Models
 
-Deploy `stableLM` 7B model
+Deploy [`stableLM`](https://huggingface.co/rustformers/stablelm-ggml) 7B model
 
 ```sh
 helm repo add ialacol https://chenhunghan.github.io/ialacol
