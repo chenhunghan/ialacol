@@ -7,7 +7,7 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 # https://github.com/marella/ctransformers#cuda
-RUN CT_CUBLAS=1 pip3 install ctransformers --no-binary ctransformers
+RUN pip3 install ctransformers[cuda]
 COPY . .
 EXPOSE 8000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

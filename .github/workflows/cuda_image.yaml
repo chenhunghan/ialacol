@@ -1,4 +1,4 @@
-name: Build and Push CUDA 11 Image to Github Container Registry
+name: Build and Push CUDA Image to Github Container Registry
 
 on:
   push:
@@ -7,14 +7,14 @@ on:
     paths:
     - '**.py'
     - 'requirements.txt'
-    - 'Dockerfile.cuda11'
-    - '.github/workflows/cuda_11_image.yaml'
+    - 'Dockerfile.cuda'
+    - '.github/workflows/cuda_image.yaml'
     paths-ignore:
     - 'examples/**'
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ialacol-cuda11
+  IMAGE_NAME: ialacol-cuda
 jobs:
   build_and_push_image_to_gcr:
     runs-on: ubuntu-latest
@@ -40,7 +40,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./Dockerfile.cuda11
+          file: ./Dockerfile.cuda
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
