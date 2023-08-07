@@ -38,8 +38,10 @@ async def get_llm(
         ctransformer_model_type = "dolly-v2"
     if "stablelm" in body.model:
         ctransformer_model_type = "gpt_neox"
-
     config = get_config(body)
+    MODE_TYPE = get_env("MODE_TYPE", "")
+    if len(MODE_TYPE) > 0:
+        ctransformer_model_type = MODE_TYPE
     MODELS_FOLDER = get_env("MODELS_FOLDER", "models")
 
     return LLM(
