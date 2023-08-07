@@ -10,8 +10,6 @@ on:
     - 'Dockerfile.cuda11'
     - 'Dockerfile.cuda12'
     - '.github/workflows/cuda_image.yaml'
-    paths-ignore:
-    - 'examples/**'
 
 env:
   REGISTRY: ghcr.io
