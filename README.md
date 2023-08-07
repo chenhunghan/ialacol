@@ -63,7 +63,7 @@ Alternatively, using OpenAI's client library (see more examples in the `examples
 openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api chat_completions.create -m llama-2-7b-chat.ggmlv3.q4_0.bin -g user "Hello world!"
 ```
 
-## GPY Acceleration
+## GPU Acceleration
 
 To enable GPU/CUDA acceleration, you need to use the container image built for GPU and add `GPU_LAYERS` environment variable.
 
