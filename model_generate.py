@@ -33,6 +33,8 @@ def model_generate(
     log.debug("batch_size: %s", batch_size)
     threads = config.threads
     log.debug("thread: %s", threads)
+    gpu_layers = config.gpu_layers
+    log.debug("gpu_layers: %s", gpu_layers)
     log.debug("prompt: %s", prompt)
 
     log.debug("Getting from ctransformer instance")
@@ -95,6 +97,8 @@ def chat_model_generate(
     log.debug("batch_size: %s", batch_size)
     threads = config.threads
     log.debug("thread: %s", threads)
+    gpu_layers = config.gpu_layers
+    log.debug("gpu_layers: %s", gpu_layers)
     log.debug("prompt: %s", prompt)
 
     log.debug("Getting from ctransformer instance")

@@ -1,0 +1,13 @@
+# syntax=docker/dockerfile:1
+
+# 11.7.1 https://github.com/ggerganov/llama.cpp/blob/master/.devops/main-cuda.Dockerfile
+FROM nvidia/cuda:11.7.1-base-ubuntu22.04
+RUN apt-get update && apt-get install -y -q python3 python3-pip
+WORKDIR /app
+COPY requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
+# https://github.com/marella/ctransformers#cuda
+RUN CT_CUBLAS=1 pip3 install ctransformers --no-binary ctransformers
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

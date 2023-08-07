@@ -1,7 +1,7 @@
 from ctransformers import LLM, AutoModelForCausalLM
 from request_body import ChatCompletionRequestBody, CompletionRequestBody
 from get_env import get_env
-
+from get_config import get_config
 
 async def get_llm(
     body: ChatCompletionRequestBody | CompletionRequestBody,
@@ -39,8 +39,11 @@ async def get_llm(
     if "stablelm" in body.model:
         ctransformer_model_type = "gpt_neox"
 
+    config = get_config(body)
     MODELS_FOLDER = get_env("MODELS_FOLDER", "models")
 
-    return AutoModelForCausalLM.from_pretrained(
-        f"./{MODELS_FOLDER}/{body.model}", model_type=ctransformer_model_type
+    return LLM(
+        model_path=f"./{MODELS_FOLDER}/{body.model}",
+        model_type=ctransformer_model_type,
+        config=config,
     )
