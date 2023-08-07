@@ -10,7 +10,7 @@ This project is inspired by other similar projects like [LocalAI](https://github
 
 ## Supported Models
 
-See "Receipts" below for instructions of deployments.
+See [Receipts](#receipts) below for instructions of deployments.
 
 - [LLaMa 2 variants](https://huggingface.co/meta-llama)
 - [OpenLLaMA variants](https://github.com/openlm-research/open_llama)
