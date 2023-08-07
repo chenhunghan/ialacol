@@ -25,10 +25,10 @@ And all LLMs supported by [ctransformers](https://github.com/marella/ctransforme
 
 ## Features
 
-- Compatibility with OpenAI APIs, allowing you to use OpenAI's Python client or any frameworks that are built on top of OpenAI APIs such as [langchain](https://github.com/hwchase17/langchain).
+- Compatibility with OpenAI APIs, allowing you to use any frameworks that are built on top of OpenAI APIs such as [langchain](https://github.com/hwchase17/langchain).
 - Lightweight, easy deployment on Kubernetes clusters with a 1-click Helm installation.
-- Support for various commercially usable models.
 - Streaming first! For better UX.
+- Optional CUDA acceleration.
 
 ## Quick Start
 
@@ -63,6 +63,28 @@ Alternatively, using OpenAI's client library (see more examples in the `examples
 openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api chat_completions.create -m llama-2-7b-chat.ggmlv3.q4_0.bin -g user "Hello world!"
 ```
 
+## GPU Acceleration
+
+To enable GPU/CUDA acceleration, you need to use the container image built for GPU and add `GPU_LAYERS` environment variable. `GPU_LAYERS` is determine by the size of your GPU memory. See the PR/discussion in [llama.cpp](https://github.com/ggerganov/llama.cpp/pull/1412) to find the best value.
+
+### CUDA 11
+
+- `deployment.image` = `ghcr.io/chenhunghan/ialacol-cuda11:latest`
+- `deployment.env.GPU_LAYERS` is the layer to off loading to GPU.
+
+### CUDA 12
+
+- `deployment.image` = `ghcr.io/chenhunghan/ialacol-cuda11:latest`
+- `deployment.env.GPU_LAYERS` is the layer to off loading to GPU.
+
+For example
+
+```sh
+helm install llama2-7b-chat-cuda11 ialacol/ialacol -f examples/values/llama2-7b-chat-cuda11.yaml
+```
+
+Deploys llama2 7b model with 40 layers offloadind to GPU. The inference is accelerated by CUDA 11.
+
 ## Tips
 
 ### Creative v.s. Conservative
@@ -94,7 +116,7 @@ curl -X POST \
   - StarCoder <https://huggingface.co/TheBloke/starcoder-GGML>
   - StarCoderPlus <https://huggingface.co/TheBloke/starcoderplus-GGML>
 - [x] Mimic restof OpenAI API, including `GET /models` and `POST /completions`
-- [ ] GPU acceleration (CUDA/METAL) 
+- [ ] GPU acceleration (CUDA/METAL)
 - [ ] Support `POST /embeddings` backed by huggingface Apache-2.0 embedding models such as [Sentence Transformers](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) and [hkunlp/instructor](https://huggingface.co/hkunlp/instructor-large)
 - [ ] Suuport Apache-2.0 [fastchat-t5-3b](https://huggingface.co/lmsys/fastchat-t5-3b-v1.0)
 - [ ] Support more Apache-2.0 models such as [codet5p](https://huggingface.co/Salesforce/codet5p-16b) and others listed [here](https://github.com/eugeneyan/open-llms)
@@ -135,7 +157,7 @@ helm install llama2-70b-chat ialacol/ialacol -f examples/values/llama2-70b-chat.
 
 ### OpenLM Research's OpenLLaMA Models
 
-Deploy [OpenLLaMA 7B](https://github.com/openlm-research/open_llama) model quantized by [rustformers](https://huggingface.co/rustformers/open-llama-ggml). 
+Deploy [OpenLLaMA 7B](https://github.com/openlm-research/open_llama) model quantized by [rustformers](https://huggingface.co/rustformers/open-llama-ggml).
 
 ℹ️ This is a base model, likely only useful for text completion.
 

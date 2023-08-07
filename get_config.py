@@ -37,6 +37,8 @@ def get_config(body: CompletionRequestBody | ChatCompletionRequestBody) -> Confi
     STOP = get_env_or_none("STOP")
     # ggml only, follow ctransformers defaults
     CONTEXT_LENGTH = int(get_env("CONTEXT_LENGTH", "-1"))
+    # the layers to offloading to the GPU
+    GPU_LAYERS = int(get_env("GPU_LAYERS", "0"))
 
     log.info("TOP_K: %s", TOP_K)
     log.info("TOP_P: %s", TOP_P)
@@ -49,6 +51,7 @@ def get_config(body: CompletionRequestBody | ChatCompletionRequestBody) -> Confi
     log.info("MAX_TOKENS: %s", MAX_TOKENS)
     log.info("STOP: %s", STOP)
     log.info("CONTEXT_LENGTH: %s", CONTEXT_LENGTH)
+    log.info("GPU_LAYERS: %s", GPU_LAYERS)
     
     config = Config(
         top_k=body.top_k if body.top_k else TOP_K,
@@ -62,5 +65,6 @@ def get_config(body: CompletionRequestBody | ChatCompletionRequestBody) -> Confi
         max_new_tokens=body.max_tokens if body.max_tokens else MAX_TOKENS,
         stop=body.stop if body.stop else STOP,
         context_length=CONTEXT_LENGTH,
+        gpu_layers=GPU_LAYERS,
     )
     return config
