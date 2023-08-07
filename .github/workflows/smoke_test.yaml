@@ -24,6 +24,9 @@ env:
 jobs:
   build-image:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -183,7 +186,7 @@ jobs:
               DEFAULT_MODEL_HG_REPO_ID: $STARCODER_MODEL_HG_REPO_ID
               DEFAULT_MODEL_FILE: $STARCODER_MODEL_FILE
               LOGGING_LEVEL: $LOGGING_LEVEL
-              TOP_K: 1
+              TOP_K: 40
               REPETITION_PENALTY: 1.176
           resources:
             {}
