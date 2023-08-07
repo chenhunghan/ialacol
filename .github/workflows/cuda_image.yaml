@@ -42,7 +42,9 @@ jobs:
           context: .
           file: ./Dockerfile.cuda11
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.CUDA_11_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.CUDA_11_IMAGE_NAME }}:latest
           labels: ${{ steps.meta.outputs.labels }}
   cuda12_image_to_gcr:
     runs-on: ubuntu-latest
@@ -70,5 +72,7 @@ jobs:
           context: .
           file: ./Dockerfile.cuda12
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.CUDA_12_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.CUDA_12_IMAGE_NAME }}:latest
           labels: ${{ steps.meta.outputs.labels }}
