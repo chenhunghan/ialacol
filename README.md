@@ -65,12 +65,17 @@ openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api chat_completions.crea
 
 ## GPU Acceleration
 
-### CUDA
+To enable GPU/CUDA acceleration, you need to use the container image built for GPU and add `GPU_LAYERS` environment variable. `GPU_LAYERS` is determine by the size of your GPU memory. See the PR/discussion in [llama.cpp](https://github.com/ggerganov/llama.cpp/pull/1412) to find the best value.
 
-To enable GPU/CUDA acceleration, you need to use the container image built for GPU and add `GPU_LAYERS` environment variable.
+### CUDA 11
 
-- `deployment.image` = `ghcr.io/chenhunghan/ialacol-cuda:latest`
-- `deployment.env.GPU_LAYERS` is the layer to off loading to GPU. The value is determine by the size of your GPU memory. See the PR/discussion in [llama.cpp](https://github.com/ggerganov/llama.cpp/pull/1412) to find the best value.
+- `deployment.image` = `ghcr.io/chenhunghan/ialacol-cuda11:latest`
+- `deployment.env.GPU_LAYERS` is the layer to off loading to GPU.
+
+### CUDA 12
+
+- `deployment.image` = `ghcr.io/chenhunghan/ialacol-cuda11:latest`
+- `deployment.env.GPU_LAYERS` is the layer to off loading to GPU.
 
 For example
 

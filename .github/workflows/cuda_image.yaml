@@ -7,16 +7,18 @@ on:
     paths:
     - '**.py'
     - 'requirements.txt'
-    - 'Dockerfile.cuda'
+    - 'Dockerfile.cuda11'
+    - 'Dockerfile.cuda12'
     - '.github/workflows/cuda_image.yaml'
     paths-ignore:
     - 'examples/**'
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ialacol-cuda
+  CUDA_11_IMAGE_NAME: ialacol-cuda11
+  CUDA_12_IMAGE_NAME: ialacol-cuda12
 jobs:
-  build_and_push_image_to_gcr:
+  cuda11_image_to_gcr:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -35,12 +37,40 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.CUDA_11_IMAGE_NAME }}
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./Dockerfile.cuda
+          file: ./Dockerfile.cuda11
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+  cuda12_image_to_gcr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.CUDA_12_IMAGE_NAME }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile.cuda12
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
