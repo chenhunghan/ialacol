@@ -3,6 +3,16 @@ entries:
   ialacol:
   - apiVersion: v2
     appVersion: 0.7.0
+    created: "2023-08-08T05:53:39.889149894Z"
+    description: A Helm chart for ialacol
+    digest: 2031a9d74ac690401deceebb4f319d75fdc636e4ca2846e7cc49939f129463ad
+    name: ialacol
+    type: application
+    urls:
+    - https://github.com/chenhunghan/ialacol/releases/download/ialacol-0.7.1/ialacol-0.7.1.tgz
+    version: 0.7.1
+  - apiVersion: v2
+    appVersion: 0.7.0
     created: "2023-08-07T19:33:39.192827976Z"
     description: A Helm chart for ialacol
     digest: 32f6139e068d2ea2493b75f3f57b1619d0779608a4e62bedef757a428098af3b
@@ -211,4 +221,4 @@ entries:
     urls:
     - https://github.com/chenhunghan/ialacol/releases/download/ialacol-0.0.1/ialacol-0.0.1.tgz
     version: 0.0.1
-generated: "2023-08-07T19:33:39.193336583Z"
+generated: "2023-08-08T05:53:39.889306095Z"
