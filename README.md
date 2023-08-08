@@ -74,7 +74,7 @@ To enable GPU/CUDA acceleration, you need to use the container image built for G
 
 ### CUDA 12
 
-- `deployment.image` = `ghcr.io/chenhunghan/ialacol-cuda11:latest`
+- `deployment.image` = `ghcr.io/chenhunghan/ialacol-cuda12:latest`
 - `deployment.env.GPU_LAYERS` is the layer to off loading to GPU.
 
 For example
