@@ -85,6 +85,12 @@ helm install llama2-7b-chat-cuda11 ialacol/ialacol -f examples/values/llama2-7b-
 
 Deploys llama2 7b model with 40 layers offloadind to GPU. The inference is accelerated by CUDA 11.
 
+### CUDA Driver Issues
+
+If you see `CUDA driver version is insufficient for CUDA runtime version` when making the request, you are likely using a Nvidia Driver that is not [compatible with the CUDA version](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html).
+
+Upgrade the driver manually on the node (See [here](https://github.com/awslabs/amazon-eks-ami/issues/1060) if you are using CUDA11 + AMI). Or try different version of CUDA.
+
 ## Tips
 
 ### Creative v.s. Conservative
