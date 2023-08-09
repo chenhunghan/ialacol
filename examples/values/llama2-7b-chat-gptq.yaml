@@ -1,0 +1,30 @@
+replicas: 1
+deployment:
+  image: ghcr.io/chenhunghan/ialacol-gptq:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: TheBloke/Llama-2-7b-Chat-GPTQ
+    DEFAULT_MODEL_FILE: gptq_model-4bit-128g.safetensors
+    MODEL_TYPE: "gptq"
+resources:
+  {}
+cache:
+  persistence:
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ~
+cacheMountPath: /app/cache
+model:
+  persistence:
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ~
+modelMountPath: /app/models
+service:
+  type: ClusterIP
+  port: 8000
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
