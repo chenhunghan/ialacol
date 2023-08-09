@@ -29,20 +29,40 @@ spec:
             value: {{ (.Values.deployment.env).DEFAULT_MODEL_HG_REPO_ID | quote }}
           - name: DEFAULT_MODEL_FILE
             value: {{ (.Values.deployment.env).DEFAULT_MODEL_FILE | quote }}
-          - name: GPU_LAYERS
-            value: {{ (.Values.deployment.env).GPU_LAYERS | quote }}
+          - name: DOWNLOAD_DEFAULT_MODEL
+            value: {{ (.Values.deployment.env).DOWNLOAD_DEFAULT_MODEL | quote }}
           - name: LOGGING_LEVEL
             value: {{ (.Values.deployment.env).LOGGING_LEVEL | quote }}
           - name: MODELS_FOLDER
             value: {{ (.Values.deployment.env).MODELS_FOLDER | quote }}
           - name: CACHE_FOLDER
             value: {{ (.Values.deployment.env).CACHE_FOLDER | quote }}
-          - name: THREADS
-            value: {{ (.Values.deployment.env).THREADS | quote }}
+          - name: TOP_K
+            value: {{ (.Values.deployment.env).TOP_K | quote }}
+          - name: TOP_P
+            value: {{ (.Values.deployment.env).TOP_P | quote }}
+          - name: TEMPERATURE
+            value: {{ (.Values.deployment.env).TEMPERATURE | quote }}
+          - name: REPETITION_PENALTY
+            value: {{ (.Values.deployment.env).REPETITION_PENALTY | quote }}
+          - name: LAST_N_TOKENS
+            value: {{ (.Values.deployment.env).LAST_N_TOKENS | quote }}
+          - name: SEED
+            value: {{ (.Values.deployment.env).SEED | quote }}
           - name: BATCH_SIZE
             value: {{ (.Values.deployment.env).BATCH_SIZE | quote }}
+          - name: THREADS
+            value: {{ (.Values.deployment.env).THREADS | quote }}
+          - name: MAX_TOKENS
+            value: {{ (.Values.deployment.env).MAX_TOKENS | quote }}
+          - name: STOP
+            value: {{ (.Values.deployment.env).STOP | quote }}
           - name: CONTEXT_LENGTH
             value: {{ (.Values.deployment.env).CONTEXT_LENGTH | quote }}
+          - name: GPU_LAYERS
+            value: {{ (.Values.deployment.env).GPU_LAYERS | quote }}
+          - name: MODE_TYPE
+            value: {{ (.Values.deployment.env).MODE_TYPE | quote }}
           volumeMounts:
           - mountPath: {{ .Values.cacheMountPath }}
             name: cache
