@@ -4,7 +4,7 @@ FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
-# https://github.com/marella/ctransformers#cuda
+# https://github.com/marella/ctransformers#metal
 RUN CT_METAL=1 pip3 install ctransformers --no-binary ctransformers
 COPY . .
 EXPOSE 8000
