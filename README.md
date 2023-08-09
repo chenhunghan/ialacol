@@ -91,6 +91,18 @@ If you see `CUDA driver version is insufficient for CUDA runtime version` when m
 
 Upgrade the driver manually on the node (See [here](https://github.com/awslabs/amazon-eks-ami/issues/1060) if you are using CUDA11 + AMI). Or try different version of CUDA.
 
+### Metal
+
+To enable Metal support, use the image `ialacol-metal` built for metal.
+
+- `deployment.image` = `ghcr.io/chenhunghan/ialacol-metal:latest`
+
+For example
+
+```sh
+helm install llama2-7b-chat-metal ialacol/ialacol -f examples/values/llama2-7b-chat-metal.yaml.yaml
+```
+
 ## Tips
 
 ### Creative v.s. Conservative

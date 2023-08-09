@@ -1,0 +1,46 @@
+name: Build and Push Metal Image to Github Container Registry
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+    - '**.py'
+    - 'requirements.txt'
+    - 'Dockerfile.metal'
+    - '.github/workflows/metal_image.yaml'
+
+env:
+  REGISTRY: ghcr.io
+  METAL_IMAGE_NAME: ialacol-metal
+jobs:
+  metal_image_to_gcr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.METAL_IMAGE_NAME }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile.metal
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.METAL_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.METAL_IMAGE_NAME }}:latest
+          labels: ${{ steps.meta.outputs.labels }}
