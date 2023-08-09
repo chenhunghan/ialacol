@@ -100,7 +100,7 @@ To enable Metal support, use the image `ialacol-metal` built for metal.
 For example
 
 ```sh
-helm install llama2-7b-metal ialacol/ialacol -f examples/values/llama2-7b-metal.yaml
+helm install llama2-7b-chat-metal ialacol/ialacol -f examples/values/llama2-7b-chat-metal.yaml.yaml
 ```
 
 ## Tips
