@@ -1,0 +1,29 @@
+replicas: 1
+deployment:
+  image: ghcr.io/chenhunghan/ialacol-metal:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: TheBloke/Llama-2-7B-Chat-GGML
+    DEFAULT_MODEL_FILE: llama-2-7b-chat.ggmlv3.q4_0.bin
+resources:
+  {}
+cache:
+  persistence:
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ~
+cacheMountPath: /app/cache
+model:
+  persistence:
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ~
+modelMountPath: /app/models
+service:
+  type: ClusterIP
+  port: 8000
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
