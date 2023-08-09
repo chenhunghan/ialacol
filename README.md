@@ -103,6 +103,24 @@ For example
 helm install llama2-7b-chat-metal ialacol/ialacol -f examples/values/llama2-7b-chat-metal.yaml.yaml
 ```
 
+### GPTQ
+
+To use GPTQ, you must
+
+- `deployment.image` = `ghcr.io/chenhunghan/ialacol-gptq:latest`
+- `deployment.env.MODEL_TYPE` = `gptq`
+
+For example
+
+```sh
+helm install llama2-7b-chat-gptq ialacol/ialacol -f examples/values/llama2-7b-chat-gptq.yaml.yaml
+```
+
+```sh
+kubectl port-forward svc/llama2-7b-chat-gptq 8000:8000
+openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api chat_completions.create -m gptq_model-4bit-128g.safetensors -g user "Hello world!"
+```
+
 ## Tips
 
 ### Creative v.s. Conservative
