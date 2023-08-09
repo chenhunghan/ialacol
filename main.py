@@ -32,7 +32,7 @@ LOGGING_LEVEL = get_env("LOGGING_LEVEL", "INFO")
 MODELS_FOLDER = get_env("MODELS_FOLDER", "models")
 CACHE_FOLDER = get_env("MODELS_FOLDER", "cache")
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("uvicorn")
 
 log.info("DEFAULT_MODEL_HG_REPO_ID: %s", DEFAULT_MODEL_HG_REPO_ID)
 log.info("DEFAULT_MODEL_FILE: %s", DEFAULT_MODEL_FILE)

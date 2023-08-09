@@ -7,7 +7,7 @@ from get_default_thread import get_default_thread
 
 LOGGING_LEVEL = get_env("LOGGING_LEVEL", "INFO")
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("uvicorn")
 try:
     log.setLevel(LOGGING_LEVEL)
 except ValueError:
