@@ -4,9 +4,18 @@
 
 ## Introduction
 
-ialacol (pronounced "localai") is an open-source project that provides a boring, lightweight, self-hosted, private, and commercially usable LLM streaming service. It is built on top of  [ctransformers](https://github.com/marella/ctransformers).
+ialacol (pronounced "localai") is a lightweight drop-in replacement for OpenAI API.
 
-This project is inspired by other similar projects like [LocalAI](https://github.com/go-skynet/LocalAI), [privateGPT](https://github.com/imartinez/privateGPT), [local.ai](https://github.com/louisgv/local.ai), [llama-cpp-python](https://github.com/abetlen/llama-cpp-python), [closedai](https://github.com/closedai-project/closedai), and [mlc-llm](https://github.com/mlc-ai/mlc-llm), with a specific focus on Kubernetes deployment.
+It is an OpenAI API-compatible wrapper [ctransformers](https://github.com/marella/ctransformers) supporting [GGML](https://github.com/ggerganov/ggml)/[GPTQ](https://github.com/PanQiWei/AutoGPTQ) with optional CUDA/Metal acceleration.
+
+ialacol is inspired by other similar projects like [LocalAI](https://github.com/go-skynet/LocalAI), [privateGPT](https://github.com/imartinez/privateGPT), [local.ai](https://github.com/louisgv/local.ai), [llama-cpp-python](https://github.com/abetlen/llama-cpp-python), [closedai](https://github.com/closedai-project/closedai), and [mlc-llm](https://github.com/mlc-ai/mlc-llm), with a specific focus on Kubernetes deployment.
+
+## Features
+
+- Compatibility with OpenAI APIs, allowing you to use any frameworks that are built on top of OpenAI APIs such as [langchain](https://github.com/hwchase17/langchain).
+- Lightweight, easy deployment on Kubernetes clusters with a 1-click Helm installation.
+- Streaming first! For better UX.
+- Optional CUDA acceleration.
 
 ## Supported Models
 
@@ -23,12 +32,12 @@ See [Receipts](#receipts) below for instructions of deployments.
 
 And all LLMs supported by [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
 
-## Features
+## Blogs
 
-- Compatibility with OpenAI APIs, allowing you to use any frameworks that are built on top of OpenAI APIs such as [langchain](https://github.com/hwchase17/langchain).
-- Lightweight, easy deployment on Kubernetes clusters with a 1-click Helm installation.
-- Streaming first! For better UX.
-- Optional CUDA acceleration.
+- [Containerized AI before Apocalypse 🐳🤖](https://dev.to/chenhunghan/containerized-ai-before-apocalypse-1569)
+- [Deploy Llama 2 AI on Kubernetes, Now](https://dev.to/chenhunghan/deploy-llama-2-ai-on-kubernetes-now-2jc5)
+- [Cloud Native Workflow for Private MPT-30B AI Apps](https://dev.to/chenhunghan/cloud-native-workflow-for-private-ai-apps-2omb)
+- [Offline AI 🤖 on Github Actions 🙅‍♂️💰](https://dev.to/chenhunghan/offline-ai-on-github-actions-38a1)
 
 ## Quick Start
 
