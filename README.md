@@ -85,12 +85,11 @@ There is a [image](https://github.com/chenhunghan/ialacol/pkgs/container/ialacol
 ```sh
 export DEFAULT_MODEL_HG_REPO_ID="TheBloke/Llama-2-7B-Chat-GGML"
 export DEFAULT_MODEL_FILE="llama-2-7b-chat.ggmlv3.q4_0.bin"
-# Metal ghcr.io/chenhunghan/ialacol-metal:latest
-# CUDA11 ghcr.io/chenhunghan/ialacol-cuda11:latest 
-# CUDA12 ghcr.io/chenhunghan/ialacol-cuda12:latest
-# Metal ghcr.io/chenhunghan/ialacol-metal:latest
-export IMAGE="ghcr.io/chenhunghan/ialacol:latest", 
-docker run --rm -it -p 8000:8000 -e DEFAULT_MODEL_HG_REPO_ID=$DEFAULT_MODEL_HG_REPO_ID -e DEFAULT_MODEL_FILE=$DEFAULT_MODEL_FILE 
+export IMAGE="ghcr.io/chenhunghan/ialacol:latest"
+docker run --rm -it -p 8000:8000 \
+     -e DEFAULT_MODEL_HG_REPO_ID=$DEFAULT_MODEL_HG_REPO_ID \
+     -e DEFAULT_MODEL_FILE=$DEFAULT_MODEL_FILE \
+     $IMAGE
 ```
 
 #### From Source
