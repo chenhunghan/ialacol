@@ -2,6 +2,7 @@
 
 This module contains the main FastAPI application.
 """
+import os
 import logging
 
 from typing import (
@@ -29,8 +30,6 @@ DEFAULT_MODEL_HG_REPO_ID = get_env(
 DEFAULT_MODEL_FILE = get_env("DEFAULT_MODEL_FILE", "llama-2-7b-chat.ggmlv3.q4_0.bin")
 DOWNLOAD_DEFAULT_MODEL = get_env("DOWNLOAD_DEFAULT_MODEL", "True") == "True"
 LOGGING_LEVEL = get_env("LOGGING_LEVEL", "INFO")
-MODELS_FOLDER = get_env("MODELS_FOLDER", "models")
-CACHE_FOLDER = get_env("MODELS_FOLDER", "cache")
 
 log = logging.getLogger("uvicorn")
 
@@ -38,8 +37,6 @@ log.info("DEFAULT_MODEL_HG_REPO_ID: %s", DEFAULT_MODEL_HG_REPO_ID)
 log.info("DEFAULT_MODEL_FILE: %s", DEFAULT_MODEL_FILE)
 log.info("DOWNLOAD_DEFAULT_MODEL: %s", DOWNLOAD_DEFAULT_MODEL)
 log.info("LOGGING_LEVEL: %s", LOGGING_LEVEL)
-log.info("MODELS_FOLDER: %s", MODELS_FOLDER)
-log.info("CACHE_FOLDER: %s", CACHE_FOLDER)
 
 DOWNLOADING_MODEL = False
 
@@ -77,15 +74,16 @@ async def startup_event():
         if DEFAULT_MODEL_FILE and DEFAULT_MODEL_HG_REPO_ID:
             set_downloading_model(True)
             log.info(
-                "Downloading model... %s/%s",
+                "Downloading model... %s/%s to %s/models",
                 DEFAULT_MODEL_HG_REPO_ID,
                 DEFAULT_MODEL_FILE,
+                os.getcwd()
             )
             try:
                 hf_hub_download(
                     repo_id=DEFAULT_MODEL_HG_REPO_ID,
-                    cache_dir=CACHE_FOLDER,
-                    local_dir=MODELS_FOLDER,
+                    cache_dir="models/.cache",
+                    local_dir="models",
                     filename=DEFAULT_MODEL_FILE,
                 )
             except Exception as exception:

@@ -6,20 +6,12 @@ deployment:
     DEFAULT_MODEL_FILE: wizardlm-uncensored-falcon-40b.ggccv1.q4_0.bin
 resources:
   {}
-cache:
-  persistence:
-    size: 45Gi
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: ~
-cacheMountPath: /app/cache
 model:
   persistence:
     size: 45Gi
     accessModes:
       - ReadWriteOnce
     storageClassName: ~
-modelMountPath: /app/models
 service:
   type: ClusterIP
   port: 8000

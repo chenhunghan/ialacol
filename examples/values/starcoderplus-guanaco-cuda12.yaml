@@ -7,20 +7,12 @@ deployment:
     GPU_LAYERS: 40
 resources:
   {}
-cache:
-  persistence:
-    size: 20Gi
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: ~
-cacheMountPath: /app/cache
 model:
   persistence:
     size: 20Gi
     accessModes:
       - ReadWriteOnce
     storageClassName: ~
-modelMountPath: /app/models
 service:
   type: ClusterIP
   port: 8000

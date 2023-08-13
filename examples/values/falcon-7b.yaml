@@ -8,20 +8,12 @@ deployment:
     MODE_TYPE: falcon
 resources:
   {}
-cache:
-  persistence:
-    size: 10Gi
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: ~
-cacheMountPath: /app/cache
 model:
   persistence:
     size: 15Gi
     accessModes:
       - ReadWriteOnce
     storageClassName: ~
-modelMountPath: /app/models
 service:
   type: ClusterIP
   port: 8000

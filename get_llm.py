@@ -1,3 +1,5 @@
+import os
+
 from ctransformers import LLM
 from request_body import ChatCompletionRequestBody, CompletionRequestBody
 from get_env import get_env
@@ -41,14 +43,16 @@ async def get_llm(
     # matching https://huggingface.co/stabilityai/stablecode-completion-alpha-3b
     if "stablecode" in body.model:
         ctransformer_model_type = "gpt_neox"
+    # matching https://huggingface.co/EleutherAI/pythia-70m
+    if "pythia" in body.model:
+        ctransformer_model_type = "gpt_neox"
     config = get_config(body)
     MODE_TYPE = get_env("MODE_TYPE", "")
     if len(MODE_TYPE) > 0:
         ctransformer_model_type = MODE_TYPE
-    MODELS_FOLDER = get_env("MODELS_FOLDER", "models")
 
     return LLM(
-        model_path=f"./{MODELS_FOLDER}/{body.model}",
+        model_path=f"{os.getcwd()}/models/{body.model}",
         model_type=ctransformer_model_type,
         config=config,
     )

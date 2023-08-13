@@ -5,7 +5,7 @@ openai.api_base = "http://localhost:8000/v1" # this is the public address of the
 
 # create a chat completion
 chat_completion = openai.ChatCompletion.create(
-  model="pythia-70m-q4_0.bin", # the model filename in the env.MODELS_FOLDER directory
+  model="pythia-70m-q4_0.bin",
   messages=[{"role": "user", "content": "Hello world! I am using OpenAI's python client library!"}]
 )
 

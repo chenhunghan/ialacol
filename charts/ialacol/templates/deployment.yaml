@@ -33,10 +33,6 @@ spec:
             value: {{ (.Values.deployment.env).DOWNLOAD_DEFAULT_MODEL | quote }}
           - name: LOGGING_LEVEL
             value: {{ (.Values.deployment.env).LOGGING_LEVEL | quote }}
-          - name: MODELS_FOLDER
-            value: {{ (.Values.deployment.env).MODELS_FOLDER | quote }}
-          - name: CACHE_FOLDER
-            value: {{ (.Values.deployment.env).CACHE_FOLDER | quote }}
           - name: TOP_K
             value: {{ (.Values.deployment.env).TOP_K | quote }}
           - name: TOP_P
@@ -64,14 +60,9 @@ spec:
           - name: MODE_TYPE
             value: {{ (.Values.deployment.env).MODE_TYPE | quote }}
           volumeMounts:
-          - mountPath: {{ .Values.cacheMountPath }}
-            name: cache
-          - mountPath: {{ .Values.modelMountPath }}
+          - mountPath: /app/models
             name: model
       volumes:
-      - name: cache
-        persistentVolumeClaim:
-          claimName: {{ .Release.Name }}-cache
       - name: model
         persistentVolumeClaim:
           claimName: {{ .Release.Name }}-model

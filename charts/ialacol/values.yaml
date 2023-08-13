@@ -7,11 +7,6 @@ deployment:
     # DEFAULT_MODEL_HG_REPO_ID: TheBloke/Llama-2-7B-Chat-GGML
     # DEFAULT_MODEL_FILE: llama-2-7b-chat.ggmlv3.q4_0.bin
     # LOGGING_LEVEL: DEBUG
-    # MODELS_FOLDER: models
-    # CACHE_FOLDER: cache
-    # THREADS: 8
-    # BATCH_SIZE: 8
-    # CONTEXT_LENGTH: 1024
 resources:
   {}
   # limits:
@@ -21,16 +16,7 @@ resources:
   #   cpu: 100m
   #   memory: 128Mi
 
-cache:
-  persistence:
-    size: 10Gi
-    accessModes:
-      - ReadWriteOnce
-    # Optional. e.g. "gp2-unencrypted"
-    storageClassName: ~
-# the path to mount the cache volume on the container
-cacheMountPath: /app/cache
-
+# The volume where we store the models and downloaded file cachehelm lint
 model:
   persistence:
     size: 24Gi
@@ -38,8 +24,6 @@ model:
       - ReadWriteOnce
     # Optional. e.g. "gp2-unencrypted"
     storageClassName: ~
-# the path to mount the model volume on the container
-modelMountPath: /app/models
 
 service:
   type: ClusterIP

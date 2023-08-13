@@ -56,7 +56,7 @@ jobs:
   llama-smoke-test:
     runs-on: ubuntu-latest
     needs: build-image
-    steps:  
+    steps:
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.7.0
 
@@ -64,12 +64,14 @@ jobs:
         uses: azure/setup-helm@v3
         with:
           version: v3.12.0
-          
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Install ialacol with LLaMa based model and wait for pods to be ready
         run: |
-          helm repo add ialacol https://chenhunghan.github.io/ialacol
-          helm repo update
-
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
@@ -81,18 +83,11 @@ jobs:
               TOP_K: 0
           resources:
             {}
-          cache:
-            persistence:
-              size: 0.5Gi
-              accessModes:
-                - ReadWriteOnce
-          cacheMountPath: /app/cache
           model:
             persistence:
               size: 2Gi
               accessModes:
                 - ReadWriteOnce
-          modelMountPath: /app/models
           service:
             type: ClusterIP
             port: $LLAMA_SVC_PORT
@@ -101,7 +96,7 @@ jobs:
           tolerations: []
           affinity: {}
           EOF
-          helm install $LLAMA_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
+          helm install $LLAMA_HELM_RELEASE_NAME -f values.yaml --namespace $HELM_NAMESPACE ./charts/ialacol
 
           echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
           sleep 40
@@ -151,23 +146,22 @@ jobs:
     steps:  
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.7.0
-
       - name: Set up Helm
         uses: azure/setup-helm@v3
         with:
           version: v3.12.0
-
       - uses: actions/setup-python@v4
         with:
           python-version: 3.11
       - name: Install OpenAI CLI
         run: |
           pip install --upgrade openai --quiet
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
       - name: Install ialacol with gpt-neox based model and wait for pods to be ready
         run: |
-          helm repo add ialacol https://chenhunghan.github.io/ialacol
-          helm repo update
-
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
@@ -180,18 +174,11 @@ jobs:
               REPETITION_PENALTY: 1.176
           resources:
             {}
-          cache:
-            persistence:
-              size: 0.5Gi
-              accessModes:
-                - ReadWriteOnce
-          cacheMountPath: /app/cache
           model:
             persistence:
               size: 0.5Gi
               accessModes:
                 - ReadWriteOnce
-          modelMountPath: /app/models
           service:
             type: ClusterIP
             port: $GPT_NEOX_SVC_PORT
@@ -200,7 +187,7 @@ jobs:
           tolerations: []
           affinity: {}
           EOF
-          helm install $GPT_NEOX_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
+          helm install $GPT_NEOX_HELM_RELEASE_NAME -f values.yaml --namespace $HELM_NAMESPACE ./charts/ialacol
 
           echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
           sleep 40
@@ -227,23 +214,22 @@ jobs:
     steps:  
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.7.0
-
       - name: Set up Helm
         uses: azure/setup-helm@v3
         with:
           version: v3.12.0
-
       - uses: actions/setup-python@v4
         with:
           python-version: 3.11
       - name: Install OpenAI CLI
         run: |
           pip install --upgrade openai --quiet
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
       - name: Install ialacol with starcoder based model and wait for pods to be ready
         run: |
-          helm repo add ialacol https://chenhunghan.github.io/ialacol
-          helm repo update
-
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
@@ -256,18 +242,11 @@ jobs:
               REPETITION_PENALTY: 1.176
           resources:
             {}
-          cache:
-            persistence:
-              size: 0.5Gi
-              accessModes:
-                - ReadWriteOnce
-          cacheMountPath: /app/cache
           model:
             persistence:
               size: 2Gi
               accessModes:
                 - ReadWriteOnce
-          modelMountPath: /app/models
           service:
             type: ClusterIP
             port: $STARCODER_SVC_PORT
@@ -276,7 +255,7 @@ jobs:
           tolerations: []
           affinity: {}
           EOF
-          helm install $STARCODER_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
+          helm install $STARCODER_HELM_RELEASE_NAME -f values.yaml --namespace $HELM_NAMESPACE ./charts/ialacol
 
           echo "Wait for the pod to be ready"
           sleep 20

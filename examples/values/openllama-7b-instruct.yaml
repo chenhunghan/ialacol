@@ -6,20 +6,12 @@ deployment:
     DEFAULT_MODEL_FILE: open-llama-7B-open-instruct.ggmlv3.q4_K_M.bin
 resources:
   {}
-cache:
-  persistence:
-    size: 10Gi
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: ~
-cacheMountPath: /app/cache
 model:
   persistence:
     size: 15Gi
     accessModes:
       - ReadWriteOnce
     storageClassName: ~
-modelMountPath: /app/models
 service:
   type: ClusterIP
   port: 8000

@@ -21,8 +21,6 @@ deployments:
         deployment:
           image: python:3.11-slim
           command: ["sleep", "999999"]
-          # the path to mount the cache volume on the container
-          cachePath: /app/cache
         tolerations:
           - key: "ai"
             operator: "Exists"
@@ -36,13 +34,6 @@ deployments:
                   operator: In
                   values:
                   - "true"
-        # cache for artifacts downloaded like embedding models
-        cacheVolume:
-          pvc:
-            storageClassName: "gp2-unencrypted"
-            size: 15Gi
-            accessModes:
-            - ReadWriteOnce
 dev:
   ialacol:
     labelSelector:
