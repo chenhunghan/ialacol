@@ -7,12 +7,6 @@ deployment:
     GPU_LAYERS: 40
 resources:
   {}
-cache:
-  persistence:
-    size: 20Gi
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: ~
 model:
   persistence:
     size: 20Gi

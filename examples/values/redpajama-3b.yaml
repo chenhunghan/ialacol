@@ -6,12 +6,6 @@ deployment:
     DEFAULT_MODEL_FILE: RedPajama-INCITE-Base-3B-v1-q5_1-ggjt.bin
 resources:
   {}
-cache:
-  persistence:
-    size: 5Gi
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: ~
 model:
   persistence:
     size: 5Gi

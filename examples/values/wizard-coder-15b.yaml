@@ -6,12 +6,6 @@ deployment:
     DEFAULT_MODEL_FILE: WizardCoder-15B-1.0.ggmlv3.q4_1.bin
 resources:
   {}
-cache:
-  persistence:
-    size: 20Gi
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: ~
 model:
   persistence:
     size: 25Gi

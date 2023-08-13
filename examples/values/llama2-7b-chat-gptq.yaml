@@ -7,12 +7,6 @@ deployment:
     MODEL_TYPE: "gptq"
 resources:
   {}
-cache:
-  persistence:
-    size: 5Gi
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: ~
 model:
   persistence:
     size: 5Gi

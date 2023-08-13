@@ -6,12 +6,6 @@ deployment:
     DEFAULT_MODEL_FILE: llama-2-13b-chat.ggmlv3.q4_0.bin
 resources:
   {}
-cache:
-  persistence:
-    size: 15Gi
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: ~
 model:
   persistence:
     size: 20Gi

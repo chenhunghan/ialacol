@@ -81,11 +81,6 @@ jobs:
               TOP_K: 0
           resources:
             {}
-          cache:
-            persistence:
-              size: 0.5Gi
-              accessModes:
-                - ReadWriteOnce
           model:
             persistence:
               size: 2Gi
@@ -178,11 +173,6 @@ jobs:
               REPETITION_PENALTY: 1.176
           resources:
             {}
-          cache:
-            persistence:
-              size: 0.5Gi
-              accessModes:
-                - ReadWriteOnce
           model:
             persistence:
               size: 0.5Gi
@@ -252,11 +242,6 @@ jobs:
               REPETITION_PENALTY: 1.176
           resources:
             {}
-          cache:
-            persistence:
-              size: 0.5Gi
-              accessModes:
-                - ReadWriteOnce
           model:
             persistence:
               size: 2Gi

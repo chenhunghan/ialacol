@@ -6,12 +6,6 @@ deployment:
     DEFAULT_MODEL_FILE: open-llama-13b-open-instruct.ggmlv3.q4_K_M.bin
 resources:
   {}
-cache:
-  persistence:
-    size: 15Gi
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: ~
 model:
   persistence:
     size: 20Gi

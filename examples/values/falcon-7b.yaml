@@ -8,12 +8,6 @@ deployment:
     MODE_TYPE: falcon
 resources:
   {}
-cache:
-  persistence:
-    size: 10Gi
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: ~
 model:
   persistence:
     size: 15Gi

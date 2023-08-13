@@ -6,12 +6,6 @@ deployment:
     DEFAULT_MODEL_FILE: open_llama_7b-q4_0-ggjt.bin
 resources:
   {}
-cache:
-  persistence:
-    size: 15Gi
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: ~
 model:
   persistence:
     size: 20Gi

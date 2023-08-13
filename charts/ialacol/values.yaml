@@ -15,16 +15,7 @@ resources:
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
-
-cache:
-  persistence:
-    size: 10Gi
-    accessModes:
-      - ReadWriteOnce
-    # Optional. e.g. "gp2-unencrypted"
-    storageClassName: ~
-
-model:
+model: # The volume where we store the models and downloaded file cache
   persistence:
     size: 24Gi
     accessModes:
