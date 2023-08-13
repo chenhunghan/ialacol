@@ -202,8 +202,8 @@ jobs:
           EOF
           helm install $GPT_NEOX_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
 
-          echo "Wait for the pod to be ready"
-          sleep 20
+          echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
+          sleep 40
       - if: always()
         run: |
           kubectl get pods -n $HELM_NAMESPACE
