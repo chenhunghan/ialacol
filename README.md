@@ -73,7 +73,10 @@ curl -X POST \
 Alternatively, using OpenAI's client library (see more examples in the `examples/openai` folder).
 
 ```sh
-openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api chat_completions.create -m llama-2-7b-chat.ggmlv3.q4_0.bin -g user "Hello world!"
+openai -k "sk-fake" \
+     -b http://localhost:8000/v1 -vvvvv \
+     api chat_completions.create -m llama-2-7b-chat.ggmlv3.q4_0.bin \
+     -g user "Hello world!"
 ```
 
 ### Run in Container
@@ -83,13 +86,10 @@ openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api chat_completions.crea
 There is a [image](https://github.com/chenhunghan/ialacol/pkgs/container/ialacol) hosted on ghcr.io (alternatively [CUDA11](https://github.com/chenhunghan/ialacol/pkgs/container/ialacol-cuda11),[CUDA12](https://github.com/chenhunghan/ialacol/pkgs/container/ialacol-cuda12),[METAL](https://github.com/chenhunghan/ialacol/pkgs/container/ialacol-metal),[GPTQ](https://github.com/chenhunghan/ialacol/pkgs/container/ialacol-gptq) variants).
 
 ```sh
-export DEFAULT_MODEL_HG_REPO_ID="TheBloke/Llama-2-7B-Chat-GGML"
-export DEFAULT_MODEL_FILE="llama-2-7b-chat.ggmlv3.q4_0.bin"
-export IMAGE="ghcr.io/chenhunghan/ialacol:latest"
 docker run --rm -it -p 8000:8000 \
-     -e DEFAULT_MODEL_HG_REPO_ID=$DEFAULT_MODEL_HG_REPO_ID \
-     -e DEFAULT_MODEL_FILE=$DEFAULT_MODEL_FILE \
-     $IMAGE
+     -e DEFAULT_MODEL_HG_REPO_ID="TheBloke/Llama-2-7B-Chat-GGML" \
+     -e DEFAULT_MODEL_FILE="llama-2-7b-chat.ggmlv3.q4_0.bin" \
+     ghcr.io/chenhunghan/ialacol:latest
 ```
 
 #### From Source
@@ -107,7 +107,9 @@ Run container
 ```sh
 export DEFAULT_MODEL_HG_REPO_ID="rustformers/pythia-ggml"
 export DEFAULT_MODEL_FILE="pythia-70m-q4_0.bin"
-docker run --rm -it -p 8000:8000 -e DEFAULT_MODEL_HG_REPO_ID=$DEFAULT_MODEL_HG_REPO_ID -e DEFAULT_MODEL_FILE=$DEFAULT_MODEL_FILE ialacol
+docker run --rm -it -p 8000:8000 \
+     -e DEFAULT_MODEL_HG_REPO_ID=$DEFAULT_MODEL_HG_REPO_ID \
+     -e DEFAULT_MODEL_FILE=$DEFAULT_MODEL_FILE ialacol
 ```
 
 ## GPU Acceleration
