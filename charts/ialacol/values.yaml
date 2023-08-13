@@ -15,6 +15,7 @@ resources:
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
+
 model: # The volume where we store the models and downloaded file cache
   persistence:
     size: 24Gi
