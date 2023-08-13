@@ -15,11 +15,16 @@ env:
   LLAMA_MODEL_HG_REPO_ID: TheBloke/orca_mini_3B-GGML
   LLAMA_MODEL_FILE: orca-mini-3b.ggmlv3.q4_0.bin
   LLAMA_SVC_PORT: 8000
+  # for testing gpt-neox base models
+  GPT_NEOX_HELM_RELEASE_NAME: stablecode-instruct-alpha-3b
+  GPT_NEOX_MODEL_HG_REPO_ID: TheBloke/stablecode-instruct-alpha-3b-GGML
+  GPT_NEOX_MODEL_FILE: stablecode-instruct-alpha-3b.ggmlv1.q4_0.bin
+  GPT_NEOX_SVC_PORT: 8001
   # for testing starcoder base models
   STARCODER_HELM_RELEASE_NAME: tiny-starcoder-py
   STARCODER_MODEL_HG_REPO_ID: mike-ravkine/tiny_starcoder_py-GGML
   STARCODER_MODEL_FILE: tiny_starcoder_py-q8_0.bin
-  STARCODER_SVC_PORT: 8001
+  STARCODER_SVC_PORT: 8002
 
 jobs:
   build-image:
@@ -140,6 +145,82 @@ jobs:
       - if: always()
         run: |
           kubectl logs --tail=20 --selector app.kubernetes.io/name=$LLAMA_HELM_RELEASE_NAME -n $HELM_NAMESPACE
+  gpt-neox-smoke-test:
+    runs-on: ubuntu-latest
+    needs: build-image
+    steps:  
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.7.0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install OpenAI CLI
+        run: |
+          pip install --upgrade openai --quiet
+      - name: Install ialacol with gpt-neox based model and wait for pods to be ready
+        run: |
+          helm repo add ialacol https://chenhunghan.github.io/ialacol
+          helm repo update
+
+          cat > values.yaml <<EOF
+          replicas: 1
+          deployment:
+            image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            env:
+              DEFAULT_MODEL_HG_REPO_ID: $GPT_NEOX_MODEL_HG_REPO_ID
+              DEFAULT_MODEL_FILE: $GPT_NEOX_MODEL_FILE
+              LOGGING_LEVEL: $LOGGING_LEVEL
+              TOP_K: 40
+              REPETITION_PENALTY: 1.176
+          resources:
+            {}
+          cache:
+            persistence:
+              size: 0.5Gi
+              accessModes:
+                - ReadWriteOnce
+          cacheMountPath: /app/cache
+          model:
+            persistence:
+              size: 0.5Gi
+              accessModes:
+                - ReadWriteOnce
+          modelMountPath: /app/models
+          service:
+            type: ClusterIP
+            port: $GPT_NEOX_SVC_PORT
+            annotations: {}
+          nodeSelector: {}
+          tolerations: []
+          affinity: {}
+          EOF
+          helm install $GPT_NEOX_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
+
+          echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
+          sleep 40
+      - if: always()
+        run: |
+          kubectl get pods -n $HELM_NAMESPACE
+      - if: always()
+        run: |
+          kubectl logs --tail=200 --selector app.kubernetes.io/name=$GPT_NEOX_HELM_RELEASE_NAME -n $HELM_NAMESPACE
+      - name: Port forward to the gpt-neox model service
+        run: |
+          kubectl port-forward svc/$GPT_NEOX_HELM_RELEASE_NAME $GPT_NEOX_SVC_PORT:$GPT_NEOX_SVC_PORT &
+          echo "Wait for port-forward to be ready"
+          sleep 5
+      - name: Check model response
+        run: |
+          openai -k "sk-fake" -b http://localhost:$GPT_NEOX_SVC_PORT/v1 -vvvvv api completions.create -m $GPT_NEOX_MODEL_FILE -p "A function adding 1 to 1 in Python."
+      - if: always()
+        run: |
+          kubectl logs --tail=20 --selector app.kubernetes.io/name=$GPT_NEOX_HELM_RELEASE_NAME -n $HELM_NAMESPACE
   starcoder-smoke-test:
     runs-on: ubuntu-latest
     needs: build-image
@@ -183,7 +264,7 @@ jobs:
           cacheMountPath: /app/cache
           model:
             persistence:
-              size: 0.5Gi
+              size: 2Gi
               accessModes:
                 - ReadWriteOnce
           modelMountPath: /app/models
