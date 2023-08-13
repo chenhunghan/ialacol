@@ -6,7 +6,8 @@ on:
     - main
 
 env:
-  REGISTRY: ghcr.io
+  REGISTRY: quay.io
+  REPO_ORG_NAME: ialacol
   IMAGE_NAME: ialacol-smoke-test
   HELM_NAMESPACE: default
   LOGGING_LEVEL: DEBUG
@@ -29,9 +30,6 @@ env:
 jobs:
   build-image:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -42,8 +40,8 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.QUAY_ROBOT_USERNAME }}
+          password: ${{ secrets.QUAY_ROBOT_PASSWORD }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -52,7 +50,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.REPO_ORG_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
   llama-smoke-test:
     runs-on: ubuntu-latest
     needs: build-image
@@ -75,7 +73,7 @@ jobs:
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
-            image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            image: ${{ env.REGISTRY }}/${{ env.REPO_ORG_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             env:
               DEFAULT_MODEL_HG_REPO_ID: $LLAMA_MODEL_HG_REPO_ID
               DEFAULT_MODEL_FILE: $LLAMA_MODEL_FILE
@@ -165,7 +163,7 @@ jobs:
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
-            image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            image: ${{ env.REGISTRY }}/${{ env.REPO_ORG_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             env:
               DEFAULT_MODEL_HG_REPO_ID: $GPT_NEOX_MODEL_HG_REPO_ID
               DEFAULT_MODEL_FILE: $GPT_NEOX_MODEL_FILE
@@ -233,7 +231,7 @@ jobs:
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
-            image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            image: ${{ env.REGISTRY }}/${{ env.REPO_ORG_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             env:
               DEFAULT_MODEL_HG_REPO_ID: $STARCODER_MODEL_HG_REPO_ID
               DEFAULT_MODEL_FILE: $STARCODER_MODEL_FILE
