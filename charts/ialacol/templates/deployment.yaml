@@ -62,6 +62,7 @@ spec:
           volumeMounts:
           - mountPath: /app/models
             name: model
+      volumes:
       - name: model
         persistentVolumeClaim:
           claimName: {{ .Release.Name }}-model
