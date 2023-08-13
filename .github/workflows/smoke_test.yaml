@@ -67,9 +67,6 @@ jobs:
           
       - name: Install ialacol with LLaMa based model and wait for pods to be ready
         run: |
-          helm repo add ialacol https://chenhunghan.github.io/ialacol
-          helm repo update
-
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
@@ -94,7 +91,7 @@ jobs:
           tolerations: []
           affinity: {}
           EOF
-          helm install $LLAMA_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
+          helm install $LLAMA_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE ./charts/ialacol
 
           echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
           sleep 40
@@ -158,9 +155,6 @@ jobs:
           pip install --upgrade openai --quiet
       - name: Install ialacol with gpt-neox based model and wait for pods to be ready
         run: |
-          helm repo add ialacol https://chenhunghan.github.io/ialacol
-          helm repo update
-
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
@@ -186,7 +180,7 @@ jobs:
           tolerations: []
           affinity: {}
           EOF
-          helm install $GPT_NEOX_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
+          helm install $GPT_NEOX_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE ./charts/ialacol
 
           echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
           sleep 40
@@ -227,9 +221,6 @@ jobs:
           pip install --upgrade openai --quiet
       - name: Install ialacol with starcoder based model and wait for pods to be ready
         run: |
-          helm repo add ialacol https://chenhunghan.github.io/ialacol
-          helm repo update
-
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
@@ -255,7 +246,7 @@ jobs:
           tolerations: []
           affinity: {}
           EOF
-          helm install $STARCODER_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE
+          helm install $STARCODER_HELM_RELEASE_NAME ialacol/ialacol -f values.yaml --namespace $HELM_NAMESPACE ./charts/ialacol
 
           echo "Wait for the pod to be ready"
           sleep 20
