@@ -7,11 +7,6 @@ deployment:
     # DEFAULT_MODEL_HG_REPO_ID: TheBloke/Llama-2-7B-Chat-GGML
     # DEFAULT_MODEL_FILE: llama-2-7b-chat.ggmlv3.q4_0.bin
     # LOGGING_LEVEL: DEBUG
-    # MODELS_FOLDER: models
-    # CACHE_FOLDER: cache
-    # THREADS: 8
-    # BATCH_SIZE: 8
-    # CONTEXT_LENGTH: 1024
 resources:
   {}
   # limits:
