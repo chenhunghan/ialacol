@@ -86,13 +86,23 @@ To enable GPU/CUDA acceleration, you need to use the container image built for G
 - `deployment.image` = `ghcr.io/chenhunghan/ialacol-cuda12:latest`
 - `deployment.env.GPU_LAYERS` is the layer to off loading to GPU.
 
-For example
+Only `llama`, `falcon`, `mpt` and `gpt_bigcode`(StarCoder/StarChat) support CUDA.
+
+#### Llama with CUDA12
 
 ```sh
-helm install llama2-7b-chat-cuda11 ialacol/ialacol -f examples/values/llama2-7b-chat-cuda11.yaml
+helm install llama2-7b-chat-cuda12 ialacol/ialacol -f examples/values/llama2-7b-chat-cuda12.yaml
 ```
 
-Deploys llama2 7b model with 40 layers offloadind to GPU. The inference is accelerated by CUDA 11.
+Deploys llama2 7b model with 40 layers offloadind to GPU. The inference is accelerated by CUDA 12.
+
+#### StarCoderPlus with CUDA12
+
+```sh
+helm install starcoderplus-guanaco-cuda12 ialacol/ialacol -f examples/values/starcoderplus-guanaco-cuda12.yaml
+```
+
+Deploys [Starcoderplus-Guanaco-GPT4-15B-V1.0 model](https://huggingface.co/LoupGarou/Starcoderplus-Guanaco-GPT4-15B-V1.0) with 40 layers offloadind to GPU. The inference is accelerated by CUDA 12.
 
 ### CUDA Driver Issues
 
