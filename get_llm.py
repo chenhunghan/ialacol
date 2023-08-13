@@ -25,7 +25,7 @@ async def get_llm(
         or "WizardCoder" in body.model
         or "minotaur-15" in body.model
     ):
-        ctransformer_model_type = "starcoder"
+        ctransformer_model_type = "gpt_bigcode"
     if "llama" in body.model:
         ctransformer_model_type = "llama"
     if "mpt" in body.model:
