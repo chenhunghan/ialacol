@@ -31,8 +31,6 @@ model:
       - ReadWriteOnce
     # Optional. e.g. "gp2-unencrypted"
     storageClassName: ~
-# the path to mount the model volume on the container
-modelMountPath: /app/models
 
 service:
   type: ClusterIP

@@ -66,7 +66,7 @@ spec:
           volumeMounts:
           - mountPath: /app/cache
             name: cache
-          - mountPath: {{ .Values.modelMountPath }}
+          - mountPath: /app/models
             name: model
       volumes:
       - name: cache
