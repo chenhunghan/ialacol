@@ -64,7 +64,7 @@ spec:
           - name: MODE_TYPE
             value: {{ (.Values.deployment.env).MODE_TYPE | quote }}
           volumeMounts:
-          - mountPath: {{ .Values.cacheMountPath }}
+          - mountPath: /app/cache
             name: cache
           - mountPath: {{ .Values.modelMountPath }}
             name: model

@@ -23,8 +23,6 @@ cache:
       - ReadWriteOnce
     # Optional. e.g. "gp2-unencrypted"
     storageClassName: ~
-# the path to mount the cache volume on the container
-cacheMountPath: /app/cache
 
 model:
   persistence:

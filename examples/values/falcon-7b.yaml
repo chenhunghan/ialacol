@@ -14,7 +14,6 @@ cache:
     accessModes:
       - ReadWriteOnce
     storageClassName: ~
-cacheMountPath: /app/cache
 model:
   persistence:
     size: 15Gi

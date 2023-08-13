@@ -86,7 +86,6 @@ jobs:
               size: 0.5Gi
               accessModes:
                 - ReadWriteOnce
-          cacheMountPath: /app/cache
           model:
             persistence:
               size: 2Gi
@@ -185,7 +184,6 @@ jobs:
               size: 0.5Gi
               accessModes:
                 - ReadWriteOnce
-          cacheMountPath: /app/cache
           model:
             persistence:
               size: 0.5Gi
@@ -261,7 +259,6 @@ jobs:
               size: 0.5Gi
               accessModes:
                 - ReadWriteOnce
-          cacheMountPath: /app/cache
           model:
             persistence:
               size: 2Gi
