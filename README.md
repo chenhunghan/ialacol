@@ -41,7 +41,11 @@ And all LLMs supported by [ctransformers](https://github.com/marella/ctransforme
 
 ## Quick Start
 
-To quickly get started with ialacol, follow the steps below:
+### Kubernetes
+
+`ialacol` offer first class citizen support for Kubernetes, which means you can automate/configure everything compare to runing without.
+
+To quickly get started with ialacol on Kubernetes, follow the steps below:
 
 ```sh
 helm repo add ialacol https://chenhunghan.github.io/ialacol
@@ -70,6 +74,41 @@ Alternatively, using OpenAI's client library (see more examples in the `examples
 
 ```sh
 openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api chat_completions.create -m llama-2-7b-chat.ggmlv3.q4_0.bin -g user "Hello world!"
+```
+
+### Run in Container
+
+#### Image from Github Registry
+
+There is a [image](https://github.com/chenhunghan/ialacol/pkgs/container/ialacol) hosted on ghcr.io (alternatively [CUDA11](https://github.com/chenhunghan/ialacol/pkgs/container/ialacol-cuda11),[CUDA12](https://github.com/chenhunghan/ialacol/pkgs/container/ialacol-cuda12),[METAL](https://github.com/chenhunghan/ialacol/pkgs/container/ialacol-metal),[GPTQ](https://github.com/chenhunghan/ialacol/pkgs/container/ialacol-gptq) variants).
+
+```sh
+export DEFAULT_MODEL_HG_REPO_ID="TheBloke/Llama-2-7B-Chat-GGML"
+export DEFAULT_MODEL_FILE="llama-2-7b-chat.ggmlv3.q4_0.bin"
+# Metal ghcr.io/chenhunghan/ialacol-metal:latest
+# CUDA11 ghcr.io/chenhunghan/ialacol-cuda11:latest 
+# CUDA12 ghcr.io/chenhunghan/ialacol-cuda12:latest
+# Metal ghcr.io/chenhunghan/ialacol-metal:latest
+export IMAGE="ghcr.io/chenhunghan/ialacol:latest", 
+docker run --rm -it -p 8000:8000 -e DEFAULT_MODEL_HG_REPO_ID=$DEFAULT_MODEL_HG_REPO_ID -e DEFAULT_MODEL_FILE=$DEFAULT_MODEL_FILE 
+```
+
+#### From Source
+
+For developers/contributors
+
+Build image
+
+```sh
+docker build --file ./Dockerfile -t ialacol .
+```
+
+Run container
+
+```sh
+export DEFAULT_MODEL_HG_REPO_ID="rustformers/pythia-ggml"
+export DEFAULT_MODEL_FILE="pythia-70m-q4_0.bin"
+docker run --rm -it -p 8000:8000 -e DEFAULT_MODEL_HG_REPO_ID=$DEFAULT_MODEL_HG_REPO_ID -e DEFAULT_MODEL_FILE=$DEFAULT_MODEL_FILE ialacol
 ```
 
 ## GPU Acceleration

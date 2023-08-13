@@ -41,6 +41,9 @@ async def get_llm(
     # matching https://huggingface.co/stabilityai/stablecode-completion-alpha-3b
     if "stablecode" in body.model:
         ctransformer_model_type = "gpt_neox"
+    # matching https://huggingface.co/EleutherAI/pythia-70m
+    if "pythia" in body.model:
+        ctransformer_model_type = "gpt_neox"
     config = get_config(body)
     MODE_TYPE = get_env("MODE_TYPE", "")
     if len(MODE_TYPE) > 0:
