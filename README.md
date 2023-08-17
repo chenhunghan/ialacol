@@ -105,8 +105,8 @@ docker build --file ./Dockerfile -t ialacol .
 Run container
 
 ```sh
-export DEFAULT_MODEL_HG_REPO_ID="rustformers/pythia-ggml"
-export DEFAULT_MODEL_FILE="pythia-70m-q4_0.bin"
+export DEFAULT_MODEL_HG_REPO_ID="TheBloke/orca_mini_3B-GGML"
+export DEFAULT_MODEL_FILE="orca-mini-3b.ggmlv3.q4_0.bin"
 docker run --rm -it -p 8000:8000 \
      -e DEFAULT_MODEL_HG_REPO_ID=$DEFAULT_MODEL_HG_REPO_ID \
      -e DEFAULT_MODEL_FILE=$DEFAULT_MODEL_FILE ialacol
