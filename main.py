@@ -3,7 +3,6 @@
 This module contains the main FastAPI application.
 """
 import os
-import logging
 
 from typing import (
     Awaitable,
@@ -22,20 +21,17 @@ from streamers import chat_completions_streamer, completions_streamer
 from model_generate import chat_model_generate, model_generate
 from get_env import get_env
 from get_llm import get_llm
+from log import log
 
 DEFAULT_MODEL_HG_REPO_ID = get_env(
     "DEFAULT_MODEL_HG_REPO_ID", "TheBloke/Llama-2-7B-Chat-GGML"
 )
 DEFAULT_MODEL_FILE = get_env("DEFAULT_MODEL_FILE", "llama-2-7b-chat.ggmlv3.q4_0.bin")
 DOWNLOAD_DEFAULT_MODEL = get_env("DOWNLOAD_DEFAULT_MODEL", "True") == "True"
-LOGGING_LEVEL = get_env("LOGGING_LEVEL", "INFO")
-
-log = logging.getLogger("uvicorn")
 
 log.info("DEFAULT_MODEL_HG_REPO_ID: %s", DEFAULT_MODEL_HG_REPO_ID)
 log.info("DEFAULT_MODEL_FILE: %s", DEFAULT_MODEL_FILE)
 log.info("DOWNLOAD_DEFAULT_MODEL: %s", DOWNLOAD_DEFAULT_MODEL)
-log.info("LOGGING_LEVEL: %s", LOGGING_LEVEL)
 
 DOWNLOADING_MODEL = False
 
@@ -63,12 +59,6 @@ async def startup_event():
     Starts up the server, setting log level, downloading the default model if necessary.
     """
     log.info("Starting up...")
-    try:
-        log.setLevel(LOGGING_LEVEL)
-        log.info("Log level set to %s", LOGGING_LEVEL)
-    except ValueError:
-        log.setLevel("INFO")
-        log.info("Unknown Log level %s, fallback to INFO", LOGGING_LEVEL)
     if DOWNLOAD_DEFAULT_MODEL is True:
         if DEFAULT_MODEL_FILE and DEFAULT_MODEL_HG_REPO_ID:
             set_downloading_model(True)
@@ -84,6 +74,7 @@ async def startup_event():
                     cache_dir="models/.cache",
                     local_dir="models",
                     filename=DEFAULT_MODEL_FILE,
+                    resume_download=True,
                 )
             except Exception as exception:
                 log.error("Error downloading model: %s", exception)
