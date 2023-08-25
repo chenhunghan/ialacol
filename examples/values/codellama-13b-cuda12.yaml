@@ -1,0 +1,29 @@
+replicas: 1
+deployment:
+  image: ghcr.io/chenhunghan/ialacol-cuda12:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: TheBloke/CodeLlama-13B-GGML
+    DEFAULT_MODEL_FILE: codellama-13b.ggmlv3.Q4_0.bin
+    GPU_LAYERS: 40
+    TOP_K: 40
+    TOP_P: 0.1
+    TEMPERATURE: 0.1
+    THREADS: 1
+    MAX_TOKENS: 1024
+    REPETITION_PENALTY: 1.8
+    LAST_N_TOKENS: 128
+resources:
+  {}
+model:
+  persistence:
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ~
+service:
+  type: ClusterIP
+  port: 8000
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
