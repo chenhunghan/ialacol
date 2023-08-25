@@ -29,8 +29,6 @@ spec:
             value: {{ (.Values.deployment.env).DEFAULT_MODEL_HG_REPO_ID | quote }}
           - name: DEFAULT_MODEL_FILE
             value: {{ (.Values.deployment.env).DEFAULT_MODEL_FILE | quote }}
-          - name: DOWNLOAD_DEFAULT_MODEL
-            value: {{ (.Values.deployment.env).DOWNLOAD_DEFAULT_MODEL | quote }}
           - name: LOGGING_LEVEL
             value: {{ (.Values.deployment.env).LOGGING_LEVEL | quote }}
           - name: TOP_K
