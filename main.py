@@ -3,7 +3,6 @@
 This module contains the main FastAPI application.
 """
 import os
-import logging
 
 from typing import (
     Awaitable,
@@ -11,33 +10,30 @@ from typing import (
     Union,
     Annotated,
 )
-from fastapi import FastAPI, Depends, HTTPException, Body
+from fastapi import FastAPI, Depends, HTTPException, Body, Request
 from fastapi.responses import StreamingResponse
-from ctransformers import LLM
+from ctransformers import LLM, Config
 from huggingface_hub import hf_hub_download
+from get_config import get_config
+from get_model_type import get_model_type
 
 from request_body import ChatCompletionRequestBody, CompletionRequestBody
 from response_body import ChatCompletionResponseBody, CompletionResponseBody
 from streamers import chat_completions_streamer, completions_streamer
 from model_generate import chat_model_generate, model_generate
 from get_env import get_env
-from get_llm import get_llm
+from log import log
 
 DEFAULT_MODEL_HG_REPO_ID = get_env(
     "DEFAULT_MODEL_HG_REPO_ID", "TheBloke/Llama-2-7B-Chat-GGML"
 )
 DEFAULT_MODEL_FILE = get_env("DEFAULT_MODEL_FILE", "llama-2-7b-chat.ggmlv3.q4_0.bin")
-DOWNLOAD_DEFAULT_MODEL = get_env("DOWNLOAD_DEFAULT_MODEL", "True") == "True"
-LOGGING_LEVEL = get_env("LOGGING_LEVEL", "INFO")
-
-log = logging.getLogger("uvicorn")
 
 log.info("DEFAULT_MODEL_HG_REPO_ID: %s", DEFAULT_MODEL_HG_REPO_ID)
 log.info("DEFAULT_MODEL_FILE: %s", DEFAULT_MODEL_FILE)
-log.info("DOWNLOAD_DEFAULT_MODEL: %s", DOWNLOAD_DEFAULT_MODEL)
-log.info("LOGGING_LEVEL: %s", LOGGING_LEVEL)
 
 DOWNLOADING_MODEL = False
+LOADING_MODEL = False
 
 
 def set_downloading_model(boolean: bool):
@@ -47,7 +43,16 @@ def set_downloading_model(boolean: bool):
         boolean (bool): the boolean value to set DOWNLOADING_MODEL to
     """
     globals()["DOWNLOADING_MODEL"] = boolean
-    log.info("DOWNLOADING_MODEL set to %s", globals()["DOWNLOADING_MODEL"])
+    log.debug("DOWNLOADING_MODEL set to %s", globals()["DOWNLOADING_MODEL"])
+    
+def set_loading_model(boolean: bool):
+    """_summary_
+
+    Args:
+        boolean (bool): the boolean value to set LOADING_MODEL to
+    """
+    globals()["LOADING_MODEL"] = boolean
+    log.debug("LOADING_MODEL set to %s", globals()["LOADING_MODEL"])
 
 
 Sender = Callable[[Union[str, bytes]], Awaitable[None]]
@@ -63,32 +68,50 @@ async def startup_event():
     Starts up the server, setting log level, downloading the default model if necessary.
     """
     log.info("Starting up...")
-    try:
-        log.setLevel(LOGGING_LEVEL)
-        log.info("Log level set to %s", LOGGING_LEVEL)
-    except ValueError:
-        log.setLevel("INFO")
-        log.info("Unknown Log level %s, fallback to INFO", LOGGING_LEVEL)
-    if DOWNLOAD_DEFAULT_MODEL is True:
-        if DEFAULT_MODEL_FILE and DEFAULT_MODEL_HG_REPO_ID:
-            set_downloading_model(True)
-            log.info(
-                "Downloading model... %s/%s to %s/models",
-                DEFAULT_MODEL_HG_REPO_ID,
-                DEFAULT_MODEL_FILE,
-                os.getcwd(),
+    if DEFAULT_MODEL_FILE and DEFAULT_MODEL_HG_REPO_ID:
+        set_downloading_model(True)
+        log.info(
+            "Downloading model... %s/%s to %s/models",
+            DEFAULT_MODEL_HG_REPO_ID,
+            DEFAULT_MODEL_FILE,
+            os.getcwd(),
+        )
+        try:
+            hf_hub_download(
+                repo_id=DEFAULT_MODEL_HG_REPO_ID,
+                cache_dir="models/.cache",
+                local_dir="models",
+                filename=DEFAULT_MODEL_FILE,
+                resume_download=True,
             )
-            try:
-                hf_hub_download(
-                    repo_id=DEFAULT_MODEL_HG_REPO_ID,
-                    cache_dir="models/.cache",
-                    local_dir="models",
-                    filename=DEFAULT_MODEL_FILE,
-                )
-            except Exception as exception:
-                log.error("Error downloading model: %s", exception)
-            finally:
-                set_downloading_model(False)
+        except Exception as exception:
+            log.error("Error downloading model: %s", exception)
+        finally:
+            set_downloading_model(False)
+
+    # ggml only, follow ctransformers defaults
+    CONTEXT_LENGTH = int(get_env("CONTEXT_LENGTH", "-1"))
+    # the layers to offloading to the GPU
+    GPU_LAYERS = int(get_env("GPU_LAYERS", "0"))
+
+    log.debug("CONTEXT_LENGTH: %s", CONTEXT_LENGTH)
+    log.debug("GPU_LAYERS: %s", GPU_LAYERS)
+
+    config = Config(
+        context_length=CONTEXT_LENGTH,
+        gpu_layers=GPU_LAYERS,
+    )
+    model_type = get_model_type(DEFAULT_MODEL_FILE)
+    log.info("Creating llm singleton with model_type: %s for DEFAULT_MODEL_FILE %s", model_type, DEFAULT_MODEL_FILE)
+    set_loading_model(True)
+    llm = LLM(
+        model_path=f"{os.getcwd()}/models/{DEFAULT_MODEL_FILE}",
+        config=config,
+        model_type=model_type,
+    )
+    log.info("llm singleton created.")
+    app.state.llm = llm
+    set_loading_model(False)
 
 
 @app.get("/v1/models")
@@ -100,6 +123,8 @@ async def models():
     """
     if DOWNLOADING_MODEL is True:
         raise HTTPException(status_code=503, detail="Downloading model")
+    if LOADING_MODEL is True:
+        raise HTTPException(status_code=503, detail="Loading model in memory")
     return {
         "data": [
             {
@@ -116,7 +141,8 @@ async def models():
 @app.post("/v1/completions", response_model=CompletionResponseBody)
 async def completions(
     body: Annotated[CompletionRequestBody, Body()],
-    llm: Annotated[LLM, Depends(get_llm)],
+    config: Annotated[Config, Depends(get_config)],
+    request: Request,
 ):
     """_summary_
         Compatible with https://platform.openai.com/docs/api-reference/completions
@@ -142,29 +168,21 @@ async def completions(
     prompt = body.prompt
 
     model_name = body.model
+    llm = request.app.state.llm
     if body.stream is True:
         log.debug("Streaming response from %s", model_name)
         return StreamingResponse(
-            completions_streamer(
-                prompt,
-                model_name,
-                llm,
-                log,
-            ),
+            completions_streamer(prompt, model_name, llm, config),
             media_type="text/event-stream",
         )
-    return model_generate(
-        prompt,
-        model_name,
-        llm,
-        log,
-    )
+    return model_generate(prompt, model_name, llm, config)
 
 
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponseBody)
 async def chat_completions(
     body: Annotated[ChatCompletionRequestBody, Body()],
-    llm: Annotated[LLM, Depends(get_llm)],
+    config: Annotated[Config, Depends(get_config)],
+    request: Request,
 ):
     """_summary_
         Compatible with https://platform.openai.com/docs/api-reference/chat
@@ -251,20 +269,11 @@ async def chat_completions(
 
     prompt = f"{system_message_content}{assistant_message_content} {default_user_start}{user_message_content}{default_user_end} {default_assistant_start}"
     model_name = body.model
+    llm = request.app.state.llm
     if body.stream is True:
         log.debug("Streaming response from %s", model_name)
         return StreamingResponse(
-            chat_completions_streamer(
-                prompt,
-                model_name,
-                llm,
-                log,
-            ),
+            chat_completions_streamer(prompt, model_name, llm, config),
             media_type="text/event-stream",
         )
-    return chat_model_generate(
-        prompt,
-        model_name,
-        llm,
-        log,
-    )
+    return chat_model_generate(prompt, model_name, llm, config)
