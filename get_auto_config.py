@@ -1,18 +1,10 @@
-import logging
 from ctransformers import Config, AutoConfig
 
 from request_body import ChatCompletionRequestBody, CompletionRequestBody
 from get_env import get_env, get_env_or_none
 from get_default_thread import get_default_thread
 from get_model_type import get_model_type
-
-LOGGING_LEVEL = get_env("LOGGING_LEVEL", "INFO")
-
-log = logging.getLogger("uvicorn")
-try:
-    log.setLevel(LOGGING_LEVEL)
-except ValueError:
-    log.setLevel("INFO")
+from log import log
 
 THREADS = int(get_env("THREADS", str(get_default_thread())))
 
@@ -59,7 +51,9 @@ def get_auto_config(
     top_k = body.top_k if body.top_k else TOP_K
     top_p = body.top_p if body.top_p else TOP_P
     temperature = body.temperature if body.temperature else TEMPERATURE
-    repetition_penalty = body.repetition_penalty if body.repetition_penalty else REPETITION_PENALTY
+    repetition_penalty = (
+        body.repetition_penalty if body.repetition_penalty else REPETITION_PENALTY
+    )
     last_n_tokens = body.last_n_tokens if body.last_n_tokens else LAST_N_TOKENS
     seed = body.seed if body.seed else SEED
     batch_size = body.batch_size if body.batch_size else BATCH_SIZE
@@ -77,10 +71,10 @@ def get_auto_config(
     log.info("threads: %s", threads)
     log.info("max_new_tokens: %s", max_new_tokens)
     log.info("stop: %s", stop)
-    
+
     log.info("CONTEXT_LENGTH: %s", CONTEXT_LENGTH)
     log.info("GPU_LAYERS: %s", GPU_LAYERS)
-    
+
     config = Config(
         top_k=top_k,
         top_p=top_p,
