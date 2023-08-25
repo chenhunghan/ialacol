@@ -1,24 +1,57 @@
 from time import time
 from logging import Logger
-from ctransformers import LLM
+from ctransformers import LLM, Config
 
+from log import log
 
 def model_generate(
     prompt: str,
     model_name: str,
     llm: LLM,
-    log: Logger,
+    config: Config,
 ):
     """_summary_
     returns the response body for /chat/completions
     """
     created = time()
 
+    top_k = config.top_k
+    log.debug("top_k: %s", top_k)
+    top_p = config.top_p
+    log.debug("top_p: %s", top_p)
+    temperature = config.temperature
+    log.debug("temperature: %s", temperature)
+    repetition_penalty = config.repetition_penalty
+    log.debug("repetition_penalty: %s", repetition_penalty)
+    last_n_tokens = config.last_n_tokens
+    log.debug("last_n_tokens: %s", last_n_tokens)
+    seed = config.seed
+    log.debug("seed: %s", seed)
+    batch_size = config.batch_size
+    log.debug("batch_size: %s", batch_size)
+    threads = config.threads
+    log.debug("threads: %s", threads)
+    max_new_tokens = config.max_new_tokens
+    log.debug("max_new_tokens: %s", max_new_tokens)
+    stop = config.stop
+    log.debug("stop: %s", stop)
     log.debug("prompt: %s", prompt)
 
     log.debug("Getting from ctransformer instance")
     result: str = llm(  # pyright: ignore [reportGeneralTypeIssues]
         prompt=prompt,
+        stream=False,
+        reset=True,
+        top_k=top_k,
+        top_p=top_p,
+        temperature=temperature,
+        repetition_penalty=repetition_penalty,
+        last_n_tokens=last_n_tokens,
+        seed=seed,
+        batch_size=batch_size,
+        threads=threads,
+        max_new_tokens=max_new_tokens,
+        stop=stop,
     )
     http_response = {
         "id": "id",
@@ -43,18 +76,51 @@ def chat_model_generate(
     prompt: str,
     model_name: str,
     llm: LLM,
-    log: Logger,
+    config: Config,
 ):
     """_summary_
     returns the response body for /chat/completions
     """
     created = time()
 
+    top_k = config.top_k
+    log.debug("top_k: %s", top_k)
+    top_p = config.top_p
+    log.debug("top_p: %s", top_p)
+    temperature = config.temperature
+    log.debug("temperature: %s", temperature)
+    repetition_penalty = config.repetition_penalty
+    log.debug("repetition_penalty: %s", repetition_penalty)
+    last_n_tokens = config.last_n_tokens
+    log.debug("last_n_tokens: %s", last_n_tokens)
+    seed = config.seed
+    log.debug("seed: %s", seed)
+    batch_size = config.batch_size
+    log.debug("batch_size: %s", batch_size)
+    threads = config.threads
+    log.debug("threads: %s", threads)
+    max_new_tokens = config.max_new_tokens
+    log.debug("max_new_tokens: %s", max_new_tokens)
+    stop = config.stop
+    log.debug("stop: %s", stop)
+    log.debug("prompt: %s", prompt)
     log.debug("prompt: %s", prompt)
 
     log.debug("Getting from ctransformer instance")
     result: str = llm(  # pyright: ignore [reportGeneralTypeIssues]
         prompt=prompt,
+        stream=False,
+        reset=True,
+        top_k=top_k,
+        top_p=top_p,
+        temperature=temperature,
+        repetition_penalty=repetition_penalty,
+        last_n_tokens=last_n_tokens,
+        seed=seed,
+        batch_size=batch_size,
+        threads=threads,
+        max_new_tokens=max_new_tokens,
+        stop=stop,
     )
     http_response = {
         "id": "id",

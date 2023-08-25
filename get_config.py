@@ -1,17 +1,16 @@
-from ctransformers import Config, AutoConfig
+from ctransformers import Config
 
 from request_body import ChatCompletionRequestBody, CompletionRequestBody
 from get_env import get_env, get_env_or_none
 from get_default_thread import get_default_thread
-from get_model_type import get_model_type
 from log import log
 
 THREADS = int(get_env("THREADS", str(get_default_thread())))
 
 
-def get_auto_config(
+def get_config(
     body: CompletionRequestBody | ChatCompletionRequestBody,
-) -> AutoConfig:
+) -> Config:
     # ggml only, follow ctransformers defaults
     TOP_K = int(get_env("TOP_K", "40"))
     # OpenAI API defaults https://platform.openai.com/docs/api-reference/chat/create#chat/create-top_p
@@ -30,10 +29,6 @@ def get_auto_config(
     MAX_TOKENS = int(get_env("MAX_TOKENS", "9999999"))
     # OpenAI API defaults https://platform.openai.com/docs/api-reference/chat/create#chat/create-stop
     STOP = get_env_or_none("STOP")
-    # ggml only, follow ctransformers defaults
-    CONTEXT_LENGTH = int(get_env("CONTEXT_LENGTH", "-1"))
-    # the layers to offloading to the GPU
-    GPU_LAYERS = int(get_env("GPU_LAYERS", "0"))
 
     log.debug("TOP_K: %s", TOP_K)
     log.debug("TOP_P: %s", TOP_P)
@@ -45,8 +40,6 @@ def get_auto_config(
     log.debug("THREADS: %s", THREADS)
     log.debug("MAX_TOKENS: %s", MAX_TOKENS)
     log.debug("STOP: %s", STOP)
-    log.debug("CONTEXT_LENGTH: %s", CONTEXT_LENGTH)
-    log.debug("GPU_LAYERS: %s", GPU_LAYERS)
 
     top_k = body.top_k if body.top_k else TOP_K
     top_p = body.top_p if body.top_p else TOP_P
@@ -61,20 +54,6 @@ def get_auto_config(
     max_new_tokens = body.max_tokens if body.max_tokens else MAX_TOKENS
     stop = body.stop if body.stop else STOP
 
-    log.info("top_k: %s", top_k)
-    log.info("top_p: %s", top_p)
-    log.info("temperature: %s", temperature)
-    log.info("repetition_penalty: %s", repetition_penalty)
-    log.info("last_n_tokens: %s", last_n_tokens)
-    log.info("seed: %s", seed)
-    log.info("batch_size: %s", batch_size)
-    log.info("threads: %s", threads)
-    log.info("max_new_tokens: %s", max_new_tokens)
-    log.info("stop: %s", stop)
-
-    log.info("CONTEXT_LENGTH: %s", CONTEXT_LENGTH)
-    log.info("GPU_LAYERS: %s", GPU_LAYERS)
-
     config = Config(
         top_k=top_k,
         top_p=top_p,
@@ -86,16 +65,6 @@ def get_auto_config(
         threads=threads,
         max_new_tokens=max_new_tokens,
         stop=stop,
-        context_length=CONTEXT_LENGTH,
-        gpu_layers=GPU_LAYERS,
     )
 
-    model_type = get_model_type(body)
-
-    log.info("model_type: %s", model_type)
-
-    auto_config = AutoConfig(
-        config=config,
-        model_type=model_type,
-    )
-    return auto_config
+    return config

@@ -12,15 +12,15 @@ from typing import (
 )
 from fastapi import FastAPI, Depends, HTTPException, Body
 from fastapi.responses import StreamingResponse
-from ctransformers import LLM
+from ctransformers import Config, AutoConfig, AutoModelForCausalLM
 from huggingface_hub import hf_hub_download
+from get_config import get_config
 
 from request_body import ChatCompletionRequestBody, CompletionRequestBody
 from response_body import ChatCompletionResponseBody, CompletionResponseBody
 from streamers import chat_completions_streamer, completions_streamer
 from model_generate import chat_model_generate, model_generate
 from get_env import get_env
-from get_llm import get_llm
 from log import log
 
 DEFAULT_MODEL_HG_REPO_ID = get_env(
@@ -81,6 +81,27 @@ async def startup_event():
             finally:
                 set_downloading_model(False)
 
+    # ggml only, follow ctransformers defaults
+    CONTEXT_LENGTH = int(get_env("CONTEXT_LENGTH", "-1"))
+    # the layers to offloading to the GPU
+    GPU_LAYERS = int(get_env("GPU_LAYERS", "0"))
+
+    log.debug("CONTEXT_LENGTH: %s", CONTEXT_LENGTH)
+    log.debug("GPU_LAYERS: %s", GPU_LAYERS)
+
+    config = Config(
+        context_length=CONTEXT_LENGTH,
+        gpu_layers=GPU_LAYERS,
+    )
+    log.info("Creating llm singleton...")
+    llm = AutoModelForCausalLM.from_pretrained(
+        model_path_or_repo_id=f"{os.getcwd()}/models/{DEFAULT_MODEL_FILE}",
+        local_files_only=True,
+        config=AutoConfig(config),
+    )
+    log.info("llm singleton created.")
+    app.state.llm = llm
+
 
 @app.get("/v1/models")
 async def models():
@@ -133,6 +154,7 @@ async def completions(
     prompt = body.prompt
 
     model_name = body.model
+    llm = app.state.llm
     if body.stream is True:
         log.debug("Streaming response from %s", model_name)
         return StreamingResponse(
@@ -140,6 +162,7 @@ async def completions(
                 prompt,
                 model_name,
                 llm,
+                config,
                 log,
             ),
             media_type="text/event-stream",
@@ -148,6 +171,7 @@ async def completions(
         prompt,
         model_name,
         llm,
+        config,
         log,
     )
 
@@ -155,7 +179,7 @@ async def completions(
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponseBody)
 async def chat_completions(
     body: Annotated[ChatCompletionRequestBody, Body()],
-    llm: Annotated[LLM, Depends(get_llm)],
+    config: Annotated[Config, Depends(get_config)],
 ):
     """_summary_
         Compatible with https://platform.openai.com/docs/api-reference/chat
@@ -242,6 +266,7 @@ async def chat_completions(
 
     prompt = f"{system_message_content}{assistant_message_content} {default_user_start}{user_message_content}{default_user_end} {default_assistant_start}"
     model_name = body.model
+    llm = app.state.llm
     if body.stream is True:
         log.debug("Streaming response from %s", model_name)
         return StreamingResponse(
@@ -249,6 +274,7 @@ async def chat_completions(
                 prompt,
                 model_name,
                 llm,
+                config,
                 log,
             ),
             media_type="text/event-stream",
@@ -257,5 +283,6 @@ async def chat_completions(
         prompt,
         model_name,
         llm,
+        config,
         log,
     )
