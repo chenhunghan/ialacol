@@ -3,7 +3,6 @@ import os
 from ctransformers import LLM, AutoModelForCausalLM
 from request_body import ChatCompletionRequestBody, CompletionRequestBody
 from get_auto_config import get_auto_config
-from get_env import get_env
 
 
 async def get_llm(
@@ -22,6 +21,7 @@ async def get_llm(
 
     llm = AutoModelForCausalLM.from_pretrained(
         model_path_or_repo_id=f"{os.getcwd()}/models/{body.model}",
+        local_files_only=True,
         config=auto_config,
     )
 
