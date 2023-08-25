@@ -1,8 +1,8 @@
 from time import time
-from logging import Logger
 from ctransformers import LLM, Config
 
 from log import log
+
 
 def model_generate(
     prompt: str,
