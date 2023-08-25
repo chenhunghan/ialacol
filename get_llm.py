@@ -1,9 +1,10 @@
 import os
 
-from ctransformers import LLM
+from ctransformers import LLM, AutoModelForCausalLM
 from request_body import ChatCompletionRequestBody, CompletionRequestBody
+from get_auto_config import get_auto_config
 from get_env import get_env
-from get_config import get_config
+
 
 async def get_llm(
     body: ChatCompletionRequestBody | CompletionRequestBody,
@@ -17,42 +18,11 @@ async def get_llm(
         _type_: _description_
     """
 
-    ctransformer_model_type = "llama"
-    # These are also in "starcoder" format
-    # https://huggingface.co/TheBloke/WizardCoder-15B-1.0-GGML
-    # https://huggingface.co/TheBloke/minotaur-15B-GGML
-    if (
-        "star" in body.model
-        or "starchat" in body.model
-        or "WizardCoder" in body.model
-        or "minotaur-15" in body.model
-    ):
-        ctransformer_model_type = "gpt_bigcode"
-    if "llama" in body.model:
-        ctransformer_model_type = "llama"
-    if "mpt" in body.model:
-        ctransformer_model_type = "mpt"
-    if "replit" in body.model:
-        ctransformer_model_type = "replit"
-    if "falcon" in body.model:
-        ctransformer_model_type = "falcon"
-    if "dolly" in body.model:
-        ctransformer_model_type = "dolly-v2"
-    if "stablelm" in body.model:
-        ctransformer_model_type = "gpt_neox"
-    # matching https://huggingface.co/stabilityai/stablecode-completion-alpha-3b
-    if "stablecode" in body.model:
-        ctransformer_model_type = "gpt_neox"
-    # matching https://huggingface.co/EleutherAI/pythia-70m
-    if "pythia" in body.model:
-        ctransformer_model_type = "gpt_neox"
-    config = get_config(body)
-    MODE_TYPE = get_env("MODE_TYPE", "")
-    if len(MODE_TYPE) > 0:
-        ctransformer_model_type = MODE_TYPE
+    auto_config = get_auto_config(body)
 
-    return LLM(
-        model_path=f"{os.getcwd()}/models/{body.model}",
-        model_type=ctransformer_model_type,
-        config=config,
+    llm = AutoModelForCausalLM.from_pretrained(
+        model_path_or_repo_id=f"{os.getcwd()}/models/{body.model}",
+        config=auto_config,
     )
+
+    return llm

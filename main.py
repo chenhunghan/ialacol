@@ -22,7 +22,6 @@ from streamers import chat_completions_streamer, completions_streamer
 from model_generate import chat_model_generate, model_generate
 from get_env import get_env
 from get_llm import get_llm
-from get_config import get_config
 
 DEFAULT_MODEL_HG_REPO_ID = get_env(
     "DEFAULT_MODEL_HG_REPO_ID", "TheBloke/Llama-2-7B-Chat-GGML"
@@ -77,7 +76,7 @@ async def startup_event():
                 "Downloading model... %s/%s to %s/models",
                 DEFAULT_MODEL_HG_REPO_ID,
                 DEFAULT_MODEL_FILE,
-                os.getcwd()
+                os.getcwd(),
             )
             try:
                 hf_hub_download(
@@ -141,7 +140,6 @@ async def completions(
             "n, logit_bias, user, presence_penalty and frequency_penalty are not supporte."
         )
     prompt = body.prompt
-    config = get_config(body)
 
     model_name = body.model
     if body.stream is True:
@@ -151,7 +149,6 @@ async def completions(
                 prompt,
                 model_name,
                 llm,
-                config,
                 log,
             ),
             media_type="text/event-stream",
@@ -160,7 +157,6 @@ async def completions(
         prompt,
         model_name,
         llm,
-        config,
         log,
     )
 
@@ -254,7 +250,6 @@ async def chat_completions(
     )
 
     prompt = f"{system_message_content}{assistant_message_content} {default_user_start}{user_message_content}{default_user_end} {default_assistant_start}"
-    config = get_config(body)
     model_name = body.model
     if body.stream is True:
         log.debug("Streaming response from %s", model_name)
@@ -263,7 +258,6 @@ async def chat_completions(
                 prompt,
                 model_name,
                 llm,
-                config,
                 log,
             ),
             media_type="text/event-stream",
@@ -272,6 +266,5 @@ async def chat_completions(
         prompt,
         model_name,
         llm,
-        config,
         log,
     )
