@@ -12,8 +12,8 @@ from typing import (
 )
 from fastapi import FastAPI, Depends, HTTPException, Body, Request
 from fastapi.responses import StreamingResponse
-from ctransformers import LLM, Config
-from huggingface_hub import hf_hub_download
+from ctransformers import LLM, AutoModelForCausalLM, Config
+from huggingface_hub import hf_hub_download, snapshot_download
 from get_config import get_config
 from get_model_type import get_model_type
 
@@ -70,22 +70,37 @@ async def startup_event():
     Starts up the server, setting log level, downloading the default model if necessary.
     """
     log.info("Starting up...")
-    if DEFAULT_MODEL_FILE and DEFAULT_MODEL_HG_REPO_ID:
+    model_type = get_model_type(DEFAULT_MODEL_FILE)
+    if DEFAULT_MODEL_HG_REPO_ID:
         set_downloading_model(True)
-        log.info(
-            "Downloading model... %s/%s to %s/models",
-            DEFAULT_MODEL_HG_REPO_ID,
-            DEFAULT_MODEL_FILE,
-            os.getcwd(),
-        )
+
         try:
-            hf_hub_download(
-                repo_id=DEFAULT_MODEL_HG_REPO_ID,
-                cache_dir="models/.cache",
-                local_dir="models",
-                filename=DEFAULT_MODEL_FILE,
-                resume_download=True,
-            )
+            if model_type == "gptq":
+                log.info(
+                    "Downloading repo %s to %s/models",
+                    DEFAULT_MODEL_HG_REPO_ID,
+                    os.getcwd(),
+                )
+                snapshot_download(
+                    repo_id=DEFAULT_MODEL_HG_REPO_ID,
+                    cache_dir="models/.cache",
+                    local_dir="models",
+                    resume_download=True,
+                )
+            elif DEFAULT_MODEL_FILE:
+                log.info(
+                    "Downloading model... %s/%s to %s/models",
+                    DEFAULT_MODEL_HG_REPO_ID,
+                    DEFAULT_MODEL_FILE,
+                    os.getcwd(),
+                )
+                hf_hub_download(
+                    repo_id=DEFAULT_MODEL_HG_REPO_ID,
+                    cache_dir="models/.cache",
+                    local_dir="models",
+                    filename=DEFAULT_MODEL_FILE,
+                    resume_download=True,
+                )
         except Exception as exception:
             log.error("Error downloading model: %s", exception)
         finally:
@@ -103,20 +118,29 @@ async def startup_event():
         context_length=CONTEXT_LENGTH,
         gpu_layers=GPU_LAYERS,
     )
-    model_type = get_model_type(DEFAULT_MODEL_FILE)
+
     log.info(
-        "Creating llm singleton with model_type: %s for DEFAULT_MODEL_FILE %s",
+        "Creating llm singleton with model_type: %s",
         model_type,
-        DEFAULT_MODEL_FILE,
     )
     set_loading_model(True)
-    llm = LLM(
-        model_path=f"{os.getcwd()}/models/{DEFAULT_MODEL_FILE}",
-        config=config,
-        model_type=model_type,
-    )
+    if model_type == "gptq":
+        log.debug("Creating llm/gptq instance...")
+        llm = AutoModelForCausalLM.from_pretrained(
+            model_path_or_repo_id=f"{os.getcwd()}/models",
+            model_type="gptq",
+            local_files_only=True,
+        )
+        app.state.llm = llm
+    else:
+        log.debug("Creating llm/ggml instance...")
+        llm = LLM(
+            model_path=f"{os.getcwd()}/models/{DEFAULT_MODEL_FILE}",
+            config=config,
+            model_type=model_type,
+        )
+        app.state.llm = llm
     log.info("llm singleton created.")
-    app.state.llm = llm
     set_loading_model(False)
 
 
@@ -142,6 +166,7 @@ async def models():
         ],
         "object": "list",
     }
+
 
 @app.post("/v1/completions", response_model=CompletionResponseBody)
 async def completions(
@@ -181,6 +206,7 @@ async def completions(
             media_type="text/event-stream",
         )
     return model_generate(prompt, model_name, llm, config)
+
 
 @app.post("/v1/engines/{engine}/completions")
 async def engine_completions(
