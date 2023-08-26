@@ -57,6 +57,8 @@ spec:
             value: {{ (.Values.deployment.env).GPU_LAYERS | quote }}
           - name: MODE_TYPE
             value: {{ (.Values.deployment.env).MODE_TYPE | quote }}
+          - name: TRUNCATE_PROMPT_LENGTH
+            value: {{ (.Values.deployment.env).TRUNCATE_PROMPT_LENGTH | quote }}
           volumeMounts:
           - mountPath: /app/models
             name: model
