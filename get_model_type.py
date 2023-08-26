@@ -5,6 +5,7 @@ def get_model_type(
     filename: str,
 ) -> str:
     ctransformer_model_type = "llama"
+    filename = filename.lower()
     # These are also in "starcoder" format
     # https://huggingface.co/TheBloke/WizardCoder-15B-1.0-GGML
     # https://huggingface.co/TheBloke/minotaur-15B-GGML
@@ -38,6 +39,10 @@ def get_model_type(
     # https://huggingface.co/ravenscroftj/CodeGen-2B-multi-ggml-quant
     if "codegen" in filename:
         ctransformer_model_type = "gptj"
+
+    DEFAULT_MODEL_HG_REPO_ID = get_env("DEFAULT_MODEL_HG_REPO_ID", "")
+    if "gptq" in str(DEFAULT_MODEL_HG_REPO_ID).lower() or "gptq" in filename:
+        ctransformer_model_type = "gptq"
 
     MODE_TYPE = get_env("MODE_TYPE", "")
     if len(MODE_TYPE) > 0:
