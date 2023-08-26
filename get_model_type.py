@@ -1,4 +1,3 @@
-from request_body import ChatCompletionRequestBody, CompletionRequestBody
 from get_env import get_env
 
 
@@ -34,6 +33,11 @@ def get_model_type(
     # matching https://huggingface.co/EleutherAI/pythia-70m
     if "pythia" in filename:
         ctransformer_model_type = "gpt_neox"
+    # codegen family are in gptj, codegen2 isn't but not supported by ggml/ctransformer yet
+    # https://huggingface.co/Salesforce/codegen-2B-multi
+    # https://huggingface.co/ravenscroftj/CodeGen-2B-multi-ggml-quant
+    if "codegen" in filename:
+        ctransformer_model_type = "gptj"
 
     MODE_TYPE = get_env("MODE_TYPE", "")
     if len(MODE_TYPE) > 0:
