@@ -202,7 +202,7 @@ However, few things need to keep in mind:
 
 1. Copilot client sends a lenthy prompt, to include all the related context for code completion, see [copilot-explorer](https://github.com/thakkarparth007/copilot-explorer), which give heavy load on the server, if you are trying to run `ialacol` locally, opt-in `TRUNCATE_PROMPT_LENGTH` environmental variable to truncate the prompt from the beginning to reduce the workload.
 
-2. Copilot sends request in parallel, to increase the throughput, you probably need a queue like [text-inference-batcher]([text-inference-batcher](https://github.com/ialacol/text-inference-batcher).
+2. Copilot sends request in parallel, to increase the throughput, you probably need a queue like [text-inference-batcher](https://github.com/ialacol/text-inference-batcher).
 
 Start two instances of ialacol:
 
