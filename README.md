@@ -221,7 +221,7 @@ Start [tib](https://github.com/ialacol/text-inference-batcher), pointing to upst
 
 ```bash
 gh repo clone ialacol/text-inference-batcher && cd text-inference-batcher && npm install
-UPSTREAMS="http://localhost:9999,http://localhost:9999" npm start
+UPSTREAMS="http://localhost:9998,http://localhost:9999" npm start
 ```
 
 Configure VSCode Github Copilot to use [tib](https://github.com/ialacol/text-inference-batcher).
