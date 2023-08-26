@@ -7,7 +7,6 @@ from log import log
 
 THREADS = int(get_env("THREADS", str(get_default_thread())))
 
-
 def get_config(
     body: CompletionRequestBody | ChatCompletionRequestBody,
 ) -> Config:

@@ -23,6 +23,7 @@ from streamers import chat_completions_streamer, completions_streamer
 from model_generate import chat_model_generate, model_generate
 from get_env import get_env
 from log import log
+from truncate import truncate
 
 DEFAULT_MODEL_HG_REPO_ID = get_env(
     "DEFAULT_MODEL_HG_REPO_ID", "TheBloke/Llama-2-7B-Chat-GGML"
@@ -44,7 +45,8 @@ def set_downloading_model(boolean: bool):
     """
     globals()["DOWNLOADING_MODEL"] = boolean
     log.debug("DOWNLOADING_MODEL set to %s", globals()["DOWNLOADING_MODEL"])
-    
+
+
 def set_loading_model(boolean: bool):
     """_summary_
 
@@ -102,7 +104,11 @@ async def startup_event():
         gpu_layers=GPU_LAYERS,
     )
     model_type = get_model_type(DEFAULT_MODEL_FILE)
-    log.info("Creating llm singleton with model_type: %s for DEFAULT_MODEL_FILE %s", model_type, DEFAULT_MODEL_FILE)
+    log.info(
+        "Creating llm singleton with model_type: %s for DEFAULT_MODEL_FILE %s",
+        model_type,
+        DEFAULT_MODEL_FILE,
+    )
     set_loading_model(True)
     llm = LLM(
         model_path=f"{os.getcwd()}/models/{DEFAULT_MODEL_FILE}",
@@ -136,7 +142,6 @@ async def models():
         ],
         "object": "list",
     }
-
 
 @app.post("/v1/completions", response_model=CompletionResponseBody)
 async def completions(
@@ -176,6 +181,40 @@ async def completions(
             media_type="text/event-stream",
         )
     return model_generate(prompt, model_name, llm, config)
+
+@app.post("/v1/engines/{engine}/completions")
+async def engine_completions(
+    # Can't use body as FastAPI require corrent context-type header
+    # But copilot client maybe not send such header
+    request: Request,
+    # copilot client ONLY request param
+    engine: str,
+):
+    """_summary_
+        Similar to https://platform.openai.com/docs/api-reference/completions
+        but with engine param and with /v1/engines
+    Args:
+        body (CompletionRequestBody): parsed request body
+    Returns:
+        StreamingResponse: streaming response
+    """
+    if DOWNLOADING_MODEL is True:
+        raise HTTPException(status_code=503, detail="Downloading model")
+    json = await request.json()
+    log.debug("Body:%s", str(json))
+
+    body = CompletionRequestBody(**json, model=engine)
+    prompt = truncate(body.prompt)
+
+    config = get_config(body)
+    llm = request.app.state.llm
+    if body.stream is True:
+        log.debug("Streaming response from %s", engine)
+        return StreamingResponse(
+            completions_streamer(prompt, engine, llm, config),
+            media_type="text/event-stream",
+        )
+    return model_generate(prompt, engine, llm, config)
 
 
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponseBody)
