@@ -12,10 +12,11 @@ ialacol is inspired by other similar projects like [LocalAI](https://github.com/
 
 ## Features
 
-- Compatibility with OpenAI APIs, allowing you to use any frameworks that are built on top of OpenAI APIs such as [langchain](https://github.com/hwchase17/langchain).
+- Compatibility with OpenAI APIs, compatible with [langchain](https://github.com/hwchase17/langchain).
 - Lightweight, easy deployment on Kubernetes clusters with a 1-click Helm installation.
 - Streaming first! For better UX.
 - Optional CUDA acceleration.
+- Compatible with [Github Copilot VSCode Extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot), see [Copilot](#copilot)
 
 ## Supported Models
 
@@ -95,6 +96,17 @@ docker run --rm -it -p 8000:8000 \
 #### From Source
 
 For developers/contributors
+
+##### Python
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements.txt
+DEFAULT_MODEL_HG_REPO_ID="TheBloke/stablecode-completion-alpha-3b-4k-GGML" DEFAULT_MODEL_FILE="stablecode-completion-alpha-3b-4k.ggmlv1.q4_0.bin" LOGGING_LEVEL="DEBUG" THREAD=4 uvicorn main:app --reload --host 0.0.0.0 --port 9999
+```
+
+##### Docker
 
 Build image
 
@@ -181,6 +193,46 @@ openai -k "sk-fake" -b http://localhost:8000/v1 -vvvvv api chat_completions.crea
 ```
 
 ## Tips
+
+### Copilot
+
+`ialacol` can be use as a copilot client as GitHub's Copilot is almost identical API as OpenAI completion API.
+
+However, few things need to keep in mind:
+
+1. Copilot client sends a lenthy prompt, to include all the related context for code completion, see [copilot-explorer](https://github.com/thakkarparth007/copilot-explorer), which give heavy load on the server, if you are trying to run `ialacol` locally, opt-in `TRUNCATE_PROMPT_LENGTH` environmental variable to truncate the prompt from the beginning to reduce the workload.
+
+2. Copilot sends request in parallel, to increase the throughput, you probably need a queue like [text-inference-batcher]([text-inference-batcher](https://github.com/ialacol/text-inference-batcher).
+
+Start two instances of ialacol:
+
+```bash
+gh repo clone chenhunghan/ialacol && cd ialacol && python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install -r requirements.txt
+LOGGING_LEVEL="DEBUG"
+THREAD=2
+DEFAULT_MODEL_HG_REPO_ID="TheBloke/stablecode-completion-alpha-3b-4k-GGML"
+DEFAULT_MODEL_FILE="stablecode-completion-alpha-3b-4k.ggmlv1.q4_0.bin"
+TRUNCATE_PROMPT_LENGTH=100 # optional
+uvicorn main:app --host 0.0.0.0 --port 9998
+uvicorn main:app --host 0.0.0.0 --port 9999
+```
+
+Start [tib](https://github.com/ialacol/text-inference-batcher), pointing to upstream ialacol instances.
+
+```bash
+gh repo clone ialacol/text-inference-batcher && cd text-inference-batcher && npm install
+UPSTREAMS="http://localhost:9999,http://localhost:9999" npm start
+```
+
+Configure VSCode Github Copilot to use [tib](https://github.com/ialacol/text-inference-batcher).
+
+```json
+"github.copilot.advanced": {
+     "debug.overrideEngine": "stablecode-completion-alpha-3b-4k.ggmlv1.q4_0.bin",
+     "debug.testOverrideProxyUrl": "http://localhost:8000",
+     "debug.overrideProxyUrl": "http://localhost:8000"
+}
+```
 
 ### Creative v.s. Conservative
 
