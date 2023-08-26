@@ -143,15 +143,11 @@ async def models():
         "object": "list",
     }
 
-
-@app.post("/v1/engines/{engine}/completions")
 @app.post("/v1/completions", response_model=CompletionResponseBody)
 async def completions(
-    # Can't use body as FastAPI require corrent context-type header
-    # But copilot client maybe not send such header
+    body: Annotated[CompletionRequestBody, Body()],
+    config: Annotated[Config, Depends(get_config)],
     request: Request,
-    # copilot client ONLY request param
-    engine: str,
 ):
     """_summary_
         Compatible with https://platform.openai.com/docs/api-reference/completions
@@ -163,15 +159,7 @@ async def completions(
     """
     if DOWNLOADING_MODEL is True:
         raise HTTPException(status_code=503, detail="Downloading model")
-    json = await request.json()
-    log.debug("Body:%s", str(json))
-
-    from_copilot_client: bool = True if engine is str else False
-    if from_copilot_client:
-        body = CompletionRequestBody(**json, model=engine)
-    else:
-        body = CompletionRequestBody(**json)
-
+    log.debug("Body:%s", str(body))
     if (
         (body.n is not None)
         or (body.logit_bias is not None)
@@ -183,11 +171,8 @@ async def completions(
             "n, logit_bias, user, presence_penalty and frequency_penalty are not supporte."
         )
     prompt = body.prompt
-    if from_copilot_client:
-        prompt = truncate(prompt)
 
     model_name = body.model
-    config = get_config(body)
     llm = request.app.state.llm
     if body.stream is True:
         log.debug("Streaming response from %s", model_name)
@@ -196,6 +181,40 @@ async def completions(
             media_type="text/event-stream",
         )
     return model_generate(prompt, model_name, llm, config)
+
+@app.post("/v1/engines/{engine}/completions")
+async def engine_completions(
+    # Can't use body as FastAPI require corrent context-type header
+    # But copilot client maybe not send such header
+    request: Request,
+    # copilot client ONLY request param
+    engine: str,
+):
+    """_summary_
+        Similar to https://platform.openai.com/docs/api-reference/completions
+        but with engine param and with /v1/engines
+    Args:
+        body (CompletionRequestBody): parsed request body
+    Returns:
+        StreamingResponse: streaming response
+    """
+    if DOWNLOADING_MODEL is True:
+        raise HTTPException(status_code=503, detail="Downloading model")
+    json = await request.json()
+    log.debug("Body:%s", str(json))
+
+    body = CompletionRequestBody(**json, model=engine)
+    prompt = truncate(body.prompt)
+
+    config = get_config(body)
+    llm = request.app.state.llm
+    if body.stream is True:
+        log.debug("Streaming response from %s", engine)
+        return StreamingResponse(
+            completions_streamer(prompt, engine, llm, config),
+            media_type="text/event-stream",
+        )
+    return model_generate(prompt, engine, llm, config)
 
 
 @app.post("/v1/chat/completions", response_model=ChatCompletionResponseBody)
