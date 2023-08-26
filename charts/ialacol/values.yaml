@@ -1,7 +1,7 @@
 replicas: 1
 
 deployment:
-  image: quay.io/chenhunghan/ialacol:latest
+  image: ghcr.io/chenhunghan/ialacol:latest
   # or use CUDA image `ghcr.io/chenhunghan/ialacol-cuda12:latest`
   # env:
     # DEFAULT_MODEL_HG_REPO_ID: TheBloke/Llama-2-7B-Chat-GGML
