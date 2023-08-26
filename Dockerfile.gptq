@@ -8,6 +8,8 @@ RUN apt-get update \
 WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
+# Fixes exllama/cuda_ext.py:82: UserWarning: Failed to initialize NumPy: No module named 'numpy'
+RUN pip3 install numpy
 # https://github.com/marella/ctransformers#gptq
 RUN pip3 install ctransformers[gptq]
 COPY . .
