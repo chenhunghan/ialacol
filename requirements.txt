@@ -3,7 +3,7 @@ blake3==0.3.3
 certifi==2023.7.22
 charset-normalizer==3.1.0
 click==8.1.3
-ctransformers==0.2.26
+ctransformers==0.2.27
 fastapi==0.95.2
 filelock==3.12.0
 fsspec==2023.5.0
