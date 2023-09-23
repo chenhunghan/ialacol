@@ -24,6 +24,7 @@ from model_generate import chat_model_generate, model_generate
 from get_env import get_env
 from log import log
 from truncate import truncate
+from const import DEFAULT_CONTEXT_LENGTH
 
 DEFAULT_MODEL_HG_REPO_ID = get_env(
     "DEFAULT_MODEL_HG_REPO_ID", "TheBloke/Llama-2-7B-Chat-GGML"
@@ -107,7 +108,7 @@ async def startup_event():
             set_downloading_model(False)
 
     # ggml only, follow ctransformers defaults
-    CONTEXT_LENGTH = int(get_env("CONTEXT_LENGTH", "-1"))
+    CONTEXT_LENGTH = int(get_env("CONTEXT_LENGTH", DEFAULT_CONTEXT_LENGTH))
     # the layers to offloading to the GPU
     GPU_LAYERS = int(get_env("GPU_LAYERS", "0"))
 

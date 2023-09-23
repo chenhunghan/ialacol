@@ -80,6 +80,41 @@ openai -k "sk-fake" \
      -g user "Hello world!"
 ```
 
+### Configuration
+
+All configuration is done via environmental variable.
+
+| Parameter                    | Description                                                          | Default | Example                                                                      |
+| :----------------------------| :------------------------------------------------------------------- | :------ | :--------------------------------------------------------------------------- |
+| `DEFAULT_MODEL_HG_REPO_ID`   | The Hugging Face repo id to download the model                       | `None`  | `TheBloke/orca_mini_3B-GGML`                                                 |
+| `DEFAULT_MODEL_FILE`         | The file name to download from the repo, optional for GPTQ models    | `None`  | `orca-mini-3b.ggmlv3.q4_0.bin`                                               |
+| `MODE_TYPE`                  | Model type to override the auto model type detection                 | `None`  | `gptq`, `gpt_bigcode`, `llama`, `mpt`, `replit`, `falcon`, `gpt_neox` `gptj` |
+| `LOGGING_LEVEL`              | Logging level                                                        | `INFO`  | `DEBUG`                                                                      |
+| `TOP_K`                      | top-k for sampling.                                                  | `40 `   | Integers                                                                     |
+| `TOP_P`                      | top-p for sampling.                                                  | `1.0`   | Floats                                                                       |
+| `REPETITION_PENALTY`         | rp for sampling.                                                     | `1.1`   | Floats                                                                       |
+| `LAST_N_TOKENS`              | The last n tokens for repetition penalty.                            | `1.1`   | Integers                                                                     |
+| `SEED`                       | The seed for sampling.                                               | `-1`    | Integers                                                                     |
+| `BATCH_SIZE`                 | The batch size for evaluating tokens, only for GGUF/GGML models      | `8`     | Integers                                                                     |
+| `THREADS`                    | Thread number override auto detect by CPU/2, set `1` for GPTQ models | `Auto`  | Integers                                                                     |
+| `MAX_TOKENS`                 | The max number of token to generate                                  | `512`   | Integers                                                                     |
+| `STOP`                       | The token to stop the generation                                     | `None`  | `<|endoftext>`                                                               |
+| `CONTEXT_LENGTH`             | Override the auto detect context length                              | `512`   | Integers                                                                     |
+| `GPU_LAYERS`                 | The number of layers to off load to GPU                              | `0`     | Integers                                                                     |
+| `TRUNCATE_PROMPT_LENGTH`     | Truncate the prompt if set                                           | `0`     | Integers                                                                     |
+
+Sampling parameters including `TOP_K`, `TOP_P`, `REPETITION_PENALTY`, `LAST_N_TOKENS`, `SEED`, `MAX_TOKENS`, `STOP` can be override per request via request body, for example:
+
+```sh
+curl -X POST \
+     -H 'Content-Type: application/json' \
+     -d '{ "messages": [{"role": "user", "content": "Tell me a story."}], "model": "llama-2-7b-chat.ggmlv3.q4_0.bin", "stream": false, "temperature": "2", "top_p": "1.0", "top_k": "0" }' \
+     http://localhost:8000/v1/chat/completions
+```
+
+will use `temperature=2`, `top_p=1` and `top_k=0`for this request.
+
+
 ### Run in Container
 
 #### Image from Github Registry

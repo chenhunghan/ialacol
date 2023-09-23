@@ -4,6 +4,7 @@ from request_body import ChatCompletionRequestBody, CompletionRequestBody
 from get_env import get_env, get_env_or_none
 from get_default_thread import get_default_thread
 from log import log
+from const import DEFAULT_MAX_TOKENS, DEFAULT_CONTEXT_LENGTH
 
 THREADS = int(get_env("THREADS", str(get_default_thread())))
 
@@ -25,7 +26,10 @@ def get_config(
     # ggml only, follow ctransformers defaults
     BATCH_SIZE = int(get_env("BATCH_SIZE", "8"))
     # OpenAI API defaults https://platform.openai.com/docs/api-reference/chat/create#chat/create-max_tokens
-    MAX_TOKENS = int(get_env("MAX_TOKENS", "9999999"))
+    MAX_TOKENS = int(get_env("MAX_TOKENS", DEFAULT_MAX_TOKENS))
+    CONTEXT_LENGTH = int(get_env("CONTEXT_LENGTH", DEFAULT_CONTEXT_LENGTH))
+    if (MAX_TOKENS > CONTEXT_LENGTH):
+        log.warning("MAX_TOKENS is greater than CONTEXT_LENGTH, setting MAX_TOKENS < CONTEXT_LENGTH")
     # OpenAI API defaults https://platform.openai.com/docs/api-reference/chat/create#chat/create-stop
     STOP = get_env_or_none("STOP")
 
