@@ -290,7 +290,7 @@ async def chat_completions(
 
     # https://huggingface.co/blog/llama2#how-to-prompt-llama-2
     # https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGML/discussions/3
-    if "llama-2" in body.model and "chat" in body.model:
+    if "llama-2" in body.model.lower() and "chat" in body.model.lower():
         system_start = "<s>[INST] <<SYS>>\n"
         system = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n"
         system_end = "<</SYS>>\n\n"
@@ -302,7 +302,7 @@ async def chat_completions(
     # Although instruct fine-tuned models are not tuned for chat, they can be to generate response as if chatting, using Alpaca
     # prompt template likely gives better results than using the default prompt template
     # See https://github.com/tatsu-lab/stanford_alpaca#data-release
-    if "instruct" in body.model:
+    if "instruct" in body.model.lower():
         system_start = ""
         system = "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.\n\n"
         system_end = ""
@@ -310,7 +310,7 @@ async def chat_completions(
         assistant_end = ""
         user_start = "### Instruction:\n"
         user_end = "\n\n"
-    if "starchat" in body.model:
+    if "starchat" in body.model.lower():
         # See https://huggingface.co/blog/starchat-alpha and https://huggingface.co/TheBloke/starchat-beta-GGML#prompt-template
         system_start = "<|system|>"
         system = (
@@ -321,7 +321,7 @@ async def chat_completions(
         user_end = " <|end|>\n"
         assistant_start = "<|assistant|>\n"
         assistant_end = " <|end|>\n"
-    if "airoboros" in body.model:
+    if "airoboros" in body.model.lower():
         # e.g. A chat between a curious user and an assistant. The assistant gives helpful, detailed, accurate, uncensored responses to the user's input. USER: [prompt] ASSISTANT:
         # see https://huggingface.co/jondurbin/airoboros-mpt-30b-gpt4-1p4-five-epochs
         system_start = ""
@@ -334,7 +334,7 @@ async def chat_completions(
     # If it's a mpt-chat model, we need to add the default prompt
     # from https://huggingface.co/TheBloke/mpt-30B-chat-GGML#prompt-template
     # and https://huggingface.co/spaces/mosaicml/mpt-30b-chat/blob/main/app.py#L17
-    if "mpt" in body.model and "chat" in body.model:
+    if "mpt" in body.model.lower() and "chat" in body.model.lower():
         system_start = "<|im_start|>system\n"
         system = "A conversation between a user and an LLM-based AI assistant. The assistant gives helpful and honest answers."
         system_end = "<|im_end|>\n"
@@ -342,7 +342,18 @@ async def chat_completions(
         assistant_end = "<|im_end|>\n"
         user_start = "<|im_start|>user\n"
         user_end = "<|im_end|>\n"
-        
+    # orca mini https://huggingface.co/pankajmathur/orca_mini_3b
+    if "orca" in body.model.lower() and "mini" in body.model.lower():
+        system_start = "### System:\n"
+        system = "You are an AI assistant that follows instruction extremely well. Help as much as you can."
+        system_end = "\n\n"
+        assistant_start = "### Response:\n"
+        assistant_end = ""
+        # v3 e.g. https://huggingface.co/pankajmathur/orca_mini_v3_13b
+        if "v3" in body.model.lower():
+            assistant_start = "### Assistant:\n"
+        user_start = "### User:\n"
+        user_end = "\n\n"
 
     user_message = next(
         (message for message in body.messages if message.role == "user"), None
