@@ -10,7 +10,9 @@ from typing import (
     Union,
     Annotated,
 )
-from fastapi import FastAPI, Depends, HTTPException, Body, Request
+from fastapi import FastAPI, Depends, HTTPException, Body, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
 from ctransformers import LLM, AutoModelForCausalLM, Config
 from huggingface_hub import hf_hub_download, snapshot_download
@@ -64,6 +66,13 @@ Generate = Callable[[Sender], Awaitable[None]]
 
 app = FastAPI()
 
+# https://github.com/tiangolo/fastapi/issues/3361
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    exc_str = f"{exc}".replace("\n", " ").replace("   ", " ")
+    log.error("%s: %s", request, exc_str)
+    content = {"status_code": 10422, "message": exc_str, "data": None}
+    return JSONResponse(content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 @app.on_event("startup")
 async def startup_event():
