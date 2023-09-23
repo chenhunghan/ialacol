@@ -137,7 +137,7 @@ jobs:
           echo "REPLY=$REPLY" >> $GITHUB_ENV
       - if: always()
         run: |
-          kubectl logs --tail=20 --selector app.kubernetes.io/name=$LLAMA_HELM_RELEASE_NAME -n $HELM_NAMESPACE
+          kubectl logs --tail=200 --selector app.kubernetes.io/name=$LLAMA_HELM_RELEASE_NAME -n $HELM_NAMESPACE
   gpt-neox-smoke-test:
     runs-on: ubuntu-latest
     needs: build-image
@@ -205,7 +205,7 @@ jobs:
           openai -k "sk-fake" -b http://localhost:$GPT_NEOX_SVC_PORT/v1 -vvvvv api completions.create -m $GPT_NEOX_MODEL_FILE -p "A function adding 1 to 1 in Python."
       - if: always()
         run: |
-          kubectl logs --tail=20 --selector app.kubernetes.io/name=$GPT_NEOX_HELM_RELEASE_NAME -n $HELM_NAMESPACE
+          kubectl logs --tail=200 --selector app.kubernetes.io/name=$GPT_NEOX_HELM_RELEASE_NAME -n $HELM_NAMESPACE
   starcoder-smoke-test:
     runs-on: ubuntu-latest
     needs: build-image
@@ -273,4 +273,4 @@ jobs:
           openai -k "sk-fake" -b http://localhost:$STARCODER_SVC_PORT/v1 -vvvvv api completions.create -m $STARCODER_MODEL_FILE -p "def fibonnaci"
       - if: always()
         run: |
-          kubectl logs --tail=20 --selector app.kubernetes.io/name=$STARCODER_HELM_RELEASE_NAME -n $HELM_NAMESPACE
+          kubectl logs --tail=200 --selector app.kubernetes.io/name=$STARCODER_HELM_RELEASE_NAME -n $HELM_NAMESPACE

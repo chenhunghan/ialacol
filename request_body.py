@@ -19,7 +19,7 @@ class CompletionRequestBody(BaseModel):
     temperature: Optional[float]
     top_p: Optional[float]
     stop: Optional[List[str] | str]
-    stream: bool = Field()
+    stream: Optional[bool] = Field()
     model: str = Field()
     # llama.cpp specific parameters
     top_k: Optional[int]
@@ -68,7 +68,7 @@ class ChatCompletionRequestBody(BaseModel):
     temperature: Optional[float]
     top_p: Optional[float]
     stop: Optional[List[str] | str]
-    stream: bool = Field()
+    stream: Optional[bool] = Field()
     model: str = Field()
     # llama.cpp specific parameters
     top_k: Optional[int]

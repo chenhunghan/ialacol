@@ -10,7 +10,9 @@ from typing import (
     Union,
     Annotated,
 )
-from fastapi import FastAPI, Depends, HTTPException, Body, Request
+from fastapi import FastAPI, Depends, HTTPException, Body, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
 from ctransformers import LLM, AutoModelForCausalLM, Config
 from huggingface_hub import hf_hub_download, snapshot_download
@@ -64,6 +66,13 @@ Generate = Callable[[Sender], Awaitable[None]]
 
 app = FastAPI()
 
+# https://github.com/tiangolo/fastapi/issues/3361
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    exc_str = f"{exc}".replace("\n", " ").replace("   ", " ")
+    log.error("%s: %s", request, exc_str)
+    content = {"status_code": 10422, "message": exc_str, "data": None}
+    return JSONResponse(content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 @app.on_event("startup")
 async def startup_event():
@@ -271,48 +280,80 @@ async def chat_completions(
         log.warning(
             "n, logit_bias, user, presence_penalty and frequency_penalty are not supporte."
         )
-    default_assistant_start = "### Assistant: "
-    default_assistant_end = ""
-    default_user_start = "### Human: "
-    default_user_end = ""
-    default_system = ""
+    system_start = ""
+    system = "You are a helpful assistant."
+    system_end = ""
+    user_start = ""
+    user_end = ""
+    assistant_start = ""
+    assistant_end = ""
 
-    if "llama" in body.model:
-        default_assistant_start = "ASSISTANT: \n"
-        default_user_start = "USER: "
-        default_user_end = "\n"
-        default_system = "SYSTEM: You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n"
+    # https://huggingface.co/blog/llama2#how-to-prompt-llama-2
+    # https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGML/discussions/3
+    if "llama-2" in body.model.lower() and "chat" in body.model.lower():
+        system_start = "<s>[INST] <<SYS>>\n"
+        system = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n"
+        system_end = "<</SYS>>\n\n"
+        assistant_start = " "
+        assistant_end = " </s><s>[INST] "
+        user_start = ""
+        user_end = " [/INST]"
     # For most instruct fine-tuned models using  Alpaca prompt template
     # Although instruct fine-tuned models are not tuned for chat, they can be to generate response as if chatting, using Alpaca
     # prompt template likely gives better results than using the default prompt template
     # See https://github.com/tatsu-lab/stanford_alpaca#data-release
-    if "instruct" in body.model:
-        default_assistant_start = "### Response:"
-        default_user_start = "### Instruction: "
-        default_user_end = "\n\n"
-        default_system = "Below is an instruction that describes a task. Write a response that appropriately completes the request\n\n"
-    if "starchat" in body.model:
+    if "instruct" in body.model.lower():
+        system_start = ""
+        system = "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.\n\n"
+        system_end = ""
+        assistant_start = "### Response:"
+        assistant_end = ""
+        user_start = "### Instruction:\n"
+        user_end = "\n\n"
+    if "starchat" in body.model.lower():
         # See https://huggingface.co/blog/starchat-alpha and https://huggingface.co/TheBloke/starchat-beta-GGML#prompt-template
-        default_assistant_start = "<|assistant|>\n"
-        default_assistant_end = " <|end|>\n"
-        default_user_start = "<|user|>\n"
-        default_user_end = " <|end|>\n"
-        default_system = "<|system|>\nBelow is a dialogue between a human and an AI assistant called StarChat.<|end|>\n"
-    if "airoboros" in body.model:
+        system_start = "<|system|>"
+        system = (
+            "Below is a dialogue between a human and an AI assistant called StarChat."
+        )
+        system_end = " <|end|>\n"
+        user_start = "<|user|>"
+        user_end = " <|end|>\n"
+        assistant_start = "<|assistant|>\n"
+        assistant_end = " <|end|>\n"
+    if "airoboros" in body.model.lower():
         # e.g. A chat between a curious user and an assistant. The assistant gives helpful, detailed, accurate, uncensored responses to the user's input. USER: [prompt] ASSISTANT:
         # see https://huggingface.co/jondurbin/airoboros-mpt-30b-gpt4-1p4-five-epochs
-        default_assistant_start = "ASSISTANT: "
-        default_user_start = "USER: "
-        default_system = "A chat between a curious user and an assistant. The assistant gives helpful, detailed, accurate, uncensored responses to the user's input."
+        system_start = ""
+        system = "A chat between a curious user and an assistant. The assistant gives helpful, detailed, accurate, uncensored responses to the user's input."
+        system_end = ""
+        user_start = "USER: "
+        user_end = ""
+        assistant_start = "ASSISTANT: "
+        assistant_end = ""
     # If it's a mpt-chat model, we need to add the default prompt
     # from https://huggingface.co/TheBloke/mpt-30B-chat-GGML#prompt-template
     # and https://huggingface.co/spaces/mosaicml/mpt-30b-chat/blob/main/app.py#L17
-    if "mpt" in body.model and "chat" in body.model:
-        default_assistant_start = "<|im_start|>assistant\n"
-        default_assistant_end = "<|im_end|>\n"
-        default_user_start = "<|im_start|>user\n"
-        default_user_end = "<|im_end|>\n"
-        default_system = "<|im_start|>system\nA conversation between a user and an LLM-based AI assistant. The assistant gives helpful and honest answers.<|im_end|>\n"
+    if "mpt" in body.model.lower() and "chat" in body.model.lower():
+        system_start = "<|im_start|>system\n"
+        system = "A conversation between a user and an LLM-based AI assistant. The assistant gives helpful and honest answers."
+        system_end = "<|im_end|>\n"
+        assistant_start = "<|im_start|>assistant\n"
+        assistant_end = "<|im_end|>\n"
+        user_start = "<|im_start|>user\n"
+        user_end = "<|im_end|>\n"
+    # orca mini https://huggingface.co/pankajmathur/orca_mini_3b
+    if "orca" in body.model.lower() and "mini" in body.model.lower():
+        system_start = "### System:\n"
+        system = "You are an AI assistant that follows instruction extremely well. Help as much as you can."
+        system_end = "\n\n"
+        assistant_start = "### Response:\n"
+        assistant_end = ""
+        # v3 e.g. https://huggingface.co/pankajmathur/orca_mini_v3_13b
+        if "v3" in body.model.lower():
+            assistant_start = "### Assistant:\n"
+        user_start = "### User:\n"
+        user_end = "\n\n"
 
     user_message = next(
         (message for message in body.messages if message.role == "user"), None
@@ -322,18 +363,24 @@ async def chat_completions(
         (message for message in body.messages if message.role == "assistant"), None
     )
     assistant_message_content = (
-        f"{default_assistant_start}{assistant_message.content}{default_assistant_end}"
+        f"{assistant_start}{assistant_message.content}{assistant_end}"
         if assistant_message
         else ""
     )
     system_message = next(
         (message for message in body.messages if message.role == "system"), None
     )
-    system_message_content = (
-        system_message.content if system_message else default_system
-    )
-
-    prompt = f"{system_message_content}{assistant_message_content} {default_user_start}{user_message_content}{default_user_end} {default_assistant_start}"
+    system_message_content = system_message.content if system_message else system
+    # avoid duplicate user start token in prompt if user message already includes it
+    if len(user_start) > 0 and user_start in user_message_content:
+        user_start = ""
+    # avoid duplicate user end token in prompt if user message already includes it
+    if len(user_end) > 0 and user_end in user_message_content:
+        user_end = ""
+    # avoid duplicate assistant start token in prompt if user message already includes it
+    if len(assistant_start) > 0 and assistant_start in user_message_content:
+        assistant_start = ""
+    prompt = f"{system_start}{system_message_content}{system_end}{assistant_message_content}{user_start}{user_message_content}{user_end}{assistant_start}"
     model_name = body.model
     llm = request.app.state.llm
     if body.stream is True:
