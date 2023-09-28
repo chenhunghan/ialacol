@@ -310,6 +310,16 @@ async def chat_completions(
         assistant_end = ""
         user_start = "### Instruction:\n"
         user_end = "\n\n"
+    # For instruct fine-tuned models using mistral prompt template
+    # https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.1
+    if "mistral" in body.model.lower() and "instruct" in body.model.lower():
+        system_start = "<s>"
+        system = ""
+        system_end = ""
+        assistant_start = ""
+        assistant_end = "</s> "
+        user_start = "[INST] "
+        user_end = " [/INST]"
     if "starchat" in body.model.lower():
         # See https://huggingface.co/blog/starchat-alpha and https://huggingface.co/TheBloke/starchat-beta-GGML#prompt-template
         system_start = "<|system|>"
@@ -380,6 +390,9 @@ async def chat_completions(
     # avoid duplicate assistant start token in prompt if user message already includes it
     if len(assistant_start) > 0 and assistant_start in user_message_content:
         assistant_start = ""
+    # avoid duplicate system_start token in prompt if system_message_content already includes it
+    if len(system_start) > 0 and system_start in system_message_content:
+        system_start = ""
     prompt = f"{system_start}{system_message_content}{system_end}{assistant_message_content}{user_start}{user_message_content}{user_end}{assistant_start}"
     model_name = body.model
     llm = request.app.state.llm

@@ -104,7 +104,6 @@ def chat_model_generate(
     stop = config.stop
     log.debug("stop: %s", stop)
     log.debug("prompt: %s", prompt)
-    log.debug("prompt: %s", prompt)
 
     log.debug("Getting from ctransformer instance")
     result: str = llm(  # pyright: ignore [reportGeneralTypeIssues]
