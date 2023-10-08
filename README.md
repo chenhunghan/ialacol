@@ -35,6 +35,7 @@ And all LLMs supported by [ctransformers](https://github.com/marella/ctransforme
 
 ## Blogs
 
+- [Use Code Llama (and other open LLMs) as Drop-In Replacement for Copilot Code Completion](https://dev.to/chenhunghan/use-code-llama-and-other-open-llms-as-drop-in-replacement-for-copilot-code-completion-58hg)
 - [Containerized AI before Apocalypse 🐳🤖](https://dev.to/chenhunghan/containerized-ai-before-apocalypse-1569)
 - [Deploy Llama 2 AI on Kubernetes, Now](https://dev.to/chenhunghan/deploy-llama-2-ai-on-kubernetes-now-2jc5)
 - [Cloud Native Workflow for Private MPT-30B AI Apps](https://dev.to/chenhunghan/cloud-native-workflow-for-private-ai-apps-2omb)
