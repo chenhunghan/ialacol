@@ -31,9 +31,13 @@ from const import DEFAULT_CONTEXT_LENGTH
 DEFAULT_MODEL_HG_REPO_ID = get_env(
     "DEFAULT_MODEL_HG_REPO_ID", "TheBloke/Llama-2-7B-Chat-GGML"
 )
+DEFAULT_MODEL_HG_REPO_REVISION = get_env(
+    "DEFAULT_MODEL_HG_REPO_REVISION", "main"
+)
 DEFAULT_MODEL_FILE = get_env("DEFAULT_MODEL_FILE", "llama-2-7b-chat.ggmlv3.q4_0.bin")
 
 log.info("DEFAULT_MODEL_HG_REPO_ID: %s", DEFAULT_MODEL_HG_REPO_ID)
+log.info("DEFAULT_MODEL_HG_REPO_REVISION: %s", DEFAULT_MODEL_HG_REPO_REVISION)
 log.info("DEFAULT_MODEL_FILE: %s", DEFAULT_MODEL_FILE)
 
 DOWNLOADING_MODEL = False
@@ -93,6 +97,7 @@ async def startup_event():
                 )
                 snapshot_download(
                     repo_id=DEFAULT_MODEL_HG_REPO_ID,
+                    revision=DEFAULT_MODEL_HG_REPO_REVISION,
                     cache_dir="models/.cache",
                     local_dir="models",
                     resume_download=True,
@@ -106,6 +111,7 @@ async def startup_event():
                 )
                 hf_hub_download(
                     repo_id=DEFAULT_MODEL_HG_REPO_ID,
+                    revision=DEFAULT_MODEL_HG_REPO_REVISION,
                     cache_dir="models/.cache",
                     local_dir="models",
                     filename=DEFAULT_MODEL_FILE,

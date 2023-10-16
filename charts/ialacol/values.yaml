@@ -5,6 +5,7 @@ deployment:
   # or use CUDA image `ghcr.io/chenhunghan/ialacol-cuda12:latest`
   # env:
     # DEFAULT_MODEL_HG_REPO_ID: TheBloke/Llama-2-7B-Chat-GGML
+    # DEFAULT_MODEL_HG_REPO_REVISION: main
     # DEFAULT_MODEL_FILE: llama-2-7b-chat.ggmlv3.q4_0.bin
     # LOGGING_LEVEL: DEBUG
 resources:
