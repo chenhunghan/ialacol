@@ -27,6 +27,8 @@ spec:
           env:
           - name: DEFAULT_MODEL_HG_REPO_ID
             value: {{ (.Values.deployment.env).DEFAULT_MODEL_HG_REPO_ID | quote }}
+          - name: DEFAULT_MODEL_HG_REPO_REVISION
+            value: {{ (.Values.deployment.env).DEFAULT_MODEL_HG_REPO_REVISION | quote }}
           - name: DEFAULT_MODEL_FILE
             value: {{ (.Values.deployment.env).DEFAULT_MODEL_FILE | quote }}
           - name: MODE_TYPE
