@@ -22,8 +22,7 @@ ialacol is inspired by other similar projects like [LocalAI](https://github.com/
 
 See [Receipts](#receipts) below for instructions of deployments.
 
-- [LLaMa 2 variants](https://huggingface.co/meta-llama)
-- [OpenLLaMA variants](https://github.com/openlm-research/open_llama)
+- [LLaMa 2 variants](https://huggingface.co/meta-llama), including [OpenLLaMA](https://github.com/openlm-research/open_llama), [Mistral](https://huggingface.co/mistralai/Mistral-7B-v0.1).
 - [StarCoder variants](https://huggingface.co/bigcode/starcoder)
 - [WizardCoder](https://huggingface.co/WizardLM/WizardCoder-15B-V1.0)
 - [StarChat variants](https://huggingface.co/HuggingFaceH4/starchat-beta)
