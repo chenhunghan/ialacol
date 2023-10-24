@@ -1,6 +1,9 @@
 name: Smoke Test
 
-on: pull_request
+on:
+  pull_request:
+    branches:
+    - main
 
 env:
   REGISTRY: quay.io
