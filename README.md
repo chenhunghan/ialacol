@@ -22,7 +22,7 @@ ialacol is inspired by other similar projects like [LocalAI](https://github.com/
 
 See [Receipts](#receipts) below for instructions of deployments.
 
-- [LLaMa 2 variants](https://huggingface.co/meta-llama), including [OpenLLaMA](https://github.com/openlm-research/open_llama), [Mistral](https://huggingface.co/mistralai/Mistral-7B-v0.1).
+- [LLaMa 2 variants](https://huggingface.co/meta-llama), including [OpenLLaMA](https://github.com/openlm-research/open_llama), [Mistral](https://huggingface.co/mistralai/Mistral-7B-v0.1), [openchat_3.5](https://huggingface.co/openchat/openchat_3.5) and [zephyr](https://huggingface.co/HuggingFaceH4/zephyr-7b-beta).
 - [StarCoder variants](https://huggingface.co/bigcode/starcoder)
 - [WizardCoder](https://huggingface.co/WizardLM/WizardCoder-15B-V1.0)
 - [StarChat variants](https://huggingface.co/HuggingFaceH4/starchat-beta)
@@ -31,6 +31,67 @@ See [Receipts](#receipts) below for instructions of deployments.
 - [Falcon](https://falconllm.tii.ae/)
 
 And all LLMs supported by [ctransformers](https://github.com/marella/ctransformers/tree/main/models/llms).
+
+## UI
+
+`ialacol` does not have a UI, however it's compatible with any web UI that support OpenAI API, for example [chat-ui](https://github.com/huggingface/chat-ui) after [PR #541](https://github.com/huggingface/chat-ui/pull/541) merged.
+
+Assuming `ialacol` running at port 9090, you can configure [chat-ui](https://github.com/huggingface/chat-ui) to use [`zephyr-7b-beta.Q4_K_M.gguf`](https://huggingface.co/HuggingFaceH4/zephyr-7b-beta) served by `ialacol`.
+```shell
+MODELS=`[
+  {
+      "name": "zephyr-7b-beta.Q4_K_M.gguf",
+      "displayName": "Zephyr 7B β",
+      "preprompt": "<|system|>\nYou are a friendly chatbot who always responds in the style of a pirate.</s>\n",
+      "userMessageToken": "<|user|>\n",
+      "userMessageEndToken": "</s>\n",
+      "assistantMessageToken": "<|assistant|>\n",
+      "assistantMessageEndToken": "\n",
+      "parameters": {
+        "temperature": 0.1,
+        "top_p": 0.95,
+        "repetition_penalty": 1.2,
+        "top_k": 50,
+        "max_new_tokens": 4096,
+        "truncate": 999999
+      },
+      "endpoints" : [{
+        "type": "openai",
+        "baseURL": "http://localhost:9999/v1",
+        "completion": "chat_completions"
+      }]
+  }
+]
+```
+
+[openchat_3.5.Q4_K_M.gguf](https://huggingface.co/openchat/openchat_3.5)
+```shell
+MODELS=`[
+  {
+      "name": "openchat_3.5.Q4_K_M.gguf",
+      "displayName": "OpenChat 3.5",
+      "preprompt": "",
+      "userMessageToken": "GPT4 User: ",
+			"userMessageEndToken": "<|end_of_turn|>",
+			"assistantMessageToken": "GPT4 Assistant: ",
+			"assistantMessageEndToken": "<|end_of_turn|>",
+      "parameters": {
+        "temperature": 0.1,
+        "top_p": 0.95,
+        "repetition_penalty": 1.2,
+        "top_k": 50,
+        "max_new_tokens": 4096,
+        "truncate": 999999,
+        "stop": ["<|end_of_turn|>"]
+      },
+      "endpoints" : [{
+        "type": "openai",
+        "baseURL": "http://localhost:9999/v1",
+        "completion": "chat_completions"
+      }]
+  }
+]`
+```
 
 ## Blogs
 
