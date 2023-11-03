@@ -323,7 +323,7 @@ jobs:
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
-            image: ${{ env.REGISTRY }}/${{ env.REPO_ORG_NAME }}/${{ env.IMAGE_NAME }}:${{ ${{ env.GPTQ_IMAGE_TAG }}
+            image: ${{ env.REGISTRY }}/${{ env.REPO_ORG_NAME }}/${{ env.IMAGE_NAME }}:${{ env.GPTQ_IMAGE_TAG }}
             env:
               DEFAULT_MODEL_HG_REPO_ID: $GPTQ_MODEL_HG_REPO_ID
               DEFAULT_MODEL_HG_REPO_REVISION: $GPTQ_MODEL_HG_REVISION
