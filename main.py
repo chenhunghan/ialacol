@@ -370,13 +370,22 @@ async def chat_completions(
             assistant_start = "### Assistant:\n"
         user_start = "### User:\n"
         user_end = "\n\n"
+    # openchat_3.5 https://huggingface.co/openchat/openchat_3.5
+    if "openchat" in body.model.lower():
+        system_start = ""
+        system = ""
+        system_end = ""
+        assistant_start = "GPT4 Assistant: "
+        assistant_end = "<|end_of_turn|>"
+        user_start = "GPT4 User: "
+        user_end = "<|end_of_turn|>"
 
     user_message = next(
-        (message for message in body.messages if message.role == "user"), None
+        (message for message in reversed(body.messages) if message.role == "user"), None
     )
     user_message_content = user_message.content if user_message else ""
     assistant_message = next(
-        (message for message in body.messages if message.role == "assistant"), None
+        (message for message in reversed(body.messages) if message.role == "assistant"), None
     )
     assistant_message_content = (
         f"{assistant_start}{assistant_message.content}{assistant_end}"
