@@ -36,7 +36,7 @@ And all LLMs supported by [ctransformers](https://github.com/marella/ctransforme
 
 `ialacol` does not have a UI, however it's compatible with any web UI that support OpenAI API, for example [chat-ui](https://github.com/huggingface/chat-ui) after [PR #541](https://github.com/huggingface/chat-ui/pull/541) merged.
 
-Assuming `ialacol` running at port 9090, you can configure [chat-ui](https://github.com/huggingface/chat-ui) to use [`zephyr-7b-beta.Q4_K_M.gguf`](https://huggingface.co/HuggingFaceH4/zephyr-7b-beta) served by `ialacol`.
+Assuming `ialacol` running at port 8000, you can configure [chat-ui](https://github.com/huggingface/chat-ui) to use [`zephyr-7b-beta.Q4_K_M.gguf`](https://huggingface.co/HuggingFaceH4/zephyr-7b-beta) served by `ialacol`.
 ```shell
 MODELS=`[
   {
@@ -57,7 +57,7 @@ MODELS=`[
       },
       "endpoints" : [{
         "type": "openai",
-        "baseURL": "http://localhost:9999/v1",
+        "baseURL": "http://localhost:8000/v1",
         "completion": "chat_completions"
       }]
   }
@@ -86,7 +86,7 @@ MODELS=`[
       },
       "endpoints" : [{
         "type": "openai",
-        "baseURL": "http://localhost:9999/v1",
+        "baseURL": "http://localhost:8000/v1",
         "completion": "chat_completions"
       }]
   }
