@@ -381,6 +381,15 @@ async def chat_completions(
         assistant_end = "<|end_of_turn|>"
         user_start = "GPT4 User: "
         user_end = "<|end_of_turn|>"
+    # HG's zephyr https://huggingface.co/HuggingFaceH4/zephyr-7b-beta
+    if "zephyr" in body.model.lower():
+        system_start = "<|system|>\n"
+        system = ""
+        system_end = "</s>\n"
+        assistant_start = "<|assistant|>"
+        assistant_end = "\n"
+        user_start = "<|user|>\n"
+        user_end = "</s>\n"
 
     prompt = ""
     for message in body.messages:
