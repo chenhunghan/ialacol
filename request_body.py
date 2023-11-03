@@ -24,6 +24,7 @@ class CompletionRequestBody(BaseModel):
     # llama.cpp specific parameters
     top_k: Optional[int]
     repetition_penalty: Optional[float]
+    frequency_penalty: Optional[float]
     last_n_tokens: Optional[int]
     seed: Optional[int]
     batch_size: Optional[int]
@@ -32,7 +33,6 @@ class CompletionRequestBody(BaseModel):
     # ignored or currently unsupported
     suffix: Any
     presence_penalty: Any
-    frequency_penalty: Any
     echo: Any
     n: Any
     logprobs: Any
@@ -73,6 +73,7 @@ class ChatCompletionRequestBody(BaseModel):
     # llama.cpp specific parameters
     top_k: Optional[int]
     repetition_penalty: Optional[float]
+    frequency_penalty: Optional[float]
     last_n_tokens: Optional[int]
     seed: Optional[int]
     batch_size: Optional[int]
@@ -83,7 +84,6 @@ class ChatCompletionRequestBody(BaseModel):
     logit_bias: Any
     user: Any
     presence_penalty: Any
-    frequency_penalty: Any
 
     class Config:
         arbitrary_types_allowed = True
