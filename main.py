@@ -31,9 +31,7 @@ from const import DEFAULT_CONTEXT_LENGTH
 DEFAULT_MODEL_HG_REPO_ID = get_env(
     "DEFAULT_MODEL_HG_REPO_ID", "TheBloke/Llama-2-7B-Chat-GGML"
 )
-DEFAULT_MODEL_HG_REPO_REVISION = get_env(
-    "DEFAULT_MODEL_HG_REPO_REVISION", "main"
-)
+DEFAULT_MODEL_HG_REPO_REVISION = get_env("DEFAULT_MODEL_HG_REPO_REVISION", "main")
 DEFAULT_MODEL_FILE = get_env("DEFAULT_MODEL_FILE", "llama-2-7b-chat.ggmlv3.q4_0.bin")
 
 log.info("DEFAULT_MODEL_HG_REPO_ID: %s", DEFAULT_MODEL_HG_REPO_ID)
@@ -70,13 +68,17 @@ Generate = Callable[[Sender], Awaitable[None]]
 
 app = FastAPI()
 
+
 # https://github.com/tiangolo/fastapi/issues/3361
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     exc_str = f"{exc}".replace("\n", " ").replace("   ", " ")
     log.error("%s: %s", request, exc_str)
     content = {"status_code": 10422, "message": exc_str, "data": None}
-    return JSONResponse(content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+    return JSONResponse(
+        content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
+    )
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -370,36 +372,67 @@ async def chat_completions(
             assistant_start = "### Assistant:\n"
         user_start = "### User:\n"
         user_end = "\n\n"
-
-    user_message = next(
-        (message for message in body.messages if message.role == "user"), None
-    )
-    user_message_content = user_message.content if user_message else ""
-    assistant_message = next(
-        (message for message in body.messages if message.role == "assistant"), None
-    )
-    assistant_message_content = (
-        f"{assistant_start}{assistant_message.content}{assistant_end}"
-        if assistant_message
-        else ""
-    )
-    system_message = next(
-        (message for message in body.messages if message.role == "system"), None
-    )
-    system_message_content = system_message.content if system_message else system
-    # avoid duplicate user start token in prompt if user message already includes it
-    if len(user_start) > 0 and user_start in user_message_content:
-        user_start = ""
-    # avoid duplicate user end token in prompt if user message already includes it
-    if len(user_end) > 0 and user_end in user_message_content:
-        user_end = ""
-    # avoid duplicate assistant start token in prompt if user message already includes it
-    if len(assistant_start) > 0 and assistant_start in user_message_content:
-        assistant_start = ""
-    # avoid duplicate system_start token in prompt if system_message_content already includes it
-    if len(system_start) > 0 and system_start in system_message_content:
+    # openchat_3.5 https://huggingface.co/openchat/openchat_3.5
+    if "openchat" in body.model.lower():
         system_start = ""
-    prompt = f"{system_start}{system_message_content}{system_end}{assistant_message_content}{user_start}{user_message_content}{user_end}{assistant_start}"
+        system = ""
+        system_end = ""
+        assistant_start = "GPT4 Assistant: "
+        assistant_end = "<|end_of_turn|>"
+        user_start = "GPT4 User: "
+        user_end = "<|end_of_turn|>"
+    # HG's zephyr https://huggingface.co/HuggingFaceH4/zephyr-7b-beta
+    if "zephyr" in body.model.lower():
+        system_start = "<|system|>\n"
+        system = ""
+        system_end = "</s>\n"
+        assistant_start = "<|assistant|>"
+        assistant_end = "\n"
+        user_start = "<|user|>\n"
+        user_end = "</s>\n"
+
+    prompt = ""
+    for message in body.messages:
+        # Check for system message
+        if message.role == "system":
+            system_message_content = message.content if message else ""
+
+            # avoid duplicate system_start token in prompt if system_message_content already includes it
+            if len(system_start) > 0 and system_start in system_message_content:
+                system_start = ""
+            # avoid duplicate system_end token in prompt if system_message_content already includes it
+            if len(system_end) > 0 and system_end in system_message_content:
+                system_end = ""
+            prompt = f"{system_start}{system_message_content}{system_end}"
+        elif message.role == "user":
+            user_message_content = message.content if message else ""
+
+            # avoid duplicate user start token in prompt if user_message_content already includes it
+            if len(user_start) > 0 and user_start in user_message_content:
+                user_start = ""
+            # avoid duplicate user end token in prompt if user_message_content already includes it
+            if len(user_end) > 0 and user_end in user_message_content:
+                user_end = ""
+
+            prompt = f"{prompt}{user_start}{user_message_content}{user_end}"
+        elif message.role == "assistant":
+            assistant_message_content = message.content if message else ""
+
+            # avoid duplicate assistant start token in prompt if user message already includes it
+            if (
+                len(assistant_start) > 0
+                and assistant_start in assistant_message_content
+            ):
+                assistant_start = ""
+            # avoid duplicate assistant start token in prompt if user message already includes it
+            if len(assistant_end) > 0 and assistant_end in assistant_message_content:
+                assistant_end = ""
+
+            prompt = (
+                f"{prompt}{assistant_start}{assistant_message_content}{assistant_end}"
+            )
+
+    prompt = f"{prompt}{assistant_start}"
     model_name = body.model
     llm = request.app.state.llm
     if body.stream is True:

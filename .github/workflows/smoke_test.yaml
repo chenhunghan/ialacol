@@ -55,7 +55,7 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.REPO_ORG_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-  build-gptq-cuda12-image:
+  build-gptq-image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -74,7 +74,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./Dockerfile.cuda12
+          file: ./Dockerfile.gptq
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.REPO_ORG_NAME }}/${{ env.IMAGE_NAME }}:${{ env.GPTQ_IMAGE_TAG }}
@@ -124,7 +124,7 @@ jobs:
           helm install $LLAMA_HELM_RELEASE_NAME -f values.yaml --namespace $HELM_NAMESPACE ./charts/ialacol
 
           echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
-          sleep 40
+          sleep 120
       - if: always()
         run: |
           kubectl get pods -n $HELM_NAMESPACE
@@ -215,7 +215,7 @@ jobs:
           helm install $GPT_NEOX_HELM_RELEASE_NAME -f values.yaml --namespace $HELM_NAMESPACE ./charts/ialacol
 
           echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
-          sleep 40
+          sleep 120
       - if: always()
         run: |
           kubectl get pods -n $HELM_NAMESPACE
@@ -283,7 +283,7 @@ jobs:
           helm install $STARCODER_HELM_RELEASE_NAME -f values.yaml --namespace $HELM_NAMESPACE ./charts/ialacol
 
           echo "Wait for the pod to be ready"
-          sleep 20
+          sleep 120
       - if: always()
         run: |
           kubectl get pods -n $HELM_NAMESPACE
@@ -303,7 +303,7 @@ jobs:
           kubectl logs --tail=200 --selector app.kubernetes.io/name=$STARCODER_HELM_RELEASE_NAME -n $HELM_NAMESPACE
   gptq-smoke-test:
     runs-on: ubuntu-latest
-    needs: build-gptq-cuda12-image
+    needs: build-gptq-image
     steps:
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.7.0
@@ -323,7 +323,7 @@ jobs:
           cat > values.yaml <<EOF
           replicas: 1
           deployment:
-            image: ${{ env.REGISTRY }}/${{ env.REPO_ORG_NAME }}/${{ env.IMAGE_NAME }}:${{ ${{ env.GPTQ_IMAGE_TAG }}
+            image: ${{ env.REGISTRY }}/${{ env.REPO_ORG_NAME }}/${{ env.IMAGE_NAME }}:${{ env.GPTQ_IMAGE_TAG }}
             env:
               DEFAULT_MODEL_HG_REPO_ID: $GPTQ_MODEL_HG_REPO_ID
               DEFAULT_MODEL_HG_REPO_REVISION: $GPTQ_MODEL_HG_REVISION
@@ -347,8 +347,8 @@ jobs:
           EOF
           helm install $GPTQ_HELM_RELEASE_NAME -f values.yaml --namespace $HELM_NAMESPACE ./charts/ialacol
 
-          echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
-          sleep 40
+          echo "Wait for the pod to be ready, GPTQ image is around 1GB"
+          sleep 240
       - if: always()
         run: |
           kubectl get pods -n $HELM_NAMESPACE

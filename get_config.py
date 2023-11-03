@@ -8,6 +8,7 @@ from const import DEFAULT_MAX_TOKENS, DEFAULT_CONTEXT_LENGTH
 
 THREADS = int(get_env("THREADS", str(get_default_thread())))
 
+
 def get_config(
     body: CompletionRequestBody | ChatCompletionRequestBody,
 ) -> Config:
@@ -28,8 +29,10 @@ def get_config(
     # OpenAI API defaults https://platform.openai.com/docs/api-reference/chat/create#chat/create-max_tokens
     MAX_TOKENS = int(get_env("MAX_TOKENS", DEFAULT_MAX_TOKENS))
     CONTEXT_LENGTH = int(get_env("CONTEXT_LENGTH", DEFAULT_CONTEXT_LENGTH))
-    if (MAX_TOKENS > CONTEXT_LENGTH):
-        log.warning("MAX_TOKENS is greater than CONTEXT_LENGTH, setting MAX_TOKENS < CONTEXT_LENGTH")
+    if MAX_TOKENS > CONTEXT_LENGTH:
+        log.warning(
+            "MAX_TOKENS is greater than CONTEXT_LENGTH, setting MAX_TOKENS < CONTEXT_LENGTH"
+        )
     # OpenAI API defaults https://platform.openai.com/docs/api-reference/chat/create#chat/create-stop
     STOP = get_env_or_none("STOP")
 
@@ -48,7 +51,11 @@ def get_config(
     top_p = body.top_p if body.top_p else TOP_P
     temperature = body.temperature if body.temperature else TEMPERATURE
     repetition_penalty = (
-        body.repetition_penalty if body.repetition_penalty else REPETITION_PENALTY
+        body.frequency_penalty
+        if body.frequency_penalty
+        else (
+            body.repetition_penalty if body.repetition_penalty else REPETITION_PENALTY
+        )
     )
     last_n_tokens = body.last_n_tokens if body.last_n_tokens else LAST_N_TOKENS
     seed = body.seed if body.seed else SEED
