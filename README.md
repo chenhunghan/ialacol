@@ -72,9 +72,9 @@ MODELS=`[
       "displayName": "OpenChat 3.5",
       "preprompt": "",
       "userMessageToken": "GPT4 User: ",
-			"userMessageEndToken": "<|end_of_turn|>",
-			"assistantMessageToken": "GPT4 Assistant: ",
-			"assistantMessageEndToken": "<|end_of_turn|>",
+      "userMessageEndToken": "<|end_of_turn|>",
+      "assistantMessageToken": "GPT4 Assistant: ",
+      "assistantMessageEndToken": "<|end_of_turn|>",
       "parameters": {
         "temperature": 0.1,
         "top_p": 0.95,
