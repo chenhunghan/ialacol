@@ -347,8 +347,8 @@ jobs:
           EOF
           helm install $GPTQ_HELM_RELEASE_NAME -f values.yaml --namespace $HELM_NAMESPACE ./charts/ialacol
 
-          echo "Wait for the pod to be ready, it takes about 36s to download a 1.93GB model (~50MB/s)"
-          sleep 120
+          echo "Wait for the pod to be ready, GPTQ image is around 1GB"
+          sleep 240
       - if: always()
         run: |
           kubectl get pods -n $HELM_NAMESPACE
