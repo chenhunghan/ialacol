@@ -283,7 +283,7 @@ jobs:
           helm install $STARCODER_HELM_RELEASE_NAME -f values.yaml --namespace $HELM_NAMESPACE ./charts/ialacol
 
           echo "Wait for the pod to be ready"
-          sleep 20
+          sleep 40
       - if: always()
         run: |
           kubectl get pods -n $HELM_NAMESPACE
