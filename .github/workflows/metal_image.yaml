@@ -39,6 +39,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile.metal
+          platforms: linux/amd64, linux/arm64
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.METAL_IMAGE_NAME }}:${{ github.sha }}
