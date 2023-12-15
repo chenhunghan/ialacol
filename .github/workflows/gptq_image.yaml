@@ -39,6 +39,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile.gptq
+          platforms: linux/amd64, linux/arm64
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.GPTQ_IMAGE_NAME }}:${{ github.sha }}
