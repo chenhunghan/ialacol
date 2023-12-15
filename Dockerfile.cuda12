@@ -9,6 +9,9 @@ COPY requirements.txt requirements.txt
 # Fixes No such file or directory: 'maturin'
 RUN pip3 install maturin
 RUN pip3 install -r requirements.txt
+# Fixes The package you are trying to install is only a placeholder project on PyPI.org repository.
+# This package is hosted on NVIDIA Python Package Index.
+RUN pip3 install nvidia-pyindex && pip3 install nvidia-cublas-cu12
 # https://github.com/marella/ctransformers#cuda
 RUN pip3 install ctransformers[cuda]
 COPY . .
