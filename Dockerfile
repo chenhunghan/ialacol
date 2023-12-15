@@ -2,6 +2,8 @@
 
 FROM python:3.11-slim
 WORKDIR /app
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 COPY . .
