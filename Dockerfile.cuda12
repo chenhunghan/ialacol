@@ -11,7 +11,7 @@ RUN pip3 install maturin
 RUN pip3 install -r requirements.txt
 # Fixes The package you are trying to install is only a placeholder project on PyPI.org repository.
 # This package is hosted on NVIDIA Python Package Index.
-RUN pip3 install nvidia-pyindex && pip3 install nvidia-cublas-cu12
+RUN pip3 install --extra-index-url=https://pypi.ngc.nvidia.com --trusted-host pypi.ngc.nvidia.com nvidia-cublas-cu12
 # https://github.com/marella/ctransformers#cuda
 RUN pip3 install ctransformers[cuda]
 COPY . .
