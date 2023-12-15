@@ -2,6 +2,7 @@
 
 FROM python:3.11-slim
 WORKDIR /app
+RUN apt-get update && apt-get install -y -q curl
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 COPY requirements.txt requirements.txt
