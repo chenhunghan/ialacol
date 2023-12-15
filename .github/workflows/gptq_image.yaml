@@ -36,6 +36,11 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.GPTQ_IMAGE_NAME }}
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
+      # Workaround to provide additional free space.
+      # https://github.com/actions/virtual-environments/issues/2840
+      - run: |
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
