@@ -8,6 +8,8 @@ WORKDIR /app
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 COPY requirements.txt requirements.txt
+# Fixes No such file or directory: 'maturin'
+RUN pip3 install maturin
 RUN TMPDIR=/home/user/tmp/ pip3 install -r requirements.txt
 # Fixes exllama/cuda_ext.py:82: UserWarning: Failed to initialize NumPy: No module named 'numpy'
 RUN TMPDIR=/home/user/tmp/ pip3 install numpy
