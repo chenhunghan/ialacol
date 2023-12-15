@@ -39,8 +39,8 @@ jobs:
       # Workaround to provide additional free space.
       # https://github.com/actions/virtual-environments/issues/2840
       - run: |
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
