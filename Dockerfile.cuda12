@@ -6,6 +6,8 @@ WORKDIR /app
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 COPY requirements.txt requirements.txt
+# Fixes No such file or directory: 'maturin'
+RUN pip3 install maturin
 RUN pip3 install -r requirements.txt
 # https://github.com/marella/ctransformers#cuda
 RUN pip3 install ctransformers[cuda]
