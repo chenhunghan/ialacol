@@ -3,6 +3,9 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
+  {{- if .Values.service.annotations }}
+  annotations: {{ .Values.service.annotations }}
+  {{- end }}
 spec:
   selector:
     app.kubernetes.io/instance: {{ .Chart.Name }}
