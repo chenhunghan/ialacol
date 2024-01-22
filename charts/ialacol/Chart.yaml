@@ -3,4 +3,4 @@ appVersion: 0.13.0
 description: A Helm chart for ialacol
 name: ialacol
 type: application
-version: 0.13.0
+version: 0.14.0
