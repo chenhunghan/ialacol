@@ -3,8 +3,9 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace | quote }}
-  {{- if .Values.service.annotations }}
-  annotations: {{ .Values.service.annotations }}
+  {{- with .Values.service.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
   {{- end }}
 spec:
   selector:
