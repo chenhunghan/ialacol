@@ -1,6 +1,6 @@
 # ialacol (l-o-c-a-l-a-i)
 
-[![Docker Repository on Quay](https://quay.io/repository/chenhunghan/ialacol/status "Docker Repository on Quay")](https://quay.io/repository/chenhunghan/ialacol)
+🚧 being rewritten from Python to Rust/WebAssembly, see details <https://github.com/chenhunghan/ialacol/pull/93>
 
 ## Introduction
 
